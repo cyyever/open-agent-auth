@@ -25,7 +25,6 @@ import com.alibaba.openagentauth.core.crypto.key.resolve.KeyResolver;
 import com.alibaba.openagentauth.core.crypto.key.resolve.LocalKeyResolver;
 import com.alibaba.openagentauth.core.crypto.key.store.InMemoryKeyStore;
 import com.alibaba.openagentauth.core.crypto.key.store.KeyStore;
-import com.alibaba.openagentauth.core.token.TokenService;
 import com.alibaba.openagentauth.core.trust.model.TrustDomain;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
 import com.alibaba.openagentauth.spring.autoconfigure.ConfigConstants;
@@ -173,72 +172,6 @@ public class CoreAutoConfiguration {
         }
         logger.info("Creating TrustDomain bean: {}", trustDomain);
         return new TrustDomain(trustDomain);
-    }
-
-    /**
-     * Creates the TokenService bean if not already defined.
-     * <p>
-     * The TokenService provides token generation and validation capabilities for WITs.
-     * This bean is shared across all roles and provides the core token functionality.
-     * </p>
-     * <p>
-     * The WIT signing key configuration is read from the {@code key-management.keys}
-     * properties. The method searches for a key definition whose name contains "wit-signing"
-     * and has a local provider. If no matching configuration is found, it falls back to
-     * the default key ID "wit-signing-key" with ES256 algorithm for backward compatibility.
-     * </p>
-     *
-     * @param keyManager the key manager
-     * @param trustDomain the trust domain
-     * @param properties the configuration properties
-     * @return the TokenService bean
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public TokenService tokenService(KeyManager keyManager, TrustDomain trustDomain,
-                                     OpenAgentAuthProperties properties) {
-        logger.info("Creating TokenService bean");
-
-        // Resolve WIT signing key configuration from properties
-        String keyId = DEFAULT_WIT_SIGNING_KEY_ID;
-        KeyAlgorithm keyAlgorithm = DEFAULT_WIT_SIGNING_ALGORITHM;
-
-        InfrastructureProperties infra = properties.getInfrastructures();
-        if (infra != null && infra.getKeyManagement() != null && infra.getKeyManagement().getKeys() != null) {
-            for (Map.Entry<String, KeyDefinitionProperties> entry : infra.getKeyManagement().getKeys().entrySet()) {
-                String keyName = entry.getKey();
-                KeyDefinitionProperties keyProps = entry.getValue();
-
-                if (keyName.contains(ConfigConstants.KEY_WIT_SIGNING) && keyProps.getProvider() != null) {
-                    keyId = keyProps.getKeyId();
-                    if (keyProps.getAlgorithm() != null && !keyProps.getAlgorithm().isBlank()) {
-                        try {
-                            keyAlgorithm = KeyAlgorithm.fromValue(keyProps.getAlgorithm());
-                        } catch (IllegalArgumentException e) {
-                            logger.warn("Unknown algorithm '{}' for WIT signing key '{}', using default {}",
-                                    keyProps.getAlgorithm(), keyName, DEFAULT_WIT_SIGNING_ALGORITHM);
-                        }
-                    }
-                    logger.info("Found WIT signing key configuration: name={}, keyId={}, algorithm={}",
-                            keyName, keyId, keyAlgorithm);
-                    break;
-                }
-            }
-        }
-
-        logger.info("Getting or generating WIT signing key with ID: {}, algorithm: {}", keyId, keyAlgorithm);
-
-        JWK signingJWK;
-        try {
-            signingJWK = (JWK) keyManager.getOrGenerateKey(keyId, keyAlgorithm);
-            logger.info("WIT signing key ready. Key ID: {}", keyId);
-        } catch (Exception e) {
-            logger.error("Failed to get or generate signing key: {}", e.getMessage(), e);
-            throw new IllegalStateException("Failed to initialize WIT signing key", e);
-        }
-
-        JWSAlgorithm jwsAlgorithm = keyAlgorithm.getJwsAlgorithm();
-        return new TokenService(signingJWK, trustDomain, jwsAlgorithm);
     }
 
     /**

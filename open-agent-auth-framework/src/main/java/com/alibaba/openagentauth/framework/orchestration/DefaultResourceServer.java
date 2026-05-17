@@ -15,16 +15,12 @@
  */
 package com.alibaba.openagentauth.framework.orchestration;
 
-import com.alibaba.openagentauth.core.binding.BindingInstanceStore;
-import com.alibaba.openagentauth.core.model.token.AgentOperationAuthToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitParser;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptParser;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptValidator;
-import com.alibaba.openagentauth.core.token.aoat.AoatParser;
-import com.alibaba.openagentauth.core.token.aoat.AoatValidator;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
 import com.alibaba.openagentauth.core.validation.api.FiveLayerVerifier;
 import com.alibaba.openagentauth.core.validation.api.LayerValidator;
@@ -57,8 +53,6 @@ import java.util.List;
  * <ul>
  *   <li><b>Layer 1: Workload Authentication:</b> Validates WIT signature and claims</li>
  *   <li><b>Layer 2: Request Integrity:</b> Validates WPT signature and integrity</li>
- *   <li><b>Layer 3: User Authentication:</b> Validates AOAT signature and claims</li>
- *   <li><b>Layer 4: Identity Consistency:</b> Verifies user-workload identity binding</li>
  *   <li><b>Audit Logging:</b> Records all access attempts and decisions</li>
  * </ul>
  *
@@ -71,24 +65,17 @@ public class DefaultResourceServer implements ResourceServer {
     private static final Logger logger = LoggerFactory.getLogger(DefaultResourceServer.class);
 
     private final WitParser witParser;
-    private final AoatParser aoatParser;
     private final WptParser wptParser;
     private final FiveLayerVerifier fiveLayerVerifier;
 
-    public DefaultResourceServer(WitValidator witValidator,
-                                 WptValidator wptValidator,
-                                 AoatValidator aoatValidator,
-                                 BindingInstanceStore bindingInstanceStore) {
+    public DefaultResourceServer(WitValidator witValidator, WptValidator wptValidator) {
 
         this.witParser = new WitParser();
-        this.aoatParser = new AoatParser();
         this.wptParser = new WptParser();
 
         this.fiveLayerVerifier = FiveLayerVerifierFactory.createVerifier(
             ValidationUtils.validateNotNull(witValidator, "WIT validator"),
-            ValidationUtils.validateNotNull(wptValidator, "WPT validator"),
-            ValidationUtils.validateNotNull(aoatValidator, "AOAT validator"),
-            bindingInstanceStore
+            ValidationUtils.validateNotNull(wptValidator, "WPT validator")
         );
 
         logger.info("ResourceServerOrchestrator initialized");
@@ -131,16 +118,6 @@ public class DefaultResourceServer implements ResourceServer {
     @Override
     public ValidationResult.LayerResult validateWpt(ResourceRequest request) throws FrameworkValidationException {
         return executeLayerValidation(request, 2);
-    }
-
-    @Override
-    public ValidationResult.LayerResult validateAoat(ResourceRequest request) throws FrameworkValidationException {
-        return executeLayerValidation(request, 3);
-    }
-
-    @Override
-    public ValidationResult.LayerResult verifyIdentityConsistency(ResourceRequest request) throws FrameworkValidationException {
-        return executeLayerValidation(request, 4);
     }
 
     @Override
@@ -192,12 +169,10 @@ public class DefaultResourceServer implements ResourceServer {
     private ValidationContext buildValidationContext(ResourceRequest request) throws FrameworkValidationException {
         WorkloadIdentityToken wit = parseWit(request.getWit());
         WorkloadProofToken wpt = parseWpt(request.getWpt());
-        AgentOperationAuthToken aoat = parseAoat(request.getAoat());
 
         return ValidationContext.builder()
                 .wit(wit)
                 .wpt(wpt)
-                .agentOaToken(aoat)
                 .httpMethod(request.getHttpMethod())
                 .httpUri(request.getHttpUri())
                 .httpHeaders(request.getHttpHeaders())
@@ -273,36 +248,15 @@ public class DefaultResourceServer implements ResourceServer {
      * @throws FrameworkValidationException if parsing fails
      */
     private WorkloadProofToken parseWpt(String wptString) throws FrameworkValidationException {
-        
+
         if (ValidationUtils.isNullOrEmpty(wptString)) {
             throw new FrameworkValidationException("WPT is required");
         }
-        
+
         try {
             return wptParser.parse(wptString);
         } catch (Exception e) {
             throw new FrameworkValidationException("Failed to parse WPT: " + e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Parses AOAT string to AgentOperationAuthToken object.
-     *
-     * @param aoatString the AOAT JWT string
-     * @return the parsed AgentOperationAuthToken
-     * @throws FrameworkValidationException if parsing fails
-     */
-    private AgentOperationAuthToken parseAoat(String aoatString) throws FrameworkValidationException {
-        
-        if (ValidationUtils.isNullOrEmpty(aoatString)) {
-            throw new FrameworkValidationException("AOAT is required");
-        }
-        
-        try {
-            SignedJWT signedJwt = SignedJWT.parse(aoatString);
-            return aoatParser.parse(signedJwt);
-        } catch (ParseException e) {
-            throw new FrameworkValidationException("Failed to parse AOAT: " + e.getMessage(), e);
         }
     }
 

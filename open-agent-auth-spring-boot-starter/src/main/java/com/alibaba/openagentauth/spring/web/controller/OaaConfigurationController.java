@@ -173,9 +173,6 @@ public class OaaConfigurationController {
         if (caps.getUserAuthentication() != null && caps.getUserAuthentication().isEnabled()) {
             capabilities.put("user_authentication", Map.of("enabled", true));
         }
-        if (caps.getAudit() != null && caps.getAudit().isEnabled()) {
-            capabilities.put("audit", Map.of("enabled", true));
-        }
 
         return capabilities;
     }

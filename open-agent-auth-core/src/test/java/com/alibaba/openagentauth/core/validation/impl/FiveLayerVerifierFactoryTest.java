@@ -15,13 +15,10 @@
  */
 package com.alibaba.openagentauth.core.validation.impl;
 
-import com.alibaba.openagentauth.core.binding.BindingInstanceStore;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptValidator;
-import com.alibaba.openagentauth.core.token.aoat.AoatValidator;
 import com.alibaba.openagentauth.core.validation.api.FiveLayerVerifier;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -40,69 +37,30 @@ class FiveLayerVerifierFactoryTest {
     @Mock
     private WptValidator wptValidator;
 
-    @Mock
-    private AoatValidator aoatValidator;
-
-    @Mock
-    private BindingInstanceStore bindingInstanceStore;
-
-    @Nested
-    @DisplayName("Successful Creation Tests")
-    class SuccessfulCreationTests {
-
-        @Test
-        void shouldCreateVerifierWithoutBindingStore() {
-            FiveLayerVerifier verifier = FiveLayerVerifierFactory.createVerifier(
-                    witValidator, wptValidator, aoatValidator, null);
-
-            assertThat(verifier).isInstanceOf(DefaultFiveLayerVerifier.class);
-        }
-
-        @Test
-        void shouldCreateVerifierWithBindingStore() {
-            FiveLayerVerifier verifier = FiveLayerVerifierFactory.createVerifier(
-                    witValidator, wptValidator, aoatValidator, bindingInstanceStore);
-
-            assertThat(verifier).isInstanceOf(DefaultFiveLayerVerifier.class);
-        }
-
-        @Test
-        void shouldCreateNewVerifierInstanceEachTime() {
-            FiveLayerVerifier v1 = FiveLayerVerifierFactory.createVerifier(
-                    witValidator, wptValidator, aoatValidator, null);
-            FiveLayerVerifier v2 = FiveLayerVerifierFactory.createVerifier(
-                    witValidator, wptValidator, aoatValidator, null);
-
-            assertThat(v1).isNotSameAs(v2);
-        }
+    @Test
+    void shouldCreateVerifier() {
+        FiveLayerVerifier verifier = FiveLayerVerifierFactory.createVerifier(witValidator, wptValidator);
+        assertThat(verifier).isInstanceOf(DefaultFiveLayerVerifier.class);
     }
 
-    @Nested
-    @DisplayName("Parameter Validation Tests")
-    class ParameterValidationTests {
+    @Test
+    void shouldCreateNewVerifierInstanceEachTime() {
+        FiveLayerVerifier v1 = FiveLayerVerifierFactory.createVerifier(witValidator, wptValidator);
+        FiveLayerVerifier v2 = FiveLayerVerifierFactory.createVerifier(witValidator, wptValidator);
+        assertThat(v1).isNotSameAs(v2);
+    }
 
-        @Test
-        void shouldThrowWhenWitValidatorIsNull() {
-            assertThatThrownBy(() -> FiveLayerVerifierFactory.createVerifier(
-                    null, wptValidator, aoatValidator, null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("WIT validator");
-        }
+    @Test
+    void shouldThrowWhenWitValidatorIsNull() {
+        assertThatThrownBy(() -> FiveLayerVerifierFactory.createVerifier(null, wptValidator))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("WIT validator");
+    }
 
-        @Test
-        void shouldThrowWhenWptValidatorIsNull() {
-            assertThatThrownBy(() -> FiveLayerVerifierFactory.createVerifier(
-                    witValidator, null, aoatValidator, null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("WPT validator");
-        }
-
-        @Test
-        void shouldThrowWhenAoatValidatorIsNull() {
-            assertThatThrownBy(() -> FiveLayerVerifierFactory.createVerifier(
-                    witValidator, wptValidator, null, null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("AOAT validator");
-        }
+    @Test
+    void shouldThrowWhenWptValidatorIsNull() {
+        assertThatThrownBy(() -> FiveLayerVerifierFactory.createVerifier(witValidator, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("WPT validator");
     }
 }

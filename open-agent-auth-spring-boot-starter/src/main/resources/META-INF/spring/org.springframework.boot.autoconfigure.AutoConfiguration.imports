@@ -6,9 +6,6 @@ com.alibaba.openagentauth.spring.autoconfigure.SecurityAutoConfiguration
 # Core configuration (shared beans like KeyManager)
 com.alibaba.openagentauth.spring.autoconfigure.core.CoreAutoConfiguration
 
-# JWE encryption configuration (conditional on open-agent-auth.encryption.enabled)
-com.alibaba.openagentauth.spring.autoconfigure.role.JweEncryptionAutoConfiguration
-
 # Resource Server role (the only AAP-relevant role that survives the trim)
 com.alibaba.openagentauth.spring.autoconfigure.role.ResourceServerAutoConfiguration
 

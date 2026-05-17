@@ -15,7 +15,6 @@
  */
 package com.alibaba.openagentauth.spring.autoconfigure.properties;
 
-import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.AuditProperties;
 import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.OAuth2ClientProperties;
 import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.OAuth2ServerProperties;
 import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.OperationAuthorizationProperties;
@@ -131,16 +130,6 @@ public class CapabilitiesProperties {
     private UserAuthenticationProperties userAuthentication = new UserAuthenticationProperties();
 
     /**
-     * Audit capability configuration.
-     * <p>
-     * Provides audit logging functionality for tracking security events,
-     * user actions, agent operations, and system activities.
-     * </p>
-     */
-    @NestedConfigurationProperty
-    private AuditProperties audit = new AuditProperties();
-
-    /**
      * Gets the OAuth 2.0 Server capability configuration.
      *
      * @return the OAuth 2.0 Server capability configuration
@@ -228,23 +217,5 @@ public class CapabilitiesProperties {
      */
     public void setUserAuthentication(UserAuthenticationProperties userAuthentication) {
         this.userAuthentication = userAuthentication;
-    }
-
-    /**
-     * Gets the Audit capability configuration.
-     *
-     * @return the Audit capability configuration
-     */
-    public AuditProperties getAudit() {
-        return audit;
-    }
-
-    /**
-     * Sets the Audit capability configuration.
-     *
-     * @param audit the Audit capability configuration to set
-     */
-    public void setAudit(AuditProperties audit) {
-        this.audit = audit;
     }
 }

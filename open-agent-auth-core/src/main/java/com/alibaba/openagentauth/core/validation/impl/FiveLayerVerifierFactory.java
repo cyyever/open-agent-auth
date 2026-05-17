@@ -15,29 +15,21 @@
  */
 package com.alibaba.openagentauth.core.validation.impl;
 
-import com.alibaba.openagentauth.core.binding.BindingInstanceStore;
-import com.alibaba.openagentauth.core.token.aoat.AoatValidator;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptValidator;
 import com.alibaba.openagentauth.core.validation.api.FiveLayerVerifier;
-import com.alibaba.openagentauth.core.validation.layer.OperationAuthorizationValidator;
-import com.alibaba.openagentauth.core.validation.layer.IdentityConsistencyValidator;
 import com.alibaba.openagentauth.core.validation.layer.WorkloadIdentityValidator;
 import com.alibaba.openagentauth.core.validation.layer.WorkloadProofValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Factory that assembles the layered resource-server verifier.
+ * Factory for the layered resource-server verifier.
  *
- * <h3>Validators registered (in execution order):</h3>
- * <ol>
- *   <li>{@link WorkloadIdentityValidator} - WIT signature and claims</li>
- *   <li>{@link WorkloadProofValidator} - WPT signature and integrity</li>
- *   <li>{@link OperationAuthorizationValidator} - AOAT signature and claims</li>
- *   <li>{@link IdentityConsistencyValidator} - user/workload identity binding</li>
- * </ol>
+ * <p>After the AAP trim only the WIMSE layers remain — operation
+ * authorisation, identity consistency and policy evaluation belonged to the
+ * removed OAuth2/AOA flow.</p>
  *
  * @since 1.0
  */
@@ -45,23 +37,15 @@ public class FiveLayerVerifierFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(FiveLayerVerifierFactory.class);
 
-    public static FiveLayerVerifier createVerifier(WitValidator witValidator,
-                                                   WptValidator wptValidator,
-                                                   AoatValidator aoatValidator,
-                                                   BindingInstanceStore bindingInstanceStore) {
-
+    public static FiveLayerVerifier createVerifier(WitValidator witValidator, WptValidator wptValidator) {
         ValidationUtils.validateNotNull(witValidator, "WIT validator");
         ValidationUtils.validateNotNull(wptValidator, "WPT validator");
-        ValidationUtils.validateNotNull(aoatValidator, "AOAT validator");
 
         DefaultFiveLayerVerifier verifier = new DefaultFiveLayerVerifier();
-
         verifier.registerValidator(new WorkloadIdentityValidator(witValidator));
         verifier.registerValidator(new WorkloadProofValidator(wptValidator));
-        verifier.registerValidator(new OperationAuthorizationValidator(aoatValidator));
-        verifier.registerValidator(new IdentityConsistencyValidator(bindingInstanceStore));
 
-        logger.info("Layered verifier created with 4 validators (policy layer removed)");
+        logger.info("Layered verifier created with 2 validators (WIT + WPT)");
         return verifier;
     }
 }

@@ -15,11 +15,8 @@
  */
 package com.alibaba.openagentauth.core.validation.model;
 
-import com.alibaba.openagentauth.core.model.token.AgentOperationAuthToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
-import com.alibaba.openagentauth.core.model.context.AgentOperationAuthorization;
-import com.alibaba.openagentauth.core.model.identity.AgentIdentity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -60,27 +57,6 @@ class ValidationContextTest {
                         .algorithm("ES256")
                         .build())
                 .build();
-        AgentOperationAuthToken aoat = AgentOperationAuthToken.builder()
-                .claims(AgentOperationAuthToken.Claims.builder()
-                        .issuer("https://as.example.com")
-                        .subject("user-123")
-                        .audience("resource-server")
-                        .expirationTime(java.time.Instant.now().plusSeconds(3600))
-                        .issuedAt(java.time.Instant.now())
-                        .jwtId("jwt-id-123")
-                        .agentIdentity(AgentIdentity.builder()
-                                .id("urn:uuid:550e8400-e29b-41d4-a716-446655440001")
-                                .issuer("https://agent-platform.example.com")
-                                .issuedTo("https://agent-platform.example.com|user-123")
-                                .build())
-                        .authorization(AgentOperationAuthorization.builder()
-                                .policyId("policy-123")
-                                .build())
-                        .build())
-                .header(AgentOperationAuthToken.Header.builder()
-                        .algorithm("ES256")
-                        .build())
-                .build();
         Date timestamp = new Date();
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
@@ -90,7 +66,6 @@ class ValidationContextTest {
         ValidationContext context = ValidationContext.builder()
                 .wit(wit)
                 .wpt(wpt)
-                .agentOaToken(aoat)
                 .httpMethod(HTTP_METHOD)
                 .httpUri(HTTP_URI)
                 .httpHeaders(headers)
@@ -102,7 +77,6 @@ class ValidationContextTest {
         assertThat(context).isNotNull();
         assertThat(context.getWit()).isEqualTo(wit);
         assertThat(context.getWpt()).isEqualTo(wpt);
-        assertThat(context.getAgentOaToken()).isEqualTo(aoat);
         assertThat(context.getHttpMethod()).isEqualTo(HTTP_METHOD);
         assertThat(context.getHttpUri()).isEqualTo(HTTP_URI);
         assertThat(context.getHttpBody()).isEqualTo(HTTP_BODY);
@@ -125,7 +99,6 @@ class ValidationContextTest {
         assertThat(context).isNotNull();
         assertThat(context.getWit()).isNull();
         assertThat(context.getWpt()).isNull();
-        assertThat(context.getAgentOaToken()).isNull();
         assertThat(context.getHttpMethod()).isEqualTo(HTTP_METHOD);
         assertThat(context.getHttpUri()).isEqualTo(HTTP_URI);
         assertThat(context.getHttpBody()).isNull();

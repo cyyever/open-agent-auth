@@ -15,7 +15,6 @@
  */
 package com.alibaba.openagentauth.core.validation.model;
 
-import com.alibaba.openagentauth.core.model.token.AgentOperationAuthToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
 import com.alibaba.openagentauth.core.validation.api.LayerValidator;
@@ -77,15 +76,6 @@ public class ValidationContext {
     private final WorkloadProofToken wpt;
 
     /**
-     * The Agent Operation Authorization Token (AOAT).
-     * <p>
-     * This token represents the user's authorization for the agent to perform operations.
-     * It is verified in Layer 3.
-     * </p>
-     */
-    private final AgentOperationAuthToken agentOaToken;
-
-    /**
      * The HTTP request method.
      * <p>
      * Used in WPT verification to ensure the request method hasn't been tampered with.
@@ -144,7 +134,6 @@ public class ValidationContext {
     private ValidationContext(Builder builder) {
         this.wit = builder.wit;
         this.wpt = builder.wpt;
-        this.agentOaToken = builder.agentOaToken;
         this.httpMethod = builder.httpMethod;
         this.httpUri = builder.httpUri;
         this.httpHeaders = builder.httpHeaders;
@@ -169,15 +158,6 @@ public class ValidationContext {
      */
     public WorkloadProofToken getWpt() {
         return wpt;
-    }
-
-    /**
-     * Gets the Agent Operation Authorization Token (AOAT).
-     *
-     * @return the AOAT, or null if not present
-     */
-    public AgentOperationAuthToken getAgentOaToken() {
-        return agentOaToken;
     }
 
     /**
@@ -276,7 +256,6 @@ public class ValidationContext {
 
         private WorkloadIdentityToken wit;
         private WorkloadProofToken wpt;
-        private AgentOperationAuthToken agentOaToken;
         private String httpMethod;
         private String httpUri;
         private Map<String, String> httpHeaders;
@@ -303,17 +282,6 @@ public class ValidationContext {
          */
         public Builder wpt(WorkloadProofToken wpt) {
             this.wpt = wpt;
-            return this;
-        }
-
-        /**
-         * Sets the Agent Operation Authorization Token (AOAT).
-         *
-         * @param agentOaToken the AOAT
-         * @return this builder instance
-         */
-        public Builder agentOaToken(AgentOperationAuthToken agentOaToken) {
-            this.agentOaToken = agentOaToken;
             return this;
         }
 

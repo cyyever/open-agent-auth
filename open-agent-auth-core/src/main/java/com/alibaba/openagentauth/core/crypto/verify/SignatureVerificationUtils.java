@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * Utility class for JWT signature verification.
  * <p>
  * Centralizes the common signature verification logic shared across
- * {@code WitValidator}, {@code AoatValidator}, and {@code DefaultIdTokenValidator}.
+ * {@code WitValidator} and {@code DefaultIdTokenValidator}.
  * This eliminates code duplication and provides a single point of maintenance
  * for verification key resolution and verifier creation.
  * </p>

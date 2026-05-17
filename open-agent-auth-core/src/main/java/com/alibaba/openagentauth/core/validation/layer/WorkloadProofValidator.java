@@ -15,7 +15,6 @@
  */
 package com.alibaba.openagentauth.core.validation.layer;
 
-import com.alibaba.openagentauth.core.model.token.AgentOperationAuthToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
 import com.alibaba.openagentauth.core.token.common.JwtHashUtil;
@@ -194,64 +193,8 @@ public class WorkloadProofValidator implements LayerValidator {
      * @return error message if validation fails, null if valid
      */
     private String verifyTokenHash(String tokenType, String expectedHash, ValidationContext context) {
-        switch (tokenType) {
-            case "aoat":
-                return verifyAoatHash(expectedHash, context);
-            default:
-                // Unknown token types should have been rejected by WptValidator
-                logger.warn("Unexpected token type in oth claim: {}", tokenType);
-                return String.format("Unexpected token type in oth claim: '%s'", tokenType);
-        }
-    }
-
-    /**
-     * Verifies that the AOAT hash in the oth claim matches the actual AOAT token.
-     *
-     * @param expectedHash the expected AOAT hash from the oth claim
-     * @param context the validation context containing the actual AOAT token
-     * @return error message if validation fails, null if valid
-     */
-    private String verifyAoatHash(String expectedHash, ValidationContext context) {
-        try {
-            // Get the actual AOAT token from the context
-            AgentOperationAuthToken aoat = context.getAgentOaToken();
-            if (aoat == null) {
-                logger.warn("WPT oth claim contains aoat hash but AOAT token is not present in context");
-                return "WPT oth claim contains aoat hash but AOAT token is not provided";
-            }
-
-            // Get the AOAT JWT string
-            String aoatJwtString;
-            try {
-                aoatJwtString = aoat.getJwtString();
-            } catch (JOSEException e) {
-                logger.warn("Failed to get AOAT JWT string", e);
-                return "AOAT token missing JWT string: " + e.getMessage();
-            }
-            if (ValidationUtils.isNullOrEmpty(aoatJwtString)) {
-                logger.warn("AOAT token missing JWT string");
-                return "AOAT token missing JWT string";
-            }
-
-            // Compute the actual hash of the AOAT token
-            String actualHash = JwtHashUtil.computeAoatHash(aoatJwtString);
-
-            // Compare hashes
-            if (!expectedHash.equals(actualHash)) {
-                logger.warn("WPT oth claim aoat hash mismatch: expected={}, actual={}", expectedHash, actualHash);
-                return String.format(
-                    "WPT oth claim aoat hash does not match actual AOAT token hash: expected='%s', actual='%s'",
-                    expectedHash, actualHash
-                );
-            }
-
-            logger.debug("WPT oth claim aoat hash verified successfully");
-            return null;
-
-        } catch (Exception e) {
-            logger.error("Error verifying AOAT hash", e);
-            return "Error verifying AOAT hash: " + e.getMessage();
-        }
+        logger.warn("Unexpected token type in oth claim: {}", tokenType);
+        return String.format("Unexpected token type in oth claim: '%s'", tokenType);
     }
 
     @Override

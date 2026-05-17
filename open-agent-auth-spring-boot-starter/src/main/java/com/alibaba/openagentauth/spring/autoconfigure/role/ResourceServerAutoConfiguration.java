@@ -21,7 +21,6 @@ import com.alibaba.openagentauth.core.crypto.key.KeyManager;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptValidator;
 import com.alibaba.openagentauth.core.resolver.ServiceEndpointResolver;
-import com.alibaba.openagentauth.core.token.aoat.AoatValidator;
 import com.alibaba.openagentauth.core.trust.model.TrustDomain;
 import com.alibaba.openagentauth.framework.orchestration.DefaultResourceServer;
 import com.alibaba.openagentauth.spring.autoconfigure.core.CoreAutoConfiguration;
@@ -139,29 +138,6 @@ public class ResourceServerAutoConfiguration {
     }
 
     /**
-     * Creates an AoatValidator bean that uses the correct verification key from Authorization Server.
-     * <p>
-     * This bean uses @Primary to override the default AoatValidator bean from
-     * ResourceServerAutoConfiguration. It specifically looks for the 'aoat-signing-key'
-     * in the JWKS endpoint instead of using the first RSA key.
-     * </p>
-     *
-     * @return the AoatValidator
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public AoatValidator aoatValidator(OpenAgentAuthProperties openAgentAuthProperties, KeyManager keyManager) {
-        String aoatKeyId = openAgentAuthProperties.getKeyDefinition(KEY_AOAT_VERIFICATION).getKeyId();
-        logger.info("Creating AoatValidator bean for Resource Server. Key ID: {}", aoatKeyId);
-
-        String authorizationServerIssuer = openAgentAuthProperties.getJwksConsumer(SERVICE_AUTHORIZATION_SERVER).getIssuer();
-
-        String resourceServerIssuer = openAgentAuthProperties.getRoleIssuer(ROLE_RESOURCE_SERVER);
-
-        return new AoatValidator(keyManager, aoatKeyId, authorizationServerIssuer, resourceServerIssuer);
-    }
-
-    /**
      * Creates the WPT Validator bean if not already defined.
      * <p>
      * This validator provides validation for Workload Proof Tokens (WPT).
@@ -206,38 +182,13 @@ public class ResourceServerAutoConfiguration {
     }
 
     /**
-     * Creates the Resource Server bean if not already defined.
-     * <p>
-     * This server provides resource access control with five-layer validation architecture:
-     * </p>
-     * <ul>
-     *   <li>Layer 1: Validate WIT signature (workload authentication)</li>
-     *   <li>Layer 2: Validate WPT signature (request integrity)</li>
-     *   <li>Layer 3: Validate Agent OA Token (user authentication)</li>
-     *   <li>Layer 4: Validate identity consistency (user == workload)</li>
-     * </ul>
-     *
-     * @param witValidator the WIT validator for Layer 1 validation
-     * @param wptValidator the WPT validator for Layer 2 validation
-     * @param aoatValidator the AOAT validator for Layer 3 validation
-     * @param bindingInstanceStore the binding instance store for two-layer verification
-     * @return the Resource Server bean
+     * Creates the Resource Server bean: WIT + WPT validation only after the AAP trim.
      */
     @Bean
     @ConditionalOnMissingBean
-    public DefaultResourceServer resourceServer(
-            WitValidator witValidator,
-            WptValidator wptValidator,
-            AoatValidator aoatValidator,
-            BindingInstanceStore bindingInstanceStore) {
+    public DefaultResourceServer resourceServer(WitValidator witValidator, WptValidator wptValidator) {
         logger.info("Creating DefaultResourceServer bean");
-
-        return new DefaultResourceServer(
-                witValidator,
-                wptValidator,
-                aoatValidator,
-                bindingInstanceStore
-        );
+        return new DefaultResourceServer(witValidator, wptValidator);
     }
 
     /**

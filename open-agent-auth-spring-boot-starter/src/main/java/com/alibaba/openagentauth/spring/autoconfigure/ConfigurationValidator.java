@@ -164,7 +164,6 @@ public class ConfigurationValidator {
             case "user-authentication" -> caps.getUserAuthentication() != null && caps.getUserAuthentication().isEnabled();
             case "workload-identity" -> caps.getWorkloadIdentity() != null && caps.getWorkloadIdentity().isEnabled();
             case "operation-authorization" -> caps.getOperationAuthorization() != null && caps.getOperationAuthorization().isEnabled();
-            case "audit" -> caps.getAudit() != null && caps.getAudit().isEnabled();
             default -> {
                 logger.warn("Unknown capability: {}", capabilityName);
                 yield false;
