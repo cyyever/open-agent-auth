@@ -18,10 +18,6 @@ package com.alibaba.openagentauth.spring.autoconfigure.role;
 import com.alibaba.openagentauth.core.binding.BindingInstanceStore;
 import com.alibaba.openagentauth.core.binding.RemoteBindingInstanceStore;
 import com.alibaba.openagentauth.core.crypto.key.KeyManager;
-import com.alibaba.openagentauth.core.policy.api.PolicyEvaluator;
-import com.alibaba.openagentauth.core.policy.api.PolicyRegistry;
-import com.alibaba.openagentauth.core.policy.evaluator.LightweightPolicyEvaluator;
-import com.alibaba.openagentauth.core.policy.registry.RemotePolicyRegistry;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptValidator;
 import com.alibaba.openagentauth.core.resolver.ServiceEndpointResolver;
@@ -207,45 +203,6 @@ public class ResourceServerAutoConfiguration {
         serviceProperties.setConsumers(consumers);
         
         return new DefaultServiceEndpointResolver(serviceProperties);
-    }
-
-    /**
-     * Creates the Policy Registry bean if not already defined.
-     * <p>
-     * This registry provides storage for policies.
-     * If the authorization server base URL is configured, it creates a RemotePolicyRegistry
-     * that communicates with the Authorization Server's PolicyRegistry REST API.
-     * Otherwise, it creates an InMemoryPolicyRegistry for local policy storage.
-     * </p>
-     *
-     * @param serviceEndpointResolver the service endpoint resolver for communicating with Authorization Server
-     * @return the Policy Registry bean
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "open-agent-auth.resource-server", name = "enabled", havingValue = "true", matchIfMissing = true)
-    public PolicyRegistry policyRegistry(ServiceEndpointResolver serviceEndpointResolver) {
-        logger.info("Creating PolicyRegistry bean");
-
-        // Create RemotePolicyRegistry for communicating with Authorization Server
-        return new RemotePolicyRegistry(serviceEndpointResolver);
-    }
-
-    /**
-     * Creates the Policy Evaluator bean if not already defined.
-     * <p>
-     * This evaluator provides policy evaluation for fine-grained access control.
-     * It implements Layer 4 validation.
-     * </p>
-     *
-     * @param policyRegistry the policy registry
-     * @return the Policy Evaluator bean
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public PolicyEvaluator policyEvaluator(PolicyRegistry policyRegistry) {
-        logger.info("Creating PolicyEvaluator bean");
-        return new LightweightPolicyEvaluator(policyRegistry);
     }
 
     /**

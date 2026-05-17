@@ -19,7 +19,6 @@ import com.alibaba.openagentauth.core.binding.BindingInstanceStore;
 import com.alibaba.openagentauth.core.token.aoat.AoatValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptValidator;
-import com.alibaba.openagentauth.core.protocol.oauth2.token.server.OAuth2TokenServer;
 import com.alibaba.openagentauth.framework.exception.validation.FrameworkValidationException;
 import com.alibaba.openagentauth.framework.model.request.ResourceRequest;
 import com.alibaba.openagentauth.framework.model.audit.AuditLogEntry;
@@ -65,9 +64,6 @@ class DefaultResourceServerTest {
 
     @Mock
     private BindingInstanceStore mockBindingInstanceStore;
-    
-    @Mock
-    private OAuth2TokenServer mockOAuth2TokenServer;
 
     private static final String WORKLOAD_ID = "workload-123";
     private static final String USER_ID = "user-123";

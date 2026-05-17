@@ -19,7 +19,6 @@ import com.alibaba.openagentauth.framework.model.audit.AuditLogEntry;
 import com.alibaba.openagentauth.framework.model.request.ResourceRequest;
 import com.alibaba.openagentauth.framework.model.validation.ValidationResult;
 import com.alibaba.openagentauth.framework.exception.validation.FrameworkValidationException;
-import com.alibaba.openagentauth.framework.oauth2.FrameworkOAuth2TokenServer;
 import com.alibaba.openagentauth.framework.role.ApplicationRole;
 
 /**
@@ -163,7 +162,6 @@ import com.alibaba.openagentauth.framework.role.ApplicationRole;
  * </ul>
  *
  * @see ApplicationRole#RESOURCE_SERVER
- * @see FrameworkOAuth2TokenServer
  * @since 1.0
  */
 public interface ResourceServer {
