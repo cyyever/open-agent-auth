@@ -16,7 +16,6 @@
 package com.alibaba.openagentauth.framework.orchestration;
 
 import com.alibaba.openagentauth.core.binding.BindingInstanceStore;
-import com.alibaba.openagentauth.core.policy.api.PolicyEvaluator;
 import com.alibaba.openagentauth.core.token.aoat.AoatValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptValidator;
@@ -63,10 +62,7 @@ class DefaultResourceServerTest {
     
     @Mock
     private AoatValidator mockAoatValidator;
-    
-    @Mock
-    private PolicyEvaluator mockPolicyEvaluator;
-    
+
     @Mock
     private BindingInstanceStore mockBindingInstanceStore;
     
@@ -82,7 +78,6 @@ class DefaultResourceServerTest {
                 mockWitValidator,
                 mockWptValidator,
                 mockAoatValidator,
-                mockPolicyEvaluator,
                 mockBindingInstanceStore
         );
     }
@@ -94,20 +89,17 @@ class DefaultResourceServerTest {
         @Test
         @DisplayName("Should create resource server with valid parameters")
         void shouldCreateResourceServerWithValidParameters() {
-            // Act
             DefaultResourceServer server = new DefaultResourceServer(
-                    mockWitValidator, mockWptValidator, mockAoatValidator, mockPolicyEvaluator, mockBindingInstanceStore);
+                    mockWitValidator, mockWptValidator, mockAoatValidator, mockBindingInstanceStore);
 
-            // Assert
             assertThat(server).isNotNull();
         }
 
         @Test
         @DisplayName("Should throw exception when WIT validator is null")
         void shouldThrowExceptionWhenWitValidatorIsNull() {
-            // Act & Assert
             assertThatThrownBy(() -> new DefaultResourceServer(
-                    null, mockWptValidator, mockAoatValidator, mockPolicyEvaluator, mockBindingInstanceStore))
+                    null, mockWptValidator, mockAoatValidator, mockBindingInstanceStore))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("WIT validator cannot be null");
         }
@@ -115,9 +107,8 @@ class DefaultResourceServerTest {
         @Test
         @DisplayName("Should throw exception when WPT validator is null")
         void shouldThrowExceptionWhenWptValidatorIsNull() {
-            // Act & Assert
             assertThatThrownBy(() -> new DefaultResourceServer(
-                    mockWitValidator, null, mockAoatValidator, mockPolicyEvaluator, mockBindingInstanceStore))
+                    mockWitValidator, null, mockAoatValidator, mockBindingInstanceStore))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("WPT validator cannot be null");
         }
@@ -125,9 +116,8 @@ class DefaultResourceServerTest {
         @Test
         @DisplayName("Should throw exception when AOAT validator is null")
         void shouldThrowExceptionWhenAoatValidatorIsNull() {
-            // Act & Assert
             assertThatThrownBy(() -> new DefaultResourceServer(
-                    mockWitValidator, mockWptValidator, null, mockPolicyEvaluator, mockBindingInstanceStore))
+                    mockWitValidator, mockWptValidator, null, mockBindingInstanceStore))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("AOAT validator cannot be null");
         }
@@ -619,40 +609,6 @@ class DefaultResourceServerTest {
 
             assertThat(result).isNotNull();
             assertThat(result.getLayer()).isEqualTo(4);
-        }
-    }
-
-    @Nested
-    @DisplayName("evaluatePolicy()")
-    class EvaluatePolicy {
-
-        @Test
-        @DisplayName("Should throw exception when request is null")
-        void shouldThrowExceptionWhenRequestIsNull() {
-            assertThatThrownBy(() -> resourceServer.evaluatePolicy(null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Resource request cannot be null");
-        }
-
-        @Test
-        @DisplayName("Should return layer result with valid tokens")
-        void shouldReturnLayerResultWithValidTokens() throws Exception {
-            String wit = JwtTestHelper.generateValidWit();
-            String wpt = JwtTestHelper.generateValidWpt();
-            String aoat = JwtTestHelper.generateValidAoat();
-
-            ResourceRequest request = ResourceRequest.builder()
-                    .wit(wit)
-                    .wpt(wpt)
-                    .aoat(aoat)
-                    .httpMethod("GET")
-                    .httpUri("/api/resource")
-                    .build();
-
-            ValidationResult.LayerResult result = resourceServer.evaluatePolicy(request);
-
-            assertThat(result).isNotNull();
-            assertThat(result.getLayer()).isEqualTo(5);
         }
     }
 

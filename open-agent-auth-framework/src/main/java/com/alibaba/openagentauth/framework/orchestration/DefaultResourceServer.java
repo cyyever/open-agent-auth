@@ -19,7 +19,6 @@ import com.alibaba.openagentauth.core.binding.BindingInstanceStore;
 import com.alibaba.openagentauth.core.model.token.AgentOperationAuthToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
-import com.alibaba.openagentauth.core.policy.api.PolicyEvaluator;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitParser;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptParser;
@@ -60,7 +59,6 @@ import java.util.List;
  *   <li><b>Layer 2: Request Integrity:</b> Validates WPT signature and integrity</li>
  *   <li><b>Layer 3: User Authentication:</b> Validates AOAT signature and claims</li>
  *   <li><b>Layer 4: Identity Consistency:</b> Verifies user-workload identity binding</li>
- *   <li><b>Layer 5: Policy Evaluation:</b> Evaluates OPA policies for authorization</li>
  *   <li><b>Audit Logging:</b> Records all access attempts and decisions</li>
  * </ul>
  *
@@ -77,35 +75,22 @@ public class DefaultResourceServer implements ResourceServer {
     private final WptParser wptParser;
     private final FiveLayerVerifier fiveLayerVerifier;
 
-    /**
-     * Creates a new ResourceServerOrchestrator.
-     *
-     * @param witValidator the WIT validator
-     * @param wptValidator the WPT validator
-     * @param aoatValidator the AOAT validator
-     * @param policyEvaluator the policy evaluator
-     * @param bindingInstanceStore the binding instance store for two-layer verification (optional)
-     */
     public DefaultResourceServer(WitValidator witValidator,
                                  WptValidator wptValidator,
                                  AoatValidator aoatValidator,
-                                 PolicyEvaluator policyEvaluator,
                                  BindingInstanceStore bindingInstanceStore) {
 
-        // Validate parameters
         this.witParser = new WitParser();
         this.aoatParser = new AoatParser();
         this.wptParser = new WptParser();
-        
-        // Create the five-layer verifier using factory
+
         this.fiveLayerVerifier = FiveLayerVerifierFactory.createVerifier(
             ValidationUtils.validateNotNull(witValidator, "WIT validator"),
             ValidationUtils.validateNotNull(wptValidator, "WPT validator"),
             ValidationUtils.validateNotNull(aoatValidator, "AOAT validator"),
-            policyEvaluator,
             bindingInstanceStore
         );
-        
+
         logger.info("ResourceServerOrchestrator initialized");
     }
 
@@ -156,11 +141,6 @@ public class DefaultResourceServer implements ResourceServer {
     @Override
     public ValidationResult.LayerResult verifyIdentityConsistency(ResourceRequest request) throws FrameworkValidationException {
         return executeLayerValidation(request, 4);
-    }
-
-    @Override
-    public ValidationResult.LayerResult evaluatePolicy(ResourceRequest request) throws FrameworkValidationException {
-        return executeLayerValidation(request, 5);
     }
 
     @Override

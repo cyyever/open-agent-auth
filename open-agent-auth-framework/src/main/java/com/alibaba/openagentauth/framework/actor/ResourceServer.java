@@ -248,20 +248,6 @@ public interface ResourceServer {
     ValidationResult.LayerResult verifyIdentityConsistency(ResourceRequest request) throws FrameworkValidationException;
 
     /**
-     * Evaluates the authorization policy independently (Layer 5).
-     * <p>
-     * This method performs only Layer 5 validation: evaluating OPA policies
-     * with the request context (user, workload, operation, resource) to make
-     * an authorization decision.
-     * </p>
-     *
-     * @param request the incoming request containing all tokens and context for policy evaluation
-     * @return the layer result with validation status and details
-     * @throws FrameworkValidationException if token parsing or policy evaluation fails
-     */
-    ValidationResult.LayerResult evaluatePolicy(ResourceRequest request) throws FrameworkValidationException;
-
-    /**
      * Logs access attempt for audit purposes.
      * <p>
      * This method records the access attempt, including request details,

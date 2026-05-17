@@ -258,13 +258,11 @@ public class ResourceServerAutoConfiguration {
      *   <li>Layer 2: Validate WPT signature (request integrity)</li>
      *   <li>Layer 3: Validate Agent OA Token (user authentication)</li>
      *   <li>Layer 4: Validate identity consistency (user == workload)</li>
-     *   <li>Layer 5: OPA policy evaluation (fine-grained authorization)</li>
      * </ul>
      *
      * @param witValidator the WIT validator for Layer 1 validation
      * @param wptValidator the WPT validator for Layer 2 validation
      * @param aoatValidator the AOAT validator for Layer 3 validation
-     * @param policyEvaluator the policy evaluator for Layer 5 validation
      * @param bindingInstanceStore the binding instance store for two-layer verification
      * @return the Resource Server bean
      */
@@ -274,7 +272,6 @@ public class ResourceServerAutoConfiguration {
             WitValidator witValidator,
             WptValidator wptValidator,
             AoatValidator aoatValidator,
-            PolicyEvaluator policyEvaluator,
             BindingInstanceStore bindingInstanceStore) {
         logger.info("Creating DefaultResourceServer bean");
 
@@ -282,7 +279,6 @@ public class ResourceServerAutoConfiguration {
                 witValidator,
                 wptValidator,
                 aoatValidator,
-                policyEvaluator,
                 bindingInstanceStore
         );
     }
