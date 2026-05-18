@@ -1,13 +1,7 @@
 # Open Agent Auth Auto-Configuration
 
-# Security configuration (session cookie name, SameSite, etc.)
-com.alibaba.openagentauth.spring.autoconfigure.SecurityAutoConfiguration
-
 # Core configuration (shared beans like KeyManager)
 com.alibaba.openagentauth.spring.autoconfigure.core.CoreAutoConfiguration
 
 # Resource Server role (the only AAP-relevant role that survives the trim)
 com.alibaba.openagentauth.spring.autoconfigure.role.ResourceServerAutoConfiguration
-
-# Configuration Validator (validates role-capability consistency)
-com.alibaba.openagentauth.spring.autoconfigure.ConfigurationValidator

@@ -19,7 +19,6 @@ import com.alibaba.openagentauth.framework.model.audit.AuditLogEntry;
 import com.alibaba.openagentauth.framework.model.request.ResourceRequest;
 import com.alibaba.openagentauth.framework.model.validation.ValidationResult;
 import com.alibaba.openagentauth.framework.exception.validation.FrameworkValidationException;
-import com.alibaba.openagentauth.framework.role.ApplicationRole;
 
 /**
  * Resource Server actor interface.
@@ -161,7 +160,6 @@ import com.alibaba.openagentauth.framework.role.ApplicationRole;
  *   <li><b>5:</b> Resource Server acknowledges audit logging completion</li>
  * </ul>
  *
- * @see ApplicationRole#RESOURCE_SERVER
  * @since 1.0
  */
 public interface ResourceServer {
