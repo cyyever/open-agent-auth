@@ -19,6 +19,7 @@ import com.alibaba.openagentauth.core.model.jwk.Jwk;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.token.common.JwkConverter;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -34,9 +35,8 @@ import java.util.Map;
  */
 public class WitParser {
 
-    /**
-     * Logger for this class.
-     */
+    private static final String EXPECTED_TYP = "wit+jwt";
+
     private static final Logger logger = LoggerFactory.getLogger(WitParser.class);
 
     /**
@@ -54,20 +54,21 @@ public class WitParser {
      */
     public WorkloadIdentityToken parse(SignedJWT signedJwt) throws ParseException {
 
-        // Validate input
-        // Validate input
         ValidationUtils.validateNotNull(signedJwt, "Signed JWT");
 
         logger.debug("Parsing Workload Identity Token");
 
-        // Extract JWT claims
+        JOSEObjectType typ = signedJwt.getHeader().getType();
+        if (typ == null || !EXPECTED_TYP.equals(typ.getType())) {
+            throw new ParseException(
+                    "WIT typ header must be '" + EXPECTED_TYP + "', got: " + typ, 0);
+        }
+
         var claims = signedJwt.getJWTClaimsSet();
 
-        // Parse confirmation claim (cnf) - contains the public key for WPT verification
         WorkloadIdentityToken.Claims.Confirmation confirmation = parseConfirmationClaim(claims);
 
-        // Build structured WIT object
-        WorkloadIdentityToken wit = buildWorkloadIdentityToken(signedJwt, claims, confirmation);
+        WorkloadIdentityToken wit = buildWorkloadIdentityToken(signedJwt, claims, confirmation, typ.getType());
 
         logger.debug("Successfully parsed WIT with subject: {}", wit.getSubject());
         return wit;
@@ -129,7 +130,8 @@ public class WitParser {
     private WorkloadIdentityToken buildWorkloadIdentityToken(
             SignedJWT signedJwt,
             JWTClaimsSet claims,
-            WorkloadIdentityToken.Claims.Confirmation confirmation
+            WorkloadIdentityToken.Claims.Confirmation confirmation,
+            String typ
     ) {
 
         // Build claims
@@ -142,7 +144,7 @@ public class WitParser {
 
         // Build header
         WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder()
-                .type("wit+jwt")
+                .type(typ)
                 .algorithm(signedJwt.getHeader().getAlgorithm().getName())
                 .build();
 

@@ -117,17 +117,12 @@ class WptParserTest {
         }
 
         @Test
-        @DisplayName("Should parse WPT with custom typ header")
-        void shouldParseWptWithCustomTypHeader() throws Exception {
-            // Given
+        @DisplayName("Should reject WPT with wrong typ header")
+        void shouldRejectWptWithWrongTypHeader() throws Exception {
             String wptJwt = createWptWithCustomTyp();
-
-            // When
-            WorkloadProofToken wpt = wptParser.parse(wptJwt);
-
-            // Then
-            // Note: WptParser always defaults to "wpt+jwt" when typ is not in the header
-            assertThat(wpt.header().type()).isEqualTo("wpt+jwt");
+            assertThatThrownBy(() -> wptParser.parse(wptJwt))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("typ header must be 'wpt+jwt'");
         }
     }
 
@@ -276,16 +271,12 @@ class WptParserTest {
         }
 
         @Test
-        @DisplayName("Should default typ to wpt+jwt when not specified")
-        void shouldDefaultTypToWptJwtWhenNotSpecified() throws Exception {
-            // Given
+        @DisplayName("Should reject WPT without typ header")
+        void shouldRejectWptWithoutTypHeader() throws Exception {
             String wptJwt = createWptWithoutTyp();
-
-            // When
-            WorkloadProofToken wpt = wptParser.parse(wptJwt);
-
-            // Then
-            assertThat(wpt.header().type()).isEqualTo("wpt+jwt");
+            assertThatThrownBy(() -> wptParser.parse(wptJwt))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("typ header must be 'wpt+jwt'");
         }
     }
 

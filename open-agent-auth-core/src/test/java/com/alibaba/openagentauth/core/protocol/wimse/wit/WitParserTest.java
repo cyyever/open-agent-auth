@@ -18,6 +18,7 @@ package com.alibaba.openagentauth.core.protocol.wimse.wit;
 import com.alibaba.openagentauth.core.model.jwk.Jwk;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
@@ -310,6 +311,7 @@ class WitParserTest {
         SignedJWT signedJwt = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.RS256)
                         .keyID(signingKey.getKeyID())
+                        .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
         );

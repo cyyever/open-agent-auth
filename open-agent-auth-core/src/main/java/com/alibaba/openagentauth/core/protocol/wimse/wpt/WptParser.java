@@ -17,6 +17,7 @@ package com.alibaba.openagentauth.core.protocol.wimse.wpt;
 
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
@@ -30,9 +31,8 @@ import java.text.ParseException;
  */
 public class WptParser {
 
-    /**
-     * Logger for this class.
-     */
+    private static final String EXPECTED_TYP = "wpt+jwt";
+
     private static final Logger logger = LoggerFactory.getLogger(WptParser.class);
 
     /**
@@ -85,11 +85,14 @@ public class WptParser {
             String jwtString
     ) throws ParseException {
 
-        // Build header
+        // Build header — reject if typ is missing or not wpt+jwt
+        JOSEObjectType typ = signedJwt.getHeader().getType();
+        if (typ == null || !EXPECTED_TYP.equals(typ.getType())) {
+            throw new ParseException(
+                    "WPT typ header must be '" + EXPECTED_TYP + "', got: " + typ, 0);
+        }
         WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
-                .type(signedJwt.getHeader().getCustomParam("typ") != null 
-                        ? signedJwt.getHeader().getCustomParam("typ").toString() 
-                        : "wpt+jwt")
+                .type(typ.getType())
                 .algorithm(signedJwt.getHeader().getAlgorithm().getName())
                 .build();
 
