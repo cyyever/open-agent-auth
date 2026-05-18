@@ -95,15 +95,15 @@ class WitGeneratorTest {
 
             // Then
             assertThat(wit).isNotNull();
-            assertThat(wit.getJwtString()).isNotNull();
-            assertThat(wit.getJwtString()).isNotEmpty();
+            assertThat(wit.jwtString()).isNotNull();
+            assertThat(wit.jwtString()).isNotEmpty();
 
             // Verify required claims per draft-ietf-wimse-workload-creds
             assertThat(wit.getSubject()).isEqualTo(workloadId);
             assertThat(wit.getIssuer()).isEqualTo(trustDomain.getDomainId());
             assertThat(wit.getExpirationTime()).isNotNull();
             assertThat(wit.getConfirmation()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk()).isNotNull();
+            assertThat(wit.getConfirmation().jwk()).isNotNull();
             assertThat(wit.getJwtId()).isNotNull();
         }
 
@@ -120,9 +120,9 @@ class WitGeneratorTest {
             // Then
             // Verify cnf.jwk structure per RFC 7800
             assertThat(wit.getConfirmation()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk().algorithm()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk().algorithm()).isEqualTo("ES256");
+            assertThat(wit.getConfirmation().jwk()).isNotNull();
+            assertThat(wit.getConfirmation().jwk().algorithm()).isNotNull();
+            assertThat(wit.getConfirmation().jwk().algorithm()).isEqualTo("ES256");
         }
 
         @Test
@@ -179,7 +179,7 @@ class WitGeneratorTest {
 
             // When
             WorkloadIdentityToken wit = witGenerator.generateWit(workloadId, wptPublicKeyJson, expirationSeconds);
-            String witJwt = wit.getJwtString();
+            String witJwt = wit.jwtString();
 
             // Then
             var result = validator.validate(witJwt);
@@ -317,7 +317,7 @@ class WitGeneratorTest {
             WorkloadIdentityToken wit = witGenerator.generateWit(workloadId, wptPublicKeyJson, expirationSeconds);
 
             // Then
-            assertThat(wit.getHeader().getType()).isEqualTo("wit+jwt");
+            assertThat(wit.header().type()).isEqualTo("wit+jwt");
         }
 
         @Test
@@ -331,7 +331,7 @@ class WitGeneratorTest {
             WorkloadIdentityToken wit = witGenerator.generateWit(workloadId, wptPublicKeyJson, expirationSeconds);
 
             // Then
-            assertThat(wit.getHeader().getAlgorithm()).isEqualTo("RS256");
+            assertThat(wit.header().algorithm()).isEqualTo("RS256");
         }
 
         @Test
@@ -361,8 +361,8 @@ class WitGeneratorTest {
 
             // Then
             assertThat(wit.getConfirmation()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk().keyType()).isEqualTo(Jwk.KeyType.EC);
+            assertThat(wit.getConfirmation().jwk()).isNotNull();
+            assertThat(wit.getConfirmation().jwk().keyType()).isEqualTo(Jwk.KeyType.EC);
         }
     }
 }

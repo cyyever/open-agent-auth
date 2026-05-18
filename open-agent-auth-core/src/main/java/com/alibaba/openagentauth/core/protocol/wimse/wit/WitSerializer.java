@@ -89,11 +89,11 @@ public class WitSerializer {
     private static JWSObject buildJWSObject(WorkloadIdentityToken wit, String keyId) throws JOSEException {
         try {
             // Build JWSHeader from WIT header
-            JWSAlgorithm headerAlgorithm = new JWSAlgorithm(wit.getHeader().getAlgorithm());
-            logger.debug("Building JWSHeader with algorithm: {} (from string: {})", headerAlgorithm, wit.getHeader().getAlgorithm());
+            JWSAlgorithm headerAlgorithm = new JWSAlgorithm(wit.header().algorithm());
+            logger.debug("Building JWSHeader with algorithm: {} (from string: {})", headerAlgorithm, wit.header().algorithm());
             
             JWSHeader.Builder headerBuilder = new JWSHeader.Builder(headerAlgorithm)
-                    .type(new JOSEObjectType(wit.getHeader().getType()));
+                    .type(new JOSEObjectType(wit.header().type()));
             
             // Add key ID if provided
             if (!ValidationUtils.isNullOrEmpty(keyId)) {
@@ -113,7 +113,7 @@ public class WitSerializer {
             // Add confirmation claim (cnf) if present
             if (wit.getConfirmation() != null) {
                 Map<String, Object> cnfMap = new java.util.HashMap<>();
-                Map<String, Object> jwkMap = JwkConverter.convertJwkToMap(wit.getConfirmation().getJwk());
+                Map<String, Object> jwkMap = JwkConverter.convertJwkToMap(wit.getConfirmation().jwk());
                 cnfMap.put("jwk", jwkMap);
                 claimsBuilder.claim("cnf", cnfMap);
             }

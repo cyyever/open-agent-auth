@@ -70,7 +70,7 @@ public class WorkloadIdentityValidator implements LayerValidator {
         }
 
         // Get the JWT string from the WIT
-        String witJwtString = context.getWit().getJwtString();
+        String witJwtString = context.getWit().jwtString();
         if (ValidationUtils.isNullOrEmpty(witJwtString)) {
             logger.error("WIT JWT string is null or empty");
             return LayerValidationResult.failure(

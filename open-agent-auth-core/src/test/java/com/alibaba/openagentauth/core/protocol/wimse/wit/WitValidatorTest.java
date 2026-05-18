@@ -117,7 +117,7 @@ class WitValidatorTest {
             assertThat(result.getToken()).isNotNull();
             assertThat(result.getToken().getIssuer()).isEqualTo(trustDomain.getDomainId());
             assertThat(result.getToken().getConfirmation()).isNotNull();
-            assertThat(result.getToken().getConfirmation().getJwk()).isNotNull();
+            assertThat(result.getToken().getConfirmation().jwk()).isNotNull();
         }
     }
 
@@ -204,7 +204,7 @@ class WitValidatorTest {
                     wptPublicKey.toJSONString(),
                     3600
             );
-            String witJwt = wit.getJwtString();
+            String witJwt = wit.jwtString();
 
             // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
@@ -303,7 +303,7 @@ class WitValidatorTest {
 
             // Then
             assertThat(result.isValid()).isTrue();
-            assertThat(result.getToken().getConfirmation().getJwk()).isNotNull();
+            assertThat(result.getToken().getConfirmation().jwk()).isNotNull();
         }
     }
 
@@ -353,7 +353,7 @@ class WitValidatorTest {
                 wptPublicKey.toJSONString(),
                 3600
         );
-        return wit.getJwtString();
+        return wit.jwtString();
     }
 
     private String createExpiredWit() throws JOSEException {

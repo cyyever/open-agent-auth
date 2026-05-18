@@ -99,9 +99,9 @@ class WitParserTest {
 
             // Then
             assertThat(wit.getConfirmation()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk().keyType()).isEqualTo(Jwk.KeyType.EC);
-            assertThat(wit.getConfirmation().getJwk().algorithm()).isEqualTo("ES256");
+            assertThat(wit.getConfirmation().jwk()).isNotNull();
+            assertThat(wit.getConfirmation().jwk().keyType()).isEqualTo(Jwk.KeyType.EC);
+            assertThat(wit.getConfirmation().jwk().algorithm()).isEqualTo("ES256");
         }
 
         @Test
@@ -114,9 +114,9 @@ class WitParserTest {
             WorkloadIdentityToken wit = witParser.parse(signedJwt);
 
             // Then
-            assertThat(wit.getHeader()).isNotNull();
-            assertThat(wit.getHeader().getType()).isEqualTo("wit+jwt");
-            assertThat(wit.getHeader().getAlgorithm()).isEqualTo("RS256");
+            assertThat(wit.header()).isNotNull();
+            assertThat(wit.header().type()).isEqualTo("wit+jwt");
+            assertThat(wit.header().algorithm()).isEqualTo("RS256");
         }
 
         @Test

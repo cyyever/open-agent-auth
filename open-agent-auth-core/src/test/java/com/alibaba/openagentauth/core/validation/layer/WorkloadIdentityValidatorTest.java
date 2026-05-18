@@ -104,7 +104,7 @@ class WorkloadIdentityValidatorTest {
         @DisplayName("Should return failure when WIT JWT string is null")
         void shouldReturnFailureWhenWitJwtStringIsNull() {
             WorkloadIdentityToken wit = mock(WorkloadIdentityToken.class);
-            when(wit.getJwtString()).thenReturn(null);
+            when(wit.jwtString()).thenReturn(null);
 
             ValidationContext context = ValidationContext.builder()
                     .wit(wit)
@@ -120,7 +120,7 @@ class WorkloadIdentityValidatorTest {
         @DisplayName("Should return failure when WIT JWT string is empty")
         void shouldReturnFailureWhenWitJwtStringIsEmpty() {
             WorkloadIdentityToken wit = mock(WorkloadIdentityToken.class);
-            when(wit.getJwtString()).thenReturn("");
+            when(wit.jwtString()).thenReturn("");
 
             ValidationContext context = ValidationContext.builder()
                     .wit(wit)
@@ -136,7 +136,7 @@ class WorkloadIdentityValidatorTest {
         @DisplayName("Should return success when WIT validation passes")
         void shouldReturnSuccessWhenWitValidationPasses() throws Exception {
             WorkloadIdentityToken wit = mock(WorkloadIdentityToken.class);
-            when(wit.getJwtString()).thenReturn("valid.jwt.token");
+            when(wit.jwtString()).thenReturn("valid.jwt.token");
 
             TokenValidationResult<WorkloadIdentityToken> validationResult = 
                     TokenValidationResult.success(wit);
@@ -157,7 +157,7 @@ class WorkloadIdentityValidatorTest {
         @DisplayName("Should return failure when WIT validation fails")
         void shouldReturnFailureWhenWitValidationFails() throws Exception {
             WorkloadIdentityToken wit = mock(WorkloadIdentityToken.class);
-            when(wit.getJwtString()).thenReturn("invalid.jwt.token");
+            when(wit.jwtString()).thenReturn("invalid.jwt.token");
 
             TokenValidationResult<WorkloadIdentityToken> validationResult = 
                     TokenValidationResult.failure("Invalid signature");
@@ -178,7 +178,7 @@ class WorkloadIdentityValidatorTest {
         @DisplayName("Should return failure when WitValidator throws exception")
         void shouldReturnFailureWhenWitValidatorThrowsException() throws Exception {
             WorkloadIdentityToken wit = mock(WorkloadIdentityToken.class);
-            when(wit.getJwtString()).thenReturn("malformed.jwt.token");
+            when(wit.jwtString()).thenReturn("malformed.jwt.token");
 
             when(mockWitValidator.validate(anyString()))
                     .thenThrow(new RuntimeException("Parsing error"));

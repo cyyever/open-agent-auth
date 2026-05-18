@@ -292,7 +292,7 @@ class WptGeneratorTest {
         void shouldMatchWptAlgorithmWithWitCnfJwkAlg() throws JOSEException {
             // Given
             long expirationSeconds = 300;
-            String witAlg = testWit.getConfirmation().getJwk().algorithm();
+            String witAlg = testWit.getConfirmation().jwk().algorithm();
 
             // When
             WorkloadProofToken wpt = wptGenerator.generateWpt(testWit, wptPrivateKey, expirationSeconds);

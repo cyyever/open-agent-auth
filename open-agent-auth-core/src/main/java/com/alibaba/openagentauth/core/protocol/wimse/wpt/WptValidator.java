@@ -266,12 +266,12 @@ public class WptValidator {
 
             // Extract the public key from WIT cnf.jwk for WPT signature verification.
             // WPT must be signed with the private key corresponding to cnf.jwk.
-            if (wit.getConfirmation() == null || wit.getConfirmation().getJwk() == null) {
+            if (wit.getConfirmation() == null || wit.getConfirmation().jwk() == null) {
                 logger.warn("WIT missing cnf.jwk, cannot verify WPT signature");
                 return "WIT missing cnf.jwk";
             }
 
-            JWK wptVerificationKey = convertToJWK(wit.getConfirmation().getJwk());
+            JWK wptVerificationKey = convertToJWK(wit.getConfirmation().jwk());
             
             // Create verifier using the WIT cnf.jwk key based on key type
             JWSVerifier verifier = createVerifier(wptVerificationKey);
@@ -343,7 +343,7 @@ public class WptValidator {
     private String verifyWth(WorkloadProofToken wpt, WorkloadIdentityToken wit) {
         try {
             // Use the JWT string to compute hash
-            String witJwtString = wit.getJwtString();
+            String witJwtString = wit.jwtString();
             if (ValidationUtils.isNullOrEmpty(witJwtString)) {
                 logger.warn("WIT missing JWT string, cannot verify wth");
                 return "WIT missing JWT string";
@@ -455,11 +455,11 @@ public class WptValidator {
             }
 
             // Get WIT cnf.jwk.alg from the structured object
-            if (wit.getConfirmation() == null || wit.getConfirmation().getJwk() == null) {
+            if (wit.getConfirmation() == null || wit.getConfirmation().jwk() == null) {
                 return "WIT missing cnf.jwk claim";
             }
 
-            String witAlg = wit.getConfirmation().getJwk().algorithm();
+            String witAlg = wit.getConfirmation().jwk().algorithm();
             if (ValidationUtils.isNullOrEmpty(witAlg)) {
                 return "WIT cnf.jwk missing alg field";
             }

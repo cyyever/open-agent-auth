@@ -140,7 +140,7 @@ public class WitGenerator {
      */
     public String generateWitAsString(String subject, String wptPublicKey, long expirationSeconds) throws JOSEException {
         WorkloadIdentityToken wit = generateWit(subject, wptPublicKey, expirationSeconds);
-        return wit.getJwtString();
+        return wit.jwtString();
     }
 
     /**
@@ -216,8 +216,8 @@ public class WitGenerator {
 
             // Return new WIT object with signature and JWT string populated
             return WorkloadIdentityToken.builder()
-                    .header(wit.getHeader())
-                    .claims(wit.getClaims())
+                    .header(wit.header())
+                    .claims(wit.claims())
                     .signature(signature)
                     .jwtString(signedJwtString)
                     .build();

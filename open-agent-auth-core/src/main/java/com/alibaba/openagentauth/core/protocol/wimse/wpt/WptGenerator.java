@@ -113,7 +113,7 @@ public class WptGenerator {
         Instant expiration = now.plusSeconds(expirationSeconds);
 
         // Use the JWT string to calculate hash (wth)
-        String witJwtString = wit.getJwtString();
+        String witJwtString = wit.jwtString();
         if (ValidationUtils.isNullOrEmpty(witJwtString)) {
             throw new JOSEException("WIT missing JWT string, cannot compute wth");
         }
@@ -213,12 +213,12 @@ public class WptGenerator {
     private String extractAlgorithmFromWit(WorkloadIdentityToken wit) throws JOSEException {
 
         // Check if WIT has cnf.jwk
-        if (wit == null || wit.getConfirmation() == null || wit.getConfirmation().getJwk() == null) {
+        if (wit == null || wit.getConfirmation() == null || wit.getConfirmation().jwk() == null) {
             throw new JOSEException("WIT missing cnf.jwk claim");
         }
 
         // Extract algorithm from WIT's cnf.jwk.alg
-        Jwk jwk = wit.getConfirmation().getJwk();
+        Jwk jwk = wit.getConfirmation().jwk();
         String algorithm = jwk.algorithm();
 
         // Check if algorithm is present

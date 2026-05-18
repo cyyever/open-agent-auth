@@ -100,10 +100,10 @@ class WorkloadIdentityTokenTest {
                     .build();
 
             assertThat(token).isNotNull();
-            assertThat(token.getHeader()).isEqualTo(validHeader);
-            assertThat(token.getClaims()).isEqualTo(validClaims);
-            assertThat(token.getSignature()).isEqualTo("test-signature");
-            assertThat(token.getJwtString()).isEqualTo("test.jwt.string");
+            assertThat(token.header()).isEqualTo(validHeader);
+            assertThat(token.claims()).isEqualTo(validClaims);
+            assertThat(token.signature()).isEqualTo("test-signature");
+            assertThat(token.jwtString()).isEqualTo("test.jwt.string");
         }
 
         @Test
@@ -115,10 +115,10 @@ class WorkloadIdentityTokenTest {
                     .build();
 
             assertThat(token).isNotNull();
-            assertThat(token.getHeader()).isEqualTo(validHeader);
-            assertThat(token.getClaims()).isEqualTo(validClaims);
-            assertThat(token.getSignature()).isNull();
-            assertThat(token.getJwtString()).isNull();
+            assertThat(token.header()).isEqualTo(validHeader);
+            assertThat(token.claims()).isEqualTo(validClaims);
+            assertThat(token.signature()).isNull();
+            assertThat(token.jwtString()).isNull();
         }
 
         @Test
@@ -131,8 +131,8 @@ class WorkloadIdentityTokenTest {
                     .build();
 
             assertThat(token).isNotNull();
-            assertThat(token.getSignature()).isEqualTo("signature-only");
-            assertThat(token.getJwtString()).isNull();
+            assertThat(token.signature()).isEqualTo("signature-only");
+            assertThat(token.jwtString()).isNull();
         }
 
         @Test
@@ -145,8 +145,8 @@ class WorkloadIdentityTokenTest {
                     .build();
 
             assertThat(token).isNotNull();
-            assertThat(token.getSignature()).isNull();
-            assertThat(token.getJwtString()).isEqualTo("jwt-string-only");
+            assertThat(token.signature()).isNull();
+            assertThat(token.jwtString()).isEqualTo("jwt-string-only");
         }
 
         @Test
@@ -184,7 +184,7 @@ class WorkloadIdentityTokenTest {
                     .claims(validClaims)
                     .build();
 
-            assertThat(token.getHeader()).isEqualTo(validHeader);
+            assertThat(token.header()).isEqualTo(validHeader);
         }
 
         @Test
@@ -195,7 +195,7 @@ class WorkloadIdentityTokenTest {
                     .claims(validClaims)
                     .build();
 
-            assertThat(token.getClaims()).isEqualTo(validClaims);
+            assertThat(token.claims()).isEqualTo(validClaims);
         }
 
         @Test
@@ -207,7 +207,7 @@ class WorkloadIdentityTokenTest {
                     .signature("test-signature")
                     .build();
 
-            assertThat(token.getSignature()).isEqualTo("test-signature");
+            assertThat(token.signature()).isEqualTo("test-signature");
         }
 
         @Test
@@ -218,7 +218,7 @@ class WorkloadIdentityTokenTest {
                     .claims(validClaims)
                     .build();
 
-            assertThat(token.getSignature()).isNull();
+            assertThat(token.signature()).isNull();
         }
 
         @Test
@@ -230,7 +230,7 @@ class WorkloadIdentityTokenTest {
                     .jwtString("test.jwt.string")
                     .build();
 
-            assertThat(token.getJwtString()).isEqualTo("test.jwt.string");
+            assertThat(token.jwtString()).isEqualTo("test.jwt.string");
         }
 
         @Test
@@ -241,7 +241,7 @@ class WorkloadIdentityTokenTest {
                     .claims(validClaims)
                     .build();
 
-            assertThat(token.getJwtString()).isNull();
+            assertThat(token.jwtString()).isNull();
         }
 
         @Test
@@ -341,7 +341,7 @@ class WorkloadIdentityTokenTest {
                     .build();
 
             assertThat(token.getConfirmation()).isNotNull();
-            assertThat(token.getConfirmation().getJwk()).isEqualTo(testJwk);
+            assertThat(token.getConfirmation().jwk()).isEqualTo(testJwk);
         }
 
         @Test
@@ -463,8 +463,8 @@ class WorkloadIdentityTokenTest {
                     .algorithm("ES256")
                     .build();
 
-            assertThat(header.getType()).isEqualTo(WorkloadIdentityToken.Header.MEDIA_TYPE);
-            assertThat(header.getAlgorithm()).isEqualTo("ES256");
+            assertThat(header.type()).isEqualTo(WorkloadIdentityToken.Header.MEDIA_TYPE);
+            assertThat(header.algorithm()).isEqualTo("ES256");
         }
 
         @Test
@@ -474,8 +474,8 @@ class WorkloadIdentityTokenTest {
                     .algorithm("RS256")
                     .build();
 
-            assertThat(header.getType()).isEqualTo(WorkloadIdentityToken.Header.MEDIA_TYPE);
-            assertThat(header.getAlgorithm()).isEqualTo("RS256");
+            assertThat(header.type()).isEqualTo(WorkloadIdentityToken.Header.MEDIA_TYPE);
+            assertThat(header.algorithm()).isEqualTo("RS256");
         }
 
         @Test
@@ -595,12 +595,12 @@ class WorkloadIdentityTokenTest {
                     .confirmation(confirmation)
                     .build();
 
-            assertThat(claims.getIssuer()).isEqualTo("https://idp.example.com");
-            assertThat(claims.getSubject()).isEqualTo("spiffe://example.com/workload/test");
-            assertThat(claims.getExpirationTime()).isEqualTo(futureExpirationTime);
-            assertThat(claims.getJwtId()).isEqualTo("test-jti");
-            assertThat(claims.getConfirmation()).isEqualTo(confirmation);
-            assertThat(claims.getJwk()).isEqualTo(testJwk);
+            assertThat(claims.issuer()).isEqualTo("https://idp.example.com");
+            assertThat(claims.subject()).isEqualTo("spiffe://example.com/workload/test");
+            assertThat(claims.expirationTime()).isEqualTo(futureExpirationTime);
+            assertThat(claims.jwtId()).isEqualTo("test-jti");
+            assertThat(claims.confirmation()).isEqualTo(confirmation);
+            assertThat(claims.jwk()).isEqualTo(testJwk);
         }
 
         @Test
@@ -611,11 +611,11 @@ class WorkloadIdentityTokenTest {
                     .expirationTime(futureExpirationTime)
                     .build();
 
-            assertThat(claims.getIssuer()).isNull();
-            assertThat(claims.getSubject()).isEqualTo("spiffe://example.com/workload/test");
-            assertThat(claims.getExpirationTime()).isEqualTo(futureExpirationTime);
-            assertThat(claims.getJwtId()).isNull();
-            assertThat(claims.getConfirmation()).isNull();
+            assertThat(claims.issuer()).isNull();
+            assertThat(claims.subject()).isEqualTo("spiffe://example.com/workload/test");
+            assertThat(claims.expirationTime()).isEqualTo(futureExpirationTime);
+            assertThat(claims.jwtId()).isNull();
+            assertThat(claims.confirmation()).isNull();
         }
 
         @Test
@@ -760,7 +760,7 @@ class WorkloadIdentityTokenTest {
                     .jwk(testJwk)
                     .build();
 
-            assertThat(confirmation.getJwk()).isEqualTo(testJwk);
+            assertThat(confirmation.jwk()).isEqualTo(testJwk);
         }
 
         @Test
@@ -956,7 +956,7 @@ class WorkloadIdentityTokenTest {
                     .signature("")
                     .build();
 
-            assertThat(token.getSignature()).isEqualTo("");
+            assertThat(token.signature()).isEqualTo("");
         }
 
         @Test
@@ -968,7 +968,7 @@ class WorkloadIdentityTokenTest {
                     .jwtString("")
                     .build();
 
-            assertThat(token.getJwtString()).isEqualTo("");
+            assertThat(token.jwtString()).isEqualTo("");
         }
 
         @Test
