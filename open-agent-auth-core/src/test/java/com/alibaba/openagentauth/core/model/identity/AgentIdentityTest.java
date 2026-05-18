@@ -76,17 +76,17 @@ class AgentIdentityTest {
 
             // Then
             assertThat(identity).isNotNull();
-            assertThat(identity.getVersion()).isEqualTo(VERSION);
-            assertThat(identity.getId()).isEqualTo(AGENT_ID);
-            assertThat(identity.getIssuer()).isEqualTo(ISSUER);
-            assertThat(identity.getIssuedTo()).isEqualTo(ISSUED_TO);
-            assertThat(identity.getIssuedFor()).isNotNull();
-            assertThat(identity.getIssuedFor().getPlatform()).isEqualTo("cloud-platform");
-            assertThat(identity.getIssuedFor().getClient()).isEqualTo("web-app");
-            assertThat(identity.getIssuedFor().getClientInstance()).isEqualTo("instance-1");
-            assertThat(identity.getIssuanceDate()).isEqualTo(NOW);
-            assertThat(identity.getValidFrom()).isEqualTo(NOW);
-            assertThat(identity.getExpires()).isEqualTo(NOW.plusSeconds(3600));
+            assertThat(identity.version()).isEqualTo(VERSION);
+            assertThat(identity.id()).isEqualTo(AGENT_ID);
+            assertThat(identity.issuer()).isEqualTo(ISSUER);
+            assertThat(identity.issuedTo()).isEqualTo(ISSUED_TO);
+            assertThat(identity.issuedFor()).isNotNull();
+            assertThat(identity.issuedFor().platform()).isEqualTo("cloud-platform");
+            assertThat(identity.issuedFor().client()).isEqualTo("web-app");
+            assertThat(identity.issuedFor().clientInstance()).isEqualTo("instance-1");
+            assertThat(identity.issuanceDate()).isEqualTo(NOW);
+            assertThat(identity.validFrom()).isEqualTo(NOW);
+            assertThat(identity.expires()).isEqualTo(NOW.plusSeconds(3600));
         }
 
         @Test
@@ -100,7 +100,7 @@ class AgentIdentityTest {
                     .build();
 
             // Then
-            assertThat(identity.getVersion()).isEqualTo("1.0");
+            assertThat(identity.version()).isEqualTo("1.0");
         }
 
         @Test
@@ -114,10 +114,10 @@ class AgentIdentityTest {
                     .build();
 
             // Then
-            assertThat(identity.getIssuedFor()).isNull();
-            assertThat(identity.getIssuanceDate()).isNull();
-            assertThat(identity.getValidFrom()).isNull();
-            assertThat(identity.getExpires()).isNull();
+            assertThat(identity.issuedFor()).isNull();
+            assertThat(identity.issuanceDate()).isNull();
+            assertThat(identity.validFrom()).isNull();
+            assertThat(identity.expires()).isNull();
         }
     }
 
@@ -137,7 +137,7 @@ class AgentIdentityTest {
                     .build();
 
             // When & Then
-            assertThat(identity.getVersion()).isEqualTo("2.0");
+            assertThat(identity.version()).isEqualTo("2.0");
         }
 
         @Test
@@ -151,7 +151,7 @@ class AgentIdentityTest {
                     .build();
 
             // When & Then
-            assertThat(identity.getId()).isEqualTo(AGENT_ID);
+            assertThat(identity.id()).isEqualTo(AGENT_ID);
         }
 
         @Test
@@ -165,7 +165,7 @@ class AgentIdentityTest {
                     .build();
 
             // When & Then
-            assertThat(identity.getIssuer()).isEqualTo(ISSUER);
+            assertThat(identity.issuer()).isEqualTo(ISSUER);
         }
 
         @Test
@@ -179,7 +179,7 @@ class AgentIdentityTest {
                     .build();
 
             // When & Then
-            assertThat(identity.getIssuedTo()).isEqualTo(ISSUED_TO);
+            assertThat(identity.issuedTo()).isEqualTo(ISSUED_TO);
         }
 
         @Test
@@ -197,8 +197,8 @@ class AgentIdentityTest {
                     .build();
 
             // When & Then
-            assertThat(identity.getIssuedFor()).isNotNull();
-            assertThat(identity.getIssuedFor().getPlatform()).isEqualTo("platform-1");
+            assertThat(identity.issuedFor()).isNotNull();
+            assertThat(identity.issuedFor().platform()).isEqualTo("platform-1");
         }
 
         @Test
@@ -214,7 +214,7 @@ class AgentIdentityTest {
                     .build();
 
             // When & Then
-            assertThat(identity.getIssuanceDate()).isEqualTo(issuanceDate);
+            assertThat(identity.issuanceDate()).isEqualTo(issuanceDate);
         }
 
         @Test
@@ -230,7 +230,7 @@ class AgentIdentityTest {
                     .build();
 
             // When & Then
-            assertThat(identity.getValidFrom()).isEqualTo(validFrom);
+            assertThat(identity.validFrom()).isEqualTo(validFrom);
         }
 
         @Test
@@ -246,7 +246,7 @@ class AgentIdentityTest {
                     .build();
 
             // When & Then
-            assertThat(identity.getExpires()).isEqualTo(expires);
+            assertThat(identity.expires()).isEqualTo(expires);
         }
     }
 
@@ -439,10 +439,10 @@ class AgentIdentityTest {
 
             // Then
             assertThat(toString).contains("AgentIdentity");
-            assertThat(toString).contains("version='1.0'");
-            assertThat(toString).contains("id='agent-123'");
-            assertThat(toString).contains("issuer='https://issuer.example.com'");
-            assertThat(toString).contains("issuedTo='https://issued-to.example.com|user-123'");
+            assertThat(toString).contains("version=1.0");
+            assertThat(toString).contains("id=agent-123");
+            assertThat(toString).contains("issuer=https://issuer.example.com");
+            assertThat(toString).contains("issuedTo=https://issued-to.example.com|user-123");
         }
 
         @Test
@@ -479,9 +479,9 @@ class AgentIdentityTest {
                     .build();
 
             // Then
-            assertThat(issuedFor.getPlatform()).isEqualTo("platform-1");
-            assertThat(issuedFor.getClient()).isEqualTo("client-1");
-            assertThat(issuedFor.getClientInstance()).isEqualTo("instance-1");
+            assertThat(issuedFor.platform()).isEqualTo("platform-1");
+            assertThat(issuedFor.client()).isEqualTo("client-1");
+            assertThat(issuedFor.clientInstance()).isEqualTo("instance-1");
         }
 
         @Test
@@ -491,9 +491,9 @@ class AgentIdentityTest {
             AgentIdentity.IssuedFor issuedFor = AgentIdentity.IssuedFor.builder().build();
 
             // Then
-            assertThat(issuedFor.getPlatform()).isNull();
-            assertThat(issuedFor.getClient()).isNull();
-            assertThat(issuedFor.getClientInstance()).isNull();
+            assertThat(issuedFor.platform()).isNull();
+            assertThat(issuedFor.client()).isNull();
+            assertThat(issuedFor.clientInstance()).isNull();
         }
 
         @Test
@@ -531,9 +531,9 @@ class AgentIdentityTest {
 
             // Then
             assertThat(toString).contains("IssuedFor");
-            assertThat(toString).contains("platform='platform-1'");
-            assertThat(toString).contains("client='client-1'");
-            assertThat(toString).contains("clientInstance='instance-1'");
+            assertThat(toString).contains("platform=platform-1");
+            assertThat(toString).contains("client=client-1");
+            assertThat(toString).contains("clientInstance=instance-1");
         }
     }
 

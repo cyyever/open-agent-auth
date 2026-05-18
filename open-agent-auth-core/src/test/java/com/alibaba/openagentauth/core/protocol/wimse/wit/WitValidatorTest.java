@@ -200,7 +200,7 @@ class WitValidatorTest {
             TrustDomain wrongTrustDomain = new TrustDomain("wimse://wrong-domain.com");
             WitGenerator wrongGenerator = new WitGenerator(signingKey, wrongTrustDomain, JWSAlgorithm.RS256);
             WorkloadIdentityToken wit = wrongGenerator.generateWit(
-                    createAgentIdentity().getId(),
+                    createAgentIdentity().id(),
                     wptPublicKey.toJSONString(),
                     3600
             );
@@ -349,7 +349,7 @@ class WitValidatorTest {
 
     private String createValidWit() throws JOSEException {
         WorkloadIdentityToken wit = witGenerator.generateWit(
-                createAgentIdentity().getId(),
+                createAgentIdentity().id(),
                 wptPublicKey.toJSONString(),
                 3600
         );
