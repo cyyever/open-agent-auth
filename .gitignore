@@ -109,3 +109,6 @@ open-agent-auth-samples/pids
 
 ### Maven Toolchains ###
 .mvn/toolchains.xml
+
+### Claude Code local config ###
+.claude/
