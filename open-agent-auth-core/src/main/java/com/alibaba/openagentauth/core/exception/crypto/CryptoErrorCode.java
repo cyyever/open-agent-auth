@@ -36,27 +36,13 @@ import com.alibaba.openagentauth.core.exception.HttpStatus;
  * @since 1.0
  */
 public enum CryptoErrorCode implements CoreErrorCode {
-    
-    /**
-     * Signature operation failed.
-     * Corresponds to {@link SignatureException}.
-     * Template: {0}
-     */
-    SIGNATURE_FAILED("01", "SignatureFailed", "Signature operation failed: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
-    
+
     /**
      * Key management operation failed.
      * Corresponds to {@link KeyManagementException}.
      * Template: {0}
      */
     KEY_MANAGEMENT_FAILED("02", "KeyManagementFailed", "Key management operation failed: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
-    
-    /**
-     * File JWKS provider operation failed.
-     * Corresponds to {@link FileJwksProviderException}.
-     * Template: {0}
-     */
-    FILE_JWKS_PROVIDER_FAILED("03", "FileJwksProviderFailed", "File JWKS provider operation failed: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
 
     /**
      * Key resolution operation failed.

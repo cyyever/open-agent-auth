@@ -20,55 +20,19 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Test class for CryptoErrorCode enum.
- * <p>
- * This test class validates the error code structure, message templates,
- * and HTTP status codes for all Crypto error codes.
- * </p>
- *
- * @since 1.0
- */
 @DisplayName("Crypto Error Code Test")
 class CryptoErrorCodeTest {
-
-    @Test
-    @DisplayName("Should verify SIGNATURE_FAILED error code properties")
-    void shouldVerifySignatureFailedErrorCodeProperties() {
-        CryptoErrorCode errorCode = CryptoErrorCode.SIGNATURE_FAILED;
-        
-        assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0301");
-        assertThat(errorCode.getDomainCode()).isEqualTo("03");
-        assertThat(errorCode.getSubCode()).isEqualTo("01");
-        assertThat(errorCode.getSystemCode()).isEqualTo("10");
-        assertThat(errorCode.getErrorName()).isEqualTo("SignatureFailed");
-        assertThat(errorCode.getMessageTemplate()).isEqualTo("Signature operation failed: {0}");
-        assertThat(errorCode.getHttpStatus().value()).isEqualTo(500);
-    }
 
     @Test
     @DisplayName("Should verify KEY_MANAGEMENT_FAILED error code properties")
     void shouldVerifyKeyManagementFailedErrorCodeProperties() {
         CryptoErrorCode errorCode = CryptoErrorCode.KEY_MANAGEMENT_FAILED;
-        
+
         assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0302");
         assertThat(errorCode.getDomainCode()).isEqualTo("03");
         assertThat(errorCode.getSubCode()).isEqualTo("02");
         assertThat(errorCode.getErrorName()).isEqualTo("KeyManagementFailed");
         assertThat(errorCode.getMessageTemplate()).isEqualTo("Key management operation failed: {0}");
-        assertThat(errorCode.getHttpStatus().value()).isEqualTo(500);
-    }
-
-    @Test
-    @DisplayName("Should verify FILE_JWKS_PROVIDER_FAILED error code properties")
-    void shouldVerifyFileJwksProviderFailedErrorCodeProperties() {
-        CryptoErrorCode errorCode = CryptoErrorCode.FILE_JWKS_PROVIDER_FAILED;
-        
-        assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0303");
-        assertThat(errorCode.getDomainCode()).isEqualTo("03");
-        assertThat(errorCode.getSubCode()).isEqualTo("03");
-        assertThat(errorCode.getErrorName()).isEqualTo("FileJwksProviderFailed");
-        assertThat(errorCode.getMessageTemplate()).isEqualTo("File JWKS provider operation failed: {0}");
         assertThat(errorCode.getHttpStatus().value()).isEqualTo(500);
     }
 
@@ -92,14 +56,6 @@ class CryptoErrorCodeTest {
     @DisplayName("Should verify domain code constant")
     void shouldVerifyDomainCodeConstant() {
         assertThat(CryptoErrorCode.DOMAIN_CODE).isEqualTo("03");
-    }
-
-    @Test
-    @DisplayName("Should verify unique sub codes")
-    void shouldVerifyUniqueSubCodes() {
-        assertThat(CryptoErrorCode.SIGNATURE_FAILED.getSubCode()).isEqualTo("01");
-        assertThat(CryptoErrorCode.KEY_MANAGEMENT_FAILED.getSubCode()).isEqualTo("02");
-        assertThat(CryptoErrorCode.FILE_JWKS_PROVIDER_FAILED.getSubCode()).isEqualTo("03");
     }
 
     @Test
