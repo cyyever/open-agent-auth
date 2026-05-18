@@ -121,31 +121,31 @@ public class JwkConverter {
         Map<String, Object> jwkMap = new HashMap<>();
 
         // Required field: kty (key type)
-        if (jwk.getKeyType() != null) {
-            jwkMap.put("kty", jwk.getKeyType().getValue());
+        if (jwk.keyType() != null) {
+            jwkMap.put("kty", jwk.keyType().getValue());
         }
 
         // Optional fields
-        if (jwk.getAlgorithm() != null) {
-            jwkMap.put("alg", jwk.getAlgorithm());
+        if (jwk.algorithm() != null) {
+            jwkMap.put("alg", jwk.algorithm());
         }
-        if (jwk.getUse() != null) {
-            jwkMap.put("use", jwk.getUse().getValue());
+        if (jwk.use() != null) {
+            jwkMap.put("use", jwk.use().getValue());
         }
-        if (jwk.getKeyId() != null) {
-            jwkMap.put("kid", jwk.getKeyId());
+        if (jwk.keyId() != null) {
+            jwkMap.put("kid", jwk.keyId());
         }
 
         // EC key specific fields
-        if (jwk.getKeyType() == Jwk.KeyType.EC) {
-            if (jwk.getCurve() != null) {
-                jwkMap.put("crv", jwk.getCurve().getValue());
+        if (jwk.keyType() == Jwk.KeyType.EC) {
+            if (jwk.curve() != null) {
+                jwkMap.put("crv", jwk.curve().getValue());
             }
-            if (jwk.getX() != null) {
-                jwkMap.put("x", jwk.getX());
+            if (jwk.x() != null) {
+                jwkMap.put("x", jwk.x());
             }
-            if (jwk.getY() != null) {
-                jwkMap.put("y", jwk.getY());
+            if (jwk.y() != null) {
+                jwkMap.put("y", jwk.y());
             }
         }
 

@@ -100,8 +100,8 @@ class WitParserTest {
             // Then
             assertThat(wit.getConfirmation()).isNotNull();
             assertThat(wit.getConfirmation().getJwk()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk().getKeyType()).isEqualTo(Jwk.KeyType.EC);
-            assertThat(wit.getConfirmation().getJwk().getAlgorithm()).isEqualTo("ES256");
+            assertThat(wit.getConfirmation().getJwk().keyType()).isEqualTo(Jwk.KeyType.EC);
+            assertThat(wit.getConfirmation().getJwk().algorithm()).isEqualTo("ES256");
         }
 
         @Test

@@ -66,13 +66,13 @@ class JwkTest {
 
             // Then
             assertThat(jwk).isNotNull();
-            assertThat(jwk.getKeyType()).isEqualTo(Jwk.KeyType.EC);
-            assertThat(jwk.getUse()).isEqualTo(Jwk.KeyUse.SIGNATURE);
-            assertThat(jwk.getAlgorithm()).isEqualTo(ALGORITHM);
-            assertThat(jwk.getCurve()).isEqualTo(Jwk.Curve.P_256);
-            assertThat(jwk.getX()).isEqualTo(X_COORDINATE);
-            assertThat(jwk.getY()).isEqualTo(Y_COORDINATE);
-            assertThat(jwk.getKeyId()).isEqualTo(KEY_ID);
+            assertThat(jwk.keyType()).isEqualTo(Jwk.KeyType.EC);
+            assertThat(jwk.use()).isEqualTo(Jwk.KeyUse.SIGNATURE);
+            assertThat(jwk.algorithm()).isEqualTo(ALGORITHM);
+            assertThat(jwk.curve()).isEqualTo(Jwk.Curve.P_256);
+            assertThat(jwk.x()).isEqualTo(X_COORDINATE);
+            assertThat(jwk.y()).isEqualTo(Y_COORDINATE);
+            assertThat(jwk.keyId()).isEqualTo(KEY_ID);
         }
 
         @Test
@@ -88,9 +88,9 @@ class JwkTest {
 
             // Then
             assertThat(jwk).isNotNull();
-            assertThat(jwk.getUse()).isNull();
-            assertThat(jwk.getAlgorithm()).isNull();
-            assertThat(jwk.getKeyId()).isNull();
+            assertThat(jwk.use()).isNull();
+            assertThat(jwk.algorithm()).isNull();
+            assertThat(jwk.keyId()).isNull();
         }
 
         @Test
@@ -181,7 +181,7 @@ class JwkTest {
             Jwk jwk = createTestJwk();
 
             // When & Then
-            assertThat(jwk.getKeyType()).isEqualTo(Jwk.KeyType.EC);
+            assertThat(jwk.keyType()).isEqualTo(Jwk.KeyType.EC);
         }
 
         @Test
@@ -191,7 +191,7 @@ class JwkTest {
             Jwk jwk = createTestJwk();
 
             // When & Then
-            assertThat(jwk.getUse()).isEqualTo(Jwk.KeyUse.SIGNATURE);
+            assertThat(jwk.use()).isEqualTo(Jwk.KeyUse.SIGNATURE);
         }
 
         @Test
@@ -201,7 +201,7 @@ class JwkTest {
             Jwk jwk = createTestJwk();
 
             // When & Then
-            assertThat(jwk.getAlgorithm()).isEqualTo(ALGORITHM);
+            assertThat(jwk.algorithm()).isEqualTo(ALGORITHM);
         }
 
         @Test
@@ -211,7 +211,7 @@ class JwkTest {
             Jwk jwk = createTestJwk();
 
             // When & Then
-            assertThat(jwk.getCurve()).isEqualTo(Jwk.Curve.P_256);
+            assertThat(jwk.curve()).isEqualTo(Jwk.Curve.P_256);
         }
 
         @Test
@@ -221,7 +221,7 @@ class JwkTest {
             Jwk jwk = createTestJwk();
 
             // When & Then
-            assertThat(jwk.getX()).isEqualTo(X_COORDINATE);
+            assertThat(jwk.x()).isEqualTo(X_COORDINATE);
         }
 
         @Test
@@ -231,7 +231,7 @@ class JwkTest {
             Jwk jwk = createTestJwk();
 
             // When & Then
-            assertThat(jwk.getY()).isEqualTo(Y_COORDINATE);
+            assertThat(jwk.y()).isEqualTo(Y_COORDINATE);
         }
 
         @Test
@@ -241,7 +241,7 @@ class JwkTest {
             Jwk jwk = createTestJwk();
 
             // When & Then
-            assertThat(jwk.getKeyId()).isEqualTo(KEY_ID);
+            assertThat(jwk.keyId()).isEqualTo(KEY_ID);
         }
     }
 
@@ -423,11 +423,11 @@ class JwkTest {
             assertThat(toString).contains("Jwk");
             assertThat(toString).contains("keyType=EC");
             assertThat(toString).contains("use=SIGNATURE");
-            assertThat(toString).contains("algorithm='ES256'");
+            assertThat(toString).contains("algorithm=ES256");
             assertThat(toString).contains("curve=P_256");
-            assertThat(toString).contains("x='MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4'");
-            assertThat(toString).contains("y='4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM'");
-            assertThat(toString).contains("keyId='key-123'");
+            assertThat(toString).contains("x=MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4");
+            assertThat(toString).contains("y=4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM");
+            assertThat(toString).contains("keyId=key-123");
         }
 
         @Test

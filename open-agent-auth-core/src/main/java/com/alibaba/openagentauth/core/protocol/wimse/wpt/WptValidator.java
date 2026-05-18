@@ -155,18 +155,18 @@ public class WptValidator {
             throw new JOSEException("Jwk cannot be null");
         }
 
-        String keyId = jwk.getKeyId();
-        String algorithm = jwk.getAlgorithm();
+        String keyId = jwk.keyId();
+        String algorithm = jwk.algorithm();
 
-        if (jwk.getKeyType() == Jwk.KeyType.EC) {
+        if (jwk.keyType() == Jwk.KeyType.EC) {
             // Convert EC key
-            if (jwk.getX() == null || jwk.getY() == null) {
+            if (jwk.x() == null || jwk.y() == null) {
                 throw new JOSEException("EC key missing required components");
             }
-            
-            Curve curve = convertToNimbusCurve(jwk.getCurve());
-            BigInteger x = new BigInteger(1, Base64.getUrlDecoder().decode(jwk.getX()));
-            BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(jwk.getY()));
+
+            Curve curve = convertToNimbusCurve(jwk.curve());
+            BigInteger x = new BigInteger(1, Base64.getUrlDecoder().decode(jwk.x()));
+            BigInteger y = new BigInteger(1, Base64.getUrlDecoder().decode(jwk.y()));
             
             ECKey.Builder builder = new ECKey.Builder(curve, new ECPublicKey() {
                 @Override
@@ -198,11 +198,11 @@ public class WptValidator {
                 }
             }
             return builder.build();
-        } else if (jwk.getKeyType() == Jwk.KeyType.RSA) {
+        } else if (jwk.keyType() == Jwk.KeyType.RSA) {
             throw new JOSEException("RSA key conversion not yet supported");
         }
-        
-        throw new JOSEException("Unsupported key type: " + jwk.getKeyType());
+
+        throw new JOSEException("Unsupported key type: " + jwk.keyType());
     }
 
     /**
@@ -459,7 +459,7 @@ public class WptValidator {
                 return "WIT missing cnf.jwk claim";
             }
 
-            String witAlg = wit.getConfirmation().getJwk().getAlgorithm();
+            String witAlg = wit.getConfirmation().getJwk().algorithm();
             if (ValidationUtils.isNullOrEmpty(witAlg)) {
                 return "WIT cnf.jwk missing alg field";
             }

@@ -121,8 +121,8 @@ class WitGeneratorTest {
             // Verify cnf.jwk structure per RFC 7800
             assertThat(wit.getConfirmation()).isNotNull();
             assertThat(wit.getConfirmation().getJwk()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk().getAlgorithm()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk().getAlgorithm()).isEqualTo("ES256");
+            assertThat(wit.getConfirmation().getJwk().algorithm()).isNotNull();
+            assertThat(wit.getConfirmation().getJwk().algorithm()).isEqualTo("ES256");
         }
 
         @Test
@@ -362,7 +362,7 @@ class WitGeneratorTest {
             // Then
             assertThat(wit.getConfirmation()).isNotNull();
             assertThat(wit.getConfirmation().getJwk()).isNotNull();
-            assertThat(wit.getConfirmation().getJwk().getKeyType()).isEqualTo(Jwk.KeyType.EC);
+            assertThat(wit.getConfirmation().getJwk().keyType()).isEqualTo(Jwk.KeyType.EC);
         }
     }
 }

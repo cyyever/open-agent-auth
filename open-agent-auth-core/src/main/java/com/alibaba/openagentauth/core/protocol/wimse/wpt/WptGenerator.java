@@ -219,7 +219,7 @@ public class WptGenerator {
 
         // Extract algorithm from WIT's cnf.jwk.alg
         Jwk jwk = wit.getConfirmation().getJwk();
-        String algorithm = jwk.getAlgorithm();
+        String algorithm = jwk.algorithm();
 
         // Check if algorithm is present
         if (ValidationUtils.isNullOrEmpty(algorithm)) {
