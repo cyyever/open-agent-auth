@@ -119,8 +119,8 @@ class WptGeneratorTest {
 
             // Then
             assertThat(wpt).isNotNull();
-            assertThat(wpt.getClaims()).isNotNull();
-            assertThat(wpt.getHeader()).isNotNull();
+            assertThat(wpt.claims()).isNotNull();
+            assertThat(wpt.header()).isNotNull();
         }
 
         @Test
@@ -136,7 +136,7 @@ class WptGeneratorTest {
             WorkloadProofToken wpt = wptGenerator.generateWpt(testWit, wptPrivateKey, expirationSeconds);
 
             // Then
-            assertThat(wpt.getClaims().getWorkloadTokenHash()).isNotNull();
+            assertThat(wpt.claims().workloadTokenHash()).isNotNull();
             // The wth should be computed from the WIT's JWT string
             // Since testWit is a mock without JWT string, we just verify it's not null
         }
@@ -152,7 +152,7 @@ class WptGeneratorTest {
             WorkloadProofToken wpt = wptGenerator.generateWpt(testWit, wptPrivateKey, expirationSeconds);
 
             // Then
-            Instant expirationTime = wpt.getClaims().getExpirationTime().toInstant();
+            Instant expirationTime = wpt.claims().expirationTime().toInstant();
             Instant afterGeneration = Instant.now();
 
             // Calculate expected expiration time range
@@ -175,9 +175,9 @@ class WptGeneratorTest {
             WorkloadProofToken wpt2 = wptGenerator.generateWpt(testWit, wptPrivateKey, expirationSeconds);
 
             // Then
-            assertThat(wpt1.getClaims().getJwtId()).isNotNull();
-            assertThat(wpt2.getClaims().getJwtId()).isNotNull();
-            assertThat(wpt1.getClaims().getJwtId()).isNotEqualTo(wpt2.getClaims().getJwtId());
+            assertThat(wpt1.claims().jwtId()).isNotNull();
+            assertThat(wpt2.claims().jwtId()).isNotNull();
+            assertThat(wpt1.claims().jwtId()).isNotEqualTo(wpt2.claims().jwtId());
         }
 
         @Test
@@ -190,7 +190,7 @@ class WptGeneratorTest {
             WorkloadProofToken wpt = wptGenerator.generateWpt(testWit, wptPrivateKey, expirationSeconds);
 
             // Then
-            assertThat(wpt.getHeader().getAlgorithm()).isEqualTo("ES256");
+            assertThat(wpt.header().algorithm()).isEqualTo("ES256");
         }
 
         @Test
@@ -203,7 +203,7 @@ class WptGeneratorTest {
             WorkloadProofToken wpt = wptGenerator.generateWpt(testWit, wptPrivateKey, expirationSeconds);
 
             // Then
-            assertThat(wpt.getHeader().getType()).isEqualTo("wpt+jwt");
+            assertThat(wpt.header().type()).isEqualTo("wpt+jwt");
         }
     }
 
@@ -279,7 +279,7 @@ class WptGeneratorTest {
 
             // Then
             // Verify hash computation follows: BASE64URL(SHA-256(ASCII(WIT)))
-            String actualWth = wpt.getClaims().getWorkloadTokenHash();
+            String actualWth = wpt.claims().workloadTokenHash();
             assertThat(actualWth).isNotNull();
             // The wth should be a base64url-encoded SHA-256 hash
             // We can verify it's not empty and has reasonable length
@@ -299,7 +299,7 @@ class WptGeneratorTest {
 
             // Then
             // Per draft-ietf-wimse-wpt: WPT header alg MUST match WIT cnf.jwk.alg
-            assertThat(wpt.getHeader().getAlgorithm()).isEqualTo(witAlg);
+            assertThat(wpt.header().algorithm()).isEqualTo(witAlg);
         }
 
         @Test
@@ -316,7 +316,7 @@ class WptGeneratorTest {
             WorkloadProofToken wpt = wptGenerator.generateWpt(witWithEs256, es256Key, expirationSeconds);
 
             // Then
-            assertThat(wpt.getHeader().getAlgorithm()).isEqualTo("ES256");
+            assertThat(wpt.header().algorithm()).isEqualTo("ES256");
         }
 
         @Test

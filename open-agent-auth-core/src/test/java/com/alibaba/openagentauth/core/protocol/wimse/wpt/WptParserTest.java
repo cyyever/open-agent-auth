@@ -80,10 +80,10 @@ class WptParserTest {
 
             // Then
             assertThat(wpt).isNotNull();
-            assertThat(wpt.getHeader()).isNotNull();
-            assertThat(wpt.getClaims()).isNotNull();
-            assertThat(wpt.getJwtString()).isNotNull();
-            assertThat(wpt.getSignature()).isNotNull();
+            assertThat(wpt.header()).isNotNull();
+            assertThat(wpt.claims()).isNotNull();
+            assertThat(wpt.jwtString()).isNotNull();
+            assertThat(wpt.signature()).isNotNull();
         }
 
         @Test
@@ -96,11 +96,11 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getHeader().getType()).isEqualTo("wpt+jwt");
-            assertThat(wpt.getHeader().getAlgorithm()).isEqualTo("ES256");
-            assertThat(wpt.getClaims().getAudience()).isEqualTo("[resource-server]");
-            assertThat(wpt.getClaims().getJwtId()).isNotNull();
-            assertThat(wpt.getClaims().getWorkloadTokenHash()).isNotNull();
+            assertThat(wpt.header().type()).isEqualTo("wpt+jwt");
+            assertThat(wpt.header().algorithm()).isEqualTo("ES256");
+            assertThat(wpt.claims().audience()).isEqualTo("[resource-server]");
+            assertThat(wpt.claims().jwtId()).isNotNull();
+            assertThat(wpt.claims().workloadTokenHash()).isNotNull();
         }
 
         @Test
@@ -113,9 +113,9 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getClaims().getAccessTokenHash()).isNotNull();
-            assertThat(wpt.getClaims().getTransactionTokenHash()).isNotNull();
-            assertThat(wpt.getClaims().getOtherTokenHashes()).isNotNull();
+            assertThat(wpt.claims().accessTokenHash()).isNotNull();
+            assertThat(wpt.claims().transactionTokenHash()).isNotNull();
+            assertThat(wpt.claims().otherTokenHashes()).isNotNull();
         }
 
         @Test
@@ -129,7 +129,7 @@ class WptParserTest {
 
             // Then
             // Note: WptParser always defaults to "wpt+jwt" when typ is not in the header
-            assertThat(wpt.getHeader().getType()).isEqualTo("wpt+jwt");
+            assertThat(wpt.header().type()).isEqualTo("wpt+jwt");
         }
     }
 
@@ -190,7 +190,7 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getClaims().getAudience()).isEqualTo("[resource-server]");
+            assertThat(wpt.claims().audience()).isEqualTo("[resource-server]");
         }
 
         @Test
@@ -203,8 +203,8 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getClaims().getExpirationTime()).isNotNull();
-            assertThat(wpt.getClaims().getExpirationTime()).isAfter(new Date());
+            assertThat(wpt.claims().expirationTime()).isNotNull();
+            assertThat(wpt.claims().expirationTime()).isAfter(new Date());
         }
 
         @Test
@@ -217,7 +217,7 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getClaims().getJwtId()).isNotNull();
+            assertThat(wpt.claims().jwtId()).isNotNull();
         }
 
         @Test
@@ -230,7 +230,7 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getClaims().getWorkloadTokenHash()).isNotNull();
+            assertThat(wpt.claims().workloadTokenHash()).isNotNull();
         }
 
         @Test
@@ -243,7 +243,7 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getClaims().getAccessTokenHash()).isNotNull();
+            assertThat(wpt.claims().accessTokenHash()).isNotNull();
         }
 
         @Test
@@ -256,7 +256,7 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getClaims().getTransactionTokenHash()).isNotNull();
+            assertThat(wpt.claims().transactionTokenHash()).isNotNull();
         }
 
         @Test
@@ -269,10 +269,10 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getClaims().getOtherTokenHashes()).isNotNull();
-            assertThat(wpt.getClaims().getOtherTokenHashes()).hasSize(2);
-            assertThat(wpt.getClaims().getOtherTokenHashes()).containsKey("custom-token-1");
-            assertThat(wpt.getClaims().getOtherTokenHashes()).containsKey("custom-token-2");
+            assertThat(wpt.claims().otherTokenHashes()).isNotNull();
+            assertThat(wpt.claims().otherTokenHashes()).hasSize(2);
+            assertThat(wpt.claims().otherTokenHashes()).containsKey("custom-token-1");
+            assertThat(wpt.claims().otherTokenHashes()).containsKey("custom-token-2");
         }
 
         @Test
@@ -285,9 +285,9 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getClaims().getAccessTokenHash()).isNull();
-            assertThat(wpt.getClaims().getTransactionTokenHash()).isNull();
-            assertThat(wpt.getClaims().getOtherTokenHashes()).isNull();
+            assertThat(wpt.claims().accessTokenHash()).isNull();
+            assertThat(wpt.claims().transactionTokenHash()).isNull();
+            assertThat(wpt.claims().otherTokenHashes()).isNull();
         }
     }
 
@@ -305,7 +305,7 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getHeader().getAlgorithm()).isEqualTo("ES256");
+            assertThat(wpt.header().algorithm()).isEqualTo("ES256");
         }
 
         @Test
@@ -318,7 +318,7 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getHeader().getType()).isEqualTo("wpt+jwt");
+            assertThat(wpt.header().type()).isEqualTo("wpt+jwt");
         }
     }
 
@@ -336,7 +336,7 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getJwtString()).isEqualTo(wptJwt);
+            assertThat(wpt.jwtString()).isEqualTo(wptJwt);
         }
 
         @Test
@@ -349,10 +349,10 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             // Then
-            assertThat(wpt.getSignature()).isNotNull();
+            assertThat(wpt.signature()).isNotNull();
             String[] parts = wptJwt.split("\\.");
             assertThat(parts).hasSize(3);
-            assertThat(wpt.getSignature()).isEqualTo(parts[2]);
+            assertThat(wpt.signature()).isEqualTo(parts[2]);
         }
     }
 

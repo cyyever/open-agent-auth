@@ -136,7 +136,7 @@ public class WptGenerator {
         // Sign and serialize the WPT using the private key corresponding to WIT's cnf.jwk
         wpt = signAndSerializeWpt(wpt, wptPrivateKey);
 
-        logger.debug("Successfully generated and signed WPT: {}", wpt.getJwtString());
+        logger.debug("Successfully generated and signed WPT: {}", wpt.jwtString());
         return wpt;
     }
 
@@ -169,7 +169,7 @@ public class WptGenerator {
      */
     public String generateWptAsString(WorkloadIdentityToken wit, JWK wptPrivateKey, long expirationSeconds, OthBindableToken othBindableToken) throws JOSEException {
         WorkloadProofToken wpt = generateWpt(wit, wptPrivateKey, expirationSeconds, othBindableToken);
-        return wpt.getJwtString();
+        return wpt.jwtString();
     }
 
     /**
@@ -289,8 +289,8 @@ public class WptGenerator {
 
             // Return new WPT object with signature and JWT string populated
             return WorkloadProofToken.builder()
-                    .header(wpt.getHeader())
-                    .claims(wpt.getClaims())
+                    .header(wpt.header())
+                    .claims(wpt.claims())
                     .signature(signature)
                     .jwtString(signedJwtString)
                     .build();

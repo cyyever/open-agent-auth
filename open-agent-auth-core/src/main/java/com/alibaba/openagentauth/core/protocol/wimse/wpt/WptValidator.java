@@ -134,11 +134,11 @@ public class WptValidator {
      * @return error message if expired, null if valid
      */
     private String verifyExpiration(WorkloadProofToken wpt) {
-        if (wpt.getClaims() == null || wpt.getClaims().getExpirationTime() == null) {
+        if (wpt.claims() == null || wpt.claims().expirationTime() == null) {
             return "WPT missing expiration time";
         }
-        if (wpt.getClaims().isExpired()) {
-            return "WPT expired at: " + wpt.getClaims().getExpirationTime();
+        if (wpt.claims().isExpired()) {
+            return "WPT expired at: " + wpt.claims().expirationTime();
         }
         return null;
     }
@@ -255,7 +255,7 @@ public class WptValidator {
     private String verifySignature(WorkloadProofToken wpt, WorkloadIdentityToken wit) {
         try {
             // Use the JWT string for signature verification
-            String wptJwtString = wpt.getJwtString();
+            String wptJwtString = wpt.jwtString();
             if (ValidationUtils.isNullOrEmpty(wptJwtString)) {
                 logger.warn("WPT missing JWT string, cannot verify signature");
                 return "WPT missing JWT string";
@@ -322,11 +322,11 @@ public class WptValidator {
      * @return error message if missing required claims, null if valid
      */
     private String verifyRequiredClaims(WorkloadProofToken wpt) {
-        if (wpt.getClaims() == null) {
+        if (wpt.claims() == null) {
             return "WPT missing claims";
         }
-        if (wpt.getClaims().getWorkloadTokenHash() == null ||
-            wpt.getClaims().getWorkloadTokenHash().trim().isEmpty()) {
+        if (wpt.claims().workloadTokenHash() == null ||
+            wpt.claims().workloadTokenHash().trim().isEmpty()) {
             return "WPT missing required claim: wth";
         } else {
             return null;
@@ -350,7 +350,7 @@ public class WptValidator {
             }
 
             String expectedWth = JwtHashUtil.computeWitHash(witJwtString);
-            String actualWth = wpt.getClaims().getWorkloadTokenHash();
+            String actualWth = wpt.claims().workloadTokenHash();
 
             // Verify that the wth claim matches the hash of the WIT
             if (ValidationUtils.isNullOrEmpty(actualWth)) {
@@ -380,14 +380,14 @@ public class WptValidator {
     private String verifyOtherTokens(WorkloadProofToken wpt, WorkloadIdentityToken wit) {
         try {
             // Check if oth claim is present
-            if (wpt.getClaims().getOtherTokenHashes() == null ||
-                wpt.getClaims().getOtherTokenHashes().isEmpty()) {
+            if (wpt.claims().otherTokenHashes() == null ||
+                wpt.claims().otherTokenHashes().isEmpty()) {
                 // oth is optional, so it's okay if not present
                 logger.debug("WPT does not contain oth claim, skipping validation");
                 return null;
             }
 
-            Map<String, String> otherTokenHashes = wpt.getClaims().getOtherTokenHashes();
+            Map<String, String> otherTokenHashes = wpt.claims().otherTokenHashes();
             logger.debug("Validating WPT oth claim with {} token types", otherTokenHashes.size());
 
             // Validate each token type in oth claim
@@ -449,7 +449,7 @@ public class WptValidator {
     private String verifyAlgorithmConsistency(WorkloadProofToken wpt, WorkloadIdentityToken wit) {
         try {
             // Get WPT header algorithm
-            String wptAlg = wpt.getHeader().getAlgorithm();
+            String wptAlg = wpt.header().algorithm();
             if (ValidationUtils.isNullOrEmpty(wptAlg)) {
                 return "WPT missing algorithm in header";
             }

@@ -86,28 +86,28 @@ public class WptSerializer {
         try {
             // Build JWSHeader from WPT header
             JWSHeader header = new JWSHeader.Builder(
-                    new JWSAlgorithm(wpt.getHeader().getAlgorithm()))
-                    .type(new JOSEObjectType(wpt.getHeader().getType()))
+                    new JWSAlgorithm(wpt.header().algorithm()))
+                    .type(new JOSEObjectType(wpt.header().type()))
                     .build();
 
             // Build JWTClaimsSet from WPT claims
             JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder()
-                    .expirationTime(wpt.getClaims().getExpirationTime())
-                    .jwtID(wpt.getClaims().getJwtId())
-                    .claim("wth", wpt.getClaims().getWorkloadTokenHash());
+                    .expirationTime(wpt.claims().expirationTime())
+                    .jwtID(wpt.claims().jwtId())
+                    .claim("wth", wpt.claims().workloadTokenHash());
 
             // Add optional claims
-            if (wpt.getClaims().getAudience() != null) {
-                claimsBuilder.audience(wpt.getClaims().getAudience());
+            if (wpt.claims().audience() != null) {
+                claimsBuilder.audience(wpt.claims().audience());
             }
-            if (wpt.getClaims().getAccessTokenHash() != null) {
-                claimsBuilder.claim("ath", wpt.getClaims().getAccessTokenHash());
+            if (wpt.claims().accessTokenHash() != null) {
+                claimsBuilder.claim("ath", wpt.claims().accessTokenHash());
             }
-            if (wpt.getClaims().getTransactionTokenHash() != null) {
-                claimsBuilder.claim("tth", wpt.getClaims().getTransactionTokenHash());
+            if (wpt.claims().transactionTokenHash() != null) {
+                claimsBuilder.claim("tth", wpt.claims().transactionTokenHash());
             }
-            if (wpt.getClaims().getOtherTokenHashes() != null) {
-                claimsBuilder.claim("oth", wpt.getClaims().getOtherTokenHashes());
+            if (wpt.claims().otherTokenHashes() != null) {
+                claimsBuilder.claim("oth", wpt.claims().otherTokenHashes());
             }
 
             JWTClaimsSet claimsSet = claimsBuilder.build();

@@ -103,8 +103,8 @@ class WptValidatorTest {
 
             // Then
             assertThat(result.getToken()).isNotNull();
-            assertThat(result.getToken().getClaims().getWorkloadTokenHash()).isNotNull();
-            assertThat(result.getToken().getHeader().getType()).isEqualTo("wpt+jwt");
+            assertThat(result.getToken().claims().workloadTokenHash()).isNotNull();
+            assertThat(result.getToken().header().type()).isEqualTo("wpt+jwt");
         }
     }
 
@@ -211,7 +211,7 @@ class WptValidatorTest {
 
             // Then
             assertThat(result.isValid()).isTrue();
-            assertThat(result.getToken().getClaims().getWorkloadTokenHash()).isNotNull();
+            assertThat(result.getToken().claims().workloadTokenHash()).isNotNull();
         }
     }
 
@@ -380,40 +380,40 @@ class WptValidatorTest {
     private WorkloadProofToken tamperWithWptSignature(WorkloadProofToken wpt) {
         // JWT format: header.payload.signature
         // We need to tamper with the signature part in the JWT string
-        String jwtString = wpt.getJwtString();
+        String jwtString = wpt.jwtString();
         if (jwtString != null && jwtString.contains(".")) {
             // Split into parts and modify the signature
             int lastDotIndex = jwtString.lastIndexOf(".");
             String tamperedJwtString = jwtString.substring(0, lastDotIndex + 1) + "tampered" + jwtString.substring(lastDotIndex + 1);
 
             return WorkloadProofToken.builder()
-                    .header(wpt.getHeader())
-                    .claims(wpt.getClaims())
-                    .signature(wpt.getSignature() + "tampered")
+                    .header(wpt.header())
+                    .claims(wpt.claims())
+                    .signature(wpt.signature() + "tampered")
                     .jwtString(tamperedJwtString) // Use the tampered JWT string
                     .build();
         }
 
         // Fallback: if no JWT string, just modify signature
-        String tamperedSignature = wpt.getSignature() + "tampered";
+        String tamperedSignature = wpt.signature() + "tampered";
         return WorkloadProofToken.builder()
-                .header(wpt.getHeader())
-                .claims(wpt.getClaims())
+                .header(wpt.header())
+                .claims(wpt.claims())
                 .signature(tamperedSignature)
-                .jwtString(wpt.getJwtString())
+                .jwtString(wpt.jwtString())
                 .build();
     }
 
     private WorkloadProofToken tamperWithWptAlgorithm(WorkloadProofToken wpt) {
         WorkloadProofToken.Header tamperedHeader = WorkloadProofToken.Header.builder()
-                .type(wpt.getHeader().getType())
+                .type(wpt.header().type())
                 .algorithm("RS512") // Different algorithm
                 .build();
         return WorkloadProofToken.builder()
                 .header(tamperedHeader)
-                .claims(wpt.getClaims())
-                .signature(wpt.getSignature())
-                .jwtString(wpt.getJwtString()) // Preserve the JWT string
+                .claims(wpt.claims())
+                .signature(wpt.signature())
+                .jwtString(wpt.jwtString()) // Preserve the JWT string
                 .build();
     }
 }

@@ -130,7 +130,7 @@ public class WorkloadProofValidator implements LayerValidator {
     private String verifyOthClaimHashes(WorkloadProofToken wpt, ValidationContext context) {
         try {
             // Check if oth claim is present
-            Map<String, String> otherTokenHashes = wpt.getClaims().getOtherTokenHashes();
+            Map<String, String> otherTokenHashes = wpt.claims().otherTokenHashes();
             if (otherTokenHashes == null || otherTokenHashes.isEmpty()) {
                 logger.debug("WPT does not contain oth claim, skipping hash verification");
                 return null;

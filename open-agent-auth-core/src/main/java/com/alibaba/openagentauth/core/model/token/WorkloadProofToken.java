@@ -21,510 +21,86 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Represents a Workload Proof Token (WPT). A WPT is a JWT that proves possession
  * of the private key corresponding to the public key in the associated Workload
  * Identity Token (WIT). It binds to the WIT via the {@code wth} claim and optionally
  * to other tokens via {@code oth}.
- *
- * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519">RFC 7519 - JSON Web Token (JWT)</a>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class WorkloadProofToken {
+public record WorkloadProofToken(
+        Header header,
+        Claims claims,
+        @JsonProperty("signature") String signature,
+        @JsonProperty("jwtString") String jwtString) {
 
-    /**
-     * The JOSE header of the WPT.
-     */
-    private final Header header;
-
-    /**
-     * The claims (payload) of the WPT.
-     */
-    private final Claims claims;
-
-    /**
-     * The JWS signature of the WPT.
-     * <p>
-     * This field stores the base64url-encoded signature value that is generated
-     * during the signing process. The signature is computed over the header and
-     * claims using the algorithm specified in the header.
-     * </p>
-     * <p>
-     * According to RFC 7515, the signature is part of the JWS Compact Serialization
-     * format: header.payload.signature
-     * </p>
-     */
-    @JsonProperty("signature")
-    private final String signature;
-
-    /**
-     * The JWT string representation of the WPT.
-     * <p>
-     * This field stores the complete JWT string (header.payload.signature) as it was
-     * generated during the signing process. This is used during validation to ensure
-     * signature verification uses the exact same serialization that was signed,
-     * avoiding serialization inconsistencies that could cause verification failures.
-     * </p>
-     */
-    @JsonProperty("jwtString")
-    private final String jwtString;
-
-    private WorkloadProofToken(Builder builder) {
-        this.header = builder.header;
-        this.claims = builder.claims;
-        this.signature = builder.signature;
-        this.jwtString = builder.jwtString;
+    public WorkloadProofToken {
+        if (header == null) {
+            throw new IllegalStateException("header is REQUIRED for WPT");
+        }
+        if (claims == null) {
+            throw new IllegalStateException("claims is REQUIRED for WPT");
+        }
     }
 
-    /**
-     * Gets the JOSE header of the WPT.
-     *
-     * @return the header
-     */
-    public Header getHeader() {
-        return header;
-    }
+    /** Audience (aud) — convenience delegate to claims. */
+    public String getAudience()           { return claims != null ? claims.audience()             : null; }
+    public Date   getExpirationTime()     { return claims != null ? claims.expirationTime()       : null; }
+    public String getJwtId()              { return claims != null ? claims.jwtId()                : null; }
+    public String getWorkloadTokenHash()  { return claims != null ? claims.workloadTokenHash()    : null; }
+    public String getAccessTokenHash()    { return claims != null ? claims.accessTokenHash()      : null; }
+    public String getTransactionTokenHash(){ return claims != null ? claims.transactionTokenHash(): null; }
+    public Map<String, String> getOtherTokenHashes() { return claims != null ? claims.otherTokenHashes() : null; }
 
-    /**
-     * Gets the claims (payload) of the WPT.
-     *
-     * @return the claims
-     */
-    public Claims getClaims() {
-        return claims;
-    }
+    public boolean isExpired() { return claims != null && claims.isExpired(); }
+    public boolean isValid()   { return claims != null && claims.isValid();   }
 
-    /**
-     * Gets the signature of the WPT.
-     *
-     * @return the base64url-encoded signature value, or null if not yet signed
-     */
-    public String getSignature() {
-        return signature;
-    }
+    public static Builder builder() { return new Builder(); }
 
-    /**
-     * Gets the audience (aud) claim.
-     * <p>
-     * Convenience method that delegates to {@link Claims#getAudience()}.
-     * </p>
-     *
-     * @return the audience, or null if not present
-     */
-    public String getAudience() {
-        return claims != null ? claims.getAudience() : null;
-    }
-
-    /**
-     * Gets the expiration time (exp) claim.
-     * <p>
-     * Convenience method that delegates to {@link Claims#getExpirationTime()}.
-     * </p>
-     *
-     * @return the expiration time, or null if not present
-     */
-    public Date getExpirationTime() {
-        return claims != null ? claims.getExpirationTime() : null;
-    }
-
-    /**
-     * Gets the JWT ID (jti) claim.
-     * <p>
-     * Convenience method that delegates to {@link Claims#getJwtId()}.
-     * </p>
-     *
-     * @return the JWT ID, or null if not present
-     */
-    public String getJwtId() {
-        return claims != null ? claims.getJwtId() : null;
-    }
-
-    /**
-     * Gets the Workload Identity Token Hash (wth) claim.
-     * <p>
-     * Convenience method that delegates to {@link Claims#getWorkloadTokenHash()}.
-     * </p>
-     *
-     * @return the base64url-encoded WIT hash (never null for valid WPT)
-     */
-    public String getWorkloadTokenHash() {
-        return claims != null ? claims.getWorkloadTokenHash() : null;
-    }
-
-    /**
-     * Gets the Access Token Hash (ath) claim.
-     *
-     * @return the base64url-encoded access token hash, or null if not present
-     */
-    public String getAccessTokenHash() {
-        return claims != null ? claims.getAccessTokenHash() : null;
-    }
-
-    /**
-     * Gets the Transaction Token Hash (tth) claim.
-     * <p>
-     * Convenience method that delegates to {@link Claims#getTransactionTokenHash()}.
-     * </p>
-     *
-     * @return the base64url-encoded transaction token hash, or null if not present
-     */
-    public String getTransactionTokenHash() {
-        return claims != null ? claims.getTransactionTokenHash() : null;
-    }
-
-    /**
-     * Gets the Other Tokens Hashes (oth) claim.
-     * <p>
-     * Convenience method that delegates to {@link Claims#getOtherTokenHashes()}.
-     * </p>
-     *
-     * @return a map of token type to hash, or null if not present
-     */
-    public Map<String, String> getOtherTokenHashes() {
-        return claims != null ? claims.getOtherTokenHashes() : null;
-    }
-
-    /**
-     * Gets the JWT string representation of this token.
-     * <p>
-     * This field stores the complete JWT string (header.payload.signature) as it was
-     * originally signed. This is useful for verification purposes to avoid
-     * serialization inconsistencies.
-     * </p>
-     *
-     * @return the JWT string, or null if not available
-     */
-    public String getJwtString() {
-        return jwtString;
-    }
-
-    /**
-     * Checks if the WPT is expired.
-     *
-     * @return true if the WPT is expired, false otherwise
-     */
-    public boolean isExpired() {
-        return claims != null && claims.isExpired();
-    }
-
-    /**
-     * Checks if the WPT is currently valid (not expired).
-     *
-     * @return true if the WPT is valid, false otherwise
-     */
-    public boolean isValid() {
-        return claims != null && claims.isValid();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        WorkloadProofToken that = (WorkloadProofToken) o;
-        return Objects.equals(header, that.header) &&
-               Objects.equals(claims, that.claims) &&
-               Objects.equals(signature, that.signature);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(header, claims, signature);
-    }
-
-    @Override
-    public String toString() {
-        return "WorkloadProofToken{" +
-                "header=" + header +
-                ", claims=" + claims +
-                ", signature='" + signature + '\'' +
-                '}';
-    }
-
-    /**
-     * Creates a new builder for {@link WorkloadProofToken}.
-     *
-     * @return a new builder instance
-     */
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
-     * Builder for {@link WorkloadProofToken}.
-     */
     public static class Builder {
         private Header header;
         private Claims claims;
         private String signature;
         private String jwtString;
 
-        /**
-         * Sets the JOSE header.
-         *
-         * @param header the header
-         * @return this builder instance
-         */
-        public Builder header(Header header) {
-            this.header = header;
-            return this;
-        }
+        public Builder header(Header header)        { this.header = header;       return this; }
+        public Builder claims(Claims claims)        { this.claims = claims;       return this; }
+        public Builder signature(String signature)  { this.signature = signature; return this; }
+        public Builder jwtString(String jwtString)  { this.jwtString = jwtString; return this; }
 
-        /**
-         * Sets the claims (payload).
-         *
-         * @param claims the claims
-         * @return this builder instance
-         */
-        public Builder claims(Claims claims) {
-            this.claims = claims;
-            return this;
-        }
-
-        /**
-         * Sets the signature of the WPT.
-         * <p>
-         * The signature is the base64url-encoded JWS signature value.
-         * </p>
-         *
-         * @param signature the base64url-encoded signature value
-         * @return this builder instance
-         */
-        public Builder signature(String signature) {
-            this.signature = signature;
-            return this;
-        }
-
-        /**
-         * Sets the JWT string of the WPT.
-         * <p>
-         * The JWT string is the complete header.payload.signature representation
-         * that was generated during the signing process.
-         * </p>
-         *
-         * @param jwtString the complete JWT string
-         * @return this builder instance
-         */
-        public Builder jwtString(String jwtString) {
-            this.jwtString = jwtString;
-            return this;
-        }
-
-        /**
-         * Builds the {@link WorkloadProofToken}.
-         * <p>
-         * Validates that the required header and claims are present.
-         * </p>
-         *
-         * @return the built token
-         * @throws IllegalStateException if the required header or claims are not set
-         */
         public WorkloadProofToken build() {
-            if (header == null) {
-                throw new IllegalStateException("header is REQUIRED for WPT");
-            }
-            if (claims == null) {
-                throw new IllegalStateException("claims is REQUIRED for WPT");
-            }
-            return new WorkloadProofToken(this);
+            return new WorkloadProofToken(header, claims, signature, jwtString);
         }
     }
 
-    /**
-     * Claims (Payload) for Workload Proof Token (WPT).
-     */
+    /** Claims (Payload) for Workload Proof Token (WPT). */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class Claims {
+    public record Claims(
+            @JsonProperty("aud") String audience,
+            @JsonProperty("exp") Date expirationTime,
+            @JsonProperty("jti") String jwtId,
+            @JsonProperty("wth") String workloadTokenHash,
+            @JsonProperty("ath") String accessTokenHash,
+            @JsonProperty("tth") String transactionTokenHash,
+            @JsonProperty("oth") Map<String, String> otherTokenHashes) {
 
-        /**
-         * Audience claim (aud): the target URI of the request.
-         */
-        @JsonProperty("aud")
-        private final String audience;
-
-        /**
-         * Expiration Time claim (exp): the time after which the WPT must not be accepted.
-         */
-        @JsonProperty("exp")
-        private final Date expirationTime;
-
-        /**
-         * JWT ID claim (jti): unique identifier for replay protection.
-         */
-        @JsonProperty("jti")
-        private final String jwtId;
-
-        /**
-         * Workload Identity Token Hash claim (wth): base64url-encoded SHA-256 hash of the WIT
-         * this WPT is bound to. Hash computation: {@code BASE64URL(SHA-256(ASCII(WIT)))}.
-         */
-        @JsonProperty("wth")
-        private final String workloadTokenHash;
-
-        /**
-         * Access Token Hash claim (ath): base64url-encoded SHA-256 hash of the access token.
-         */
-        @JsonProperty("ath")
-        private final String accessTokenHash;
-
-        /**
-         * Transaction Token Hash claim (tth): base64url-encoded SHA-256 hash of the transaction token.
-         */
-        @JsonProperty("tth")
-        private final String transactionTokenHash;
-
-        /**
-         * Other Tokens Hashes claim (oth): JSON object with hashes of additional tokens this WPT
-         * is bound to (key = token type identifier, value = base64url-encoded SHA-256 hash).
-         * If entries are not understood by the recipient, the WPT must be rejected.
-         */
-        @JsonProperty("oth")
-        private final Map<String, String> otherTokenHashes;
-
-        private Claims(ClaimsBuilder builder) {
-            this.audience = builder.audience;
-            this.expirationTime = builder.expirationTime;
-            this.jwtId = builder.jwtId;
-            this.workloadTokenHash = builder.workloadTokenHash;
-            this.accessTokenHash = builder.accessTokenHash;
-            this.transactionTokenHash = builder.transactionTokenHash;
-            this.otherTokenHashes = builder.otherTokenHashes;
+        public Claims {
+            if (workloadTokenHash == null || workloadTokenHash.isEmpty()) {
+                throw new IllegalStateException("workloadTokenHash (wth) is REQUIRED");
+            }
         }
 
-        /**
-         * Gets the audience (aud) claim.
-         *
-         * @return the audience, or null if not present
-         */
-        public String getAudience() {
-            return audience;
-        }
-
-        /**
-         * Gets the expiration time (exp) claim.
-         *
-         * @return the expiration time, or null if not present
-         */
-        public Date getExpirationTime() {
-            return expirationTime;
-        }
-
-        /**
-         * Gets the JWT ID (jti) claim.
-         *
-         * @return the JWT ID, or null if not present
-         */
-        public String getJwtId() {
-            return jwtId;
-        }
-
-        /**
-         * Gets the Workload Identity Token Hash (wth) claim.
-         *
-         * @return the base64url-encoded WIT hash (never null for valid claims)
-         */
-        public String getWorkloadTokenHash() {
-            return workloadTokenHash;
-        }
-
-        /**
-         * Gets the Access Token Hash (ath) claim.
-         *
-         * @return the base64url-encoded access token hash, or null if not present
-         */
-        public String getAccessTokenHash() {
-            return accessTokenHash;
-        }
-
-        /**
-         * Gets the Transaction Token Hash (tth) claim.
-         *
-         * @return the base64url-encoded transaction token hash, or null if not present
-         */
-        public String getTransactionTokenHash() {
-            return transactionTokenHash;
-        }
-
-        /**
-         * Gets the Other Tokens Hashes (oth) claim.
-         *
-         * @return a map of token type to hash, or null if not present
-         */
-        public Map<String, String> getOtherTokenHashes() {
-            return otherTokenHashes;
-        }
-
-        /**
-         * Checks if the claims indicate the token is expired.
-         *
-         * @return true if expired, false otherwise
-         */
         public boolean isExpired() {
-            if (expirationTime == null) {
-                return false;
-            }
-            return expirationTime.before(new Date());
+            return expirationTime != null && expirationTime.before(new Date());
         }
 
-        /**
-         * Checks if the claims indicate the token is currently valid (not expired).
-         *
-         * @return true if valid, false otherwise
-         */
         public boolean isValid() {
-            Date now = new Date();
-            if (expirationTime != null && now.after(expirationTime)) {
-                return false;
-            }
-            return true;
+            return expirationTime == null || !new Date().after(expirationTime);
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Claims claims = (Claims) o;
-            return Objects.equals(audience, claims.audience) &&
-                   Objects.equals(expirationTime, claims.expirationTime) &&
-                   Objects.equals(jwtId, claims.jwtId) &&
-                   Objects.equals(workloadTokenHash, claims.workloadTokenHash) &&
-                   Objects.equals(accessTokenHash, claims.accessTokenHash) &&
-                   Objects.equals(transactionTokenHash, claims.transactionTokenHash) &&
-                   Objects.equals(otherTokenHashes, claims.otherTokenHashes);
-        }
+        public static ClaimsBuilder builder() { return new ClaimsBuilder(); }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(audience, expirationTime, jwtId, workloadTokenHash,
-                              accessTokenHash, transactionTokenHash, otherTokenHashes);
-        }
-
-        @Override
-        public String toString() {
-            return "Claims{" +
-                    "audience='" + audience + '\'' +
-                    ", expirationTime=" + expirationTime +
-                    ", jwtId='" + jwtId + '\'' +
-                    ", workloadTokenHash='" + workloadTokenHash + '\'' +
-                    ", accessTokenHash='" + accessTokenHash + '\'' +
-                    ", transactionTokenHash='" + transactionTokenHash + '\'' +
-                    ", otherTokenHashes=" + otherTokenHashes +
-                    '}';
-        }
-
-        /**
-         * Creates a new builder for {@link Claims}.
-         *
-         * @return a new builder instance
-         */
-        public static ClaimsBuilder builder() {
-            return new ClaimsBuilder();
-        }
-
-        /**
-         * Builder for {@link Claims}.
-         */
         public static class ClaimsBuilder {
             private String audience;
             private Date expirationTime;
@@ -534,260 +110,49 @@ public class WorkloadProofToken {
             private String transactionTokenHash;
             private Map<String, String> otherTokenHashes;
 
-            /**
-             * Sets the audience (aud) claim.
-             *
-             * @param audience the audience
-             * @return this builder instance
-             */
-            public ClaimsBuilder audience(String audience) {
-                this.audience = audience;
-                return this;
-            }
+            public ClaimsBuilder audience(String audience)                              { this.audience = audience;                       return this; }
+            public ClaimsBuilder expirationTime(Date expirationTime)                    { this.expirationTime = expirationTime;           return this; }
+            public ClaimsBuilder jwtId(String jwtId)                                    { this.jwtId = jwtId;                             return this; }
+            public ClaimsBuilder workloadTokenHash(String workloadTokenHash)            { this.workloadTokenHash = workloadTokenHash;     return this; }
+            public ClaimsBuilder accessTokenHash(String accessTokenHash)                { this.accessTokenHash = accessTokenHash;         return this; }
+            public ClaimsBuilder transactionTokenHash(String transactionTokenHash)      { this.transactionTokenHash = transactionTokenHash; return this; }
+            public ClaimsBuilder otherTokenHashes(Map<String, String> otherTokenHashes) { this.otherTokenHashes = otherTokenHashes;       return this; }
 
-            /**
-             * Sets the expiration time (exp) claim.
-             *
-             * @param expirationTime the expiration time
-             * @return this builder instance
-             */
-            public ClaimsBuilder expirationTime(Date expirationTime) {
-                this.expirationTime = expirationTime;
-                return this;
-            }
-
-            /**
-             * Sets the JWT ID (jti) claim.
-             *
-             * @param jwtId the JWT ID
-             * @return this builder instance
-             */
-            public ClaimsBuilder jwtId(String jwtId) {
-                this.jwtId = jwtId;
-                return this;
-            }
-
-            /**
-             * Sets the Workload Identity Token Hash (wth) claim.
-             * <p>
-             * This claim is REQUIRED. The value must be a base64url-encoded SHA-256 hash of the WIT.
-             * </p>
-             *
-             * @param workloadTokenHash the base64url-encoded WIT hash (required)
-             * @return this builder instance
-             */
-            public ClaimsBuilder workloadTokenHash(String workloadTokenHash) {
-                this.workloadTokenHash = workloadTokenHash;
-                return this;
-            }
-
-            /**
-             * Sets the Access Token Hash (ath) claim.
-             *
-             * @param accessTokenHash the base64url-encoded access token hash
-             * @return this builder instance
-             */
-            public ClaimsBuilder accessTokenHash(String accessTokenHash) {
-                this.accessTokenHash = accessTokenHash;
-                return this;
-            }
-
-            /**
-             * Sets the Transaction Token Hash (tth) claim.
-             * <p>
-             * The value must be a base64url-encoded SHA-256 hash of the transaction token.
-             * </p>
-             *
-             * @param transactionTokenHash the base64url-encoded transaction token hash
-             * @return this builder instance
-             */
-            public ClaimsBuilder transactionTokenHash(String transactionTokenHash) {
-                this.transactionTokenHash = transactionTokenHash;
-                return this;
-            }
-
-            /**
-             * Sets the Other Tokens Hashes (oth) claim.
-             * <p>
-             * The value is a JSON object with a key-value pair for each token,
-             * where the key is a token type identifier and the value is the
-             * base64url-encoded SHA-256 hash of that token.
-             * </p>
-             *
-             * @param otherTokenHashes a map of token type to base64url-encoded hash
-             * @return this builder instance
-             */
-            public ClaimsBuilder otherTokenHashes(Map<String, String> otherTokenHashes) {
-                this.otherTokenHashes = otherTokenHashes;
-                return this;
-            }
-
-            /**
-             * Builds the {@link Claims}.
-             * <p>
-             * Validates that the required {@code wth} claim is present.
-             * </p>
-             *
-             * @return the built claims
-             * @throws IllegalStateException if the required {@code wth} claim is not set
-             */
             public Claims build() {
-                if (workloadTokenHash == null || workloadTokenHash.isEmpty()) {
-                    throw new IllegalStateException("workloadTokenHash (wth) is REQUIRED");
-                }
-                return new Claims(this);
+                return new Claims(audience, expirationTime, jwtId, workloadTokenHash,
+                        accessTokenHash, transactionTokenHash, otherTokenHashes);
             }
         }
     }
 
-    /**
-     * JOSE Header for Workload Proof Token (WPT).
-     * <p>
-     * The WPT JOSE header contains the following parameters:
-     * </p>
-     * <ul>
-     *   <li><b>typ</b>: Media type, MUST be {@code wpt+jwt}</li>
-     *   <li><b>alg</b>: JWS asymmetric digital signature algorithm corresponding to
-     *       the confirmation key in the associated WIT</li>
-     * </ul>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515">RFC 7515 - JSON Web Signature (JWS)</a>
-     */
+    /** JOSE Header for Workload Proof Token (WPT). */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class Header {
+    public record Header(
+            @JsonProperty("typ") String type,
+            @JsonProperty("alg") String algorithm) {
 
-        /**
-         * The media type for WPT.
-         */
         public static final String MEDIA_TYPE = "wpt+jwt";
 
-        /**
-         * Type parameter (typ).
-         * <p>
-         * The typ JOSE header parameter of the WPT conveys a media type of {@code wpt+jwt}.
-         * This is used to declare the media type of the complete JWT.
-         * </p>
-         */
-        @JsonProperty("typ")
-        private final String type;
-
-        /**
-         * Algorithm parameter (alg).
-         * <p>
-         * An identifier for an appropriate JWS asymmetric digital signature algorithm
-         * corresponding to the confirmation key in the associated WIT.
-         * The algorithm MUST be an asymmetric signature algorithm.
-         * </p>
-         *
-         * @see <a href="https://www.iana.org/assignments/jose/jose.xhtml#web-signature-encryption-algorithms">IANA JOSE Algorithms</a>
-         */
-        @JsonProperty("alg")
-        private final String algorithm;
-
-        private Header(HeaderBuilder builder) {
-            this.type = builder.type;
-            this.algorithm = builder.algorithm;
+        public Header {
+            if (ValidationUtils.isNullOrEmpty(type)) {
+                throw new IllegalStateException("type (typ) is REQUIRED and should be 'wpt+jwt'");
+            }
+            if (ValidationUtils.isNullOrEmpty(algorithm)) {
+                throw new IllegalStateException("algorithm (alg) is REQUIRED");
+            }
         }
 
-        /**
-         * Gets the type (typ) parameter.
-         *
-         * @return the type, should be {@code wpt+jwt}
-         */
-        public String getType() {
-            return type;
-        }
+        public static HeaderBuilder builder() { return new HeaderBuilder(); }
 
-        /**
-         * Gets the algorithm (alg) parameter.
-         *
-         * @return the algorithm identifier
-         */
-        public String getAlgorithm() {
-            return algorithm;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Header header = (Header) o;
-            return Objects.equals(type, header.type) &&
-                   Objects.equals(algorithm, header.algorithm);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(type, algorithm);
-        }
-
-        @Override
-        public String toString() {
-            return "Header{" +
-                    "type='" + type + '\'' +
-                    ", algorithm='" + algorithm + '\'' +
-                    '}';
-        }
-
-        /**
-         * Creates a new builder for {@link Header}.
-         *
-         * @return a new builder instance
-         */
-        public static HeaderBuilder builder() {
-            return new HeaderBuilder();
-        }
-
-        /**
-         * Builder for {@link Header}.
-         */
         public static class HeaderBuilder {
             private String type = MEDIA_TYPE;
             private String algorithm;
 
-            /**
-             * Sets the type (typ) parameter.
-             * <p>
-             * Default value is {@code wpt+jwt}.
-             * </p>
-             *
-             * @param type the type
-             * @return this builder instance
-             */
-            public HeaderBuilder type(String type) {
-                this.type = type;
-                return this;
-            }
+            public HeaderBuilder type(String type)           { this.type = type;           return this; }
+            public HeaderBuilder algorithm(String algorithm) { this.algorithm = algorithm; return this; }
 
-            /**
-             * Sets the algorithm (alg) parameter.
-             * <p>
-             * The algorithm MUST be an asymmetric signature algorithm corresponding to
-             * the confirmation key in the associated WIT.
-             * </p>
-             *
-             * @param algorithm the algorithm identifier (e.g., "ES256", "RS256")
-             * @return this builder instance
-             */
-            public HeaderBuilder algorithm(String algorithm) {
-                this.algorithm = algorithm;
-                return this;
-            }
-
-            /**
-             * Builds the {@link Header}.
-             *
-             * @return the built header
-             * @throws IllegalStateException if required parameters are not set
-             */
             public Header build() {
-                if (ValidationUtils.isNullOrEmpty(type)) {
-                    throw new IllegalStateException("type (typ) is REQUIRED and should be 'wpt+jwt'");
-                }
-                if (ValidationUtils.isNullOrEmpty(algorithm)) {
-                    throw new IllegalStateException("algorithm (alg) is REQUIRED");
-                }
-                return new Header(this);
+                return new Header(type, algorithm);
             }
         }
     }
