@@ -29,9 +29,8 @@
         <!-- Spring Boot -->
         <spring-boot.version>3.3.11</spring-boot.version>
 
-        <!-- JWT & OAuth -->
+        <!-- JWT -->
         <nimbus-jose-jwt.version>9.37.4</nimbus-jose-jwt.version>
-        <oauth2-oidc-sdk.version>11.10.1</oauth2-oidc-sdk.version>
 
         <!-- JSON -->
         <jackson.version>2.16.1</jackson.version>
@@ -84,11 +83,6 @@
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus-jose-jwt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.nimbusds</groupId>
-                <artifactId>oauth2-oidc-sdk</artifactId>
-                <version>${oauth2-oidc-sdk.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
