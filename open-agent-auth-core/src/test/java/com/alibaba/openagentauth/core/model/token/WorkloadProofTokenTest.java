@@ -662,7 +662,7 @@ class WorkloadProofTokenTest {
                     .workloadTokenHash(null)
                     .build())
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("workloadTokenHash (wth) is REQUIRED according to draft-ietf-wimse-wpt");
+                    .hasMessage("workloadTokenHash (wth) is REQUIRED");
         }
 
         @Test
@@ -672,7 +672,7 @@ class WorkloadProofTokenTest {
                     .workloadTokenHash("")
                     .build())
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("workloadTokenHash (wth) is REQUIRED according to draft-ietf-wimse-wpt");
+                    .hasMessage("workloadTokenHash (wth) is REQUIRED");
         }
 
         @Test

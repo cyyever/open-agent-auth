@@ -32,20 +32,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * Serializer for Workload Identity Tokens (WIT).
- * <p>
- * This class provides methods to convert structured {@link WorkloadIdentityToken} objects
- * into their JWT string representations. This is useful for computing hashes, storing tokens,
- * or transmitting them over the network.
- * </p>
- * <p>
- * The serialization process reconstructs the JWT from the structured object's header and claims,
- * ensuring that the resulting JWT string matches the original format used when the token was created.
- * </p>
- *
- * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519">RFC 7519 - JSON Web Token (JWT)</a>
- * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515">RFC 7515 - JSON Web Signature (JWS)</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/">draft-ietf-wimse-workload-creds</a>
+ * Serializer for Workload Identity Tokens (WIT). Converts structured
+ * {@link WorkloadIdentityToken} objects into signed JWT strings.
  */
 public class WitSerializer {
 

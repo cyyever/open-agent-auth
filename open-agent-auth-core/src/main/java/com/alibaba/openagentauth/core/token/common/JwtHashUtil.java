@@ -25,24 +25,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 /**
- * Utility class for computing JWT hashes.
- * <p>
- * This class provides methods to compute SHA-256 hashes of JWT strings,
- * which are commonly used in token binding scenarios such as:
- * </p>
- * <ul>
- *   <li>WIT hash (wth) in Workload Proof Tokens</li>
- *   <li>Access Token hash (ath) in OAuth 2.0</li>
- *   <li>Transaction Token hash (tth)</li>
- *   <li>AOAT hash in WPT oth claim</li>
- * </ul>
- * <p>
- * According to WIMSE specification, the hash is computed as:
- * {@code BASE64URL(SHA-256(ASCII(token_string)))}
- * </p>
- *
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/">draft-ietf-wimse-wpt</a>
- * @see <a href="https://datatracker.ietf.org/doc/html/rfc9449">RFC 9449 - OAuth 2.0 Demonstrating Proof-of-Possession</a>
+ * Utility class for computing SHA-256 hashes of JWT strings, encoded as
+ * {@code BASE64URL(SHA-256(ASCII(token_string)))}.
  */
 public class JwtHashUtil {
 
@@ -92,11 +76,7 @@ public class JwtHashUtil {
     }
 
     /**
-     * Computes the WIT hash (wth) as per WIMSE specification.
-     * <p>
-     * This is a convenience method that delegates to {@link #computeSha256Hash(String)}.
-     * It is specifically named for clarity when computing WIT hashes.
-     * </p>
+     * Computes the WIT hash (wth).
      *
      * @param witJwtString the Workload Identity Token (JWT string)
      * @return the base64url-encoded SHA-256 hash of the WIT
@@ -108,13 +88,9 @@ public class JwtHashUtil {
     }
 
     /**
-     * Computes the Access Token hash (ath) as per RFC 9449.
-     * <p>
-     * This is a convenience method that delegates to {@link #computeSha256Hash(String)}.
-     * It is specifically named for clarity when computing access token hashes.
-     * </p>
+     * Computes the Access Token hash (ath).
      *
-     * @param accessToken the OAuth access token
+     * @param accessToken the access token
      * @return the base64url-encoded SHA-256 hash of the access token
      * @throws IllegalArgumentException if the access token is null or empty
      * @throws IllegalStateException if SHA-256 algorithm is not available
@@ -125,10 +101,6 @@ public class JwtHashUtil {
 
     /**
      * Computes the Transaction Token hash (tth).
-     * <p>
-     * This is a convenience method that delegates to {@link #computeSha256Hash(String)}.
-     * It is specifically named for clarity when computing transaction token hashes.
-     * </p>
      *
      * @param transactionToken the transaction token
      * @return the base64url-encoded SHA-256 hash of the transaction token
@@ -140,23 +112,12 @@ public class JwtHashUtil {
     }
 
     /**
-     * Computes the Agent Operation Authorization Token hash (aoat).
-     * <p>
-     * This is a convenience method that delegates to {@link #computeSha256Hash(String)}.
-     * It is specifically named for clarity when computing AOAT hashes, which are used
-     * in the WPT oth (other tokens hashes) claim to bind the WPT to an AOAT token.
-     * </p>
-     * <p>
-     * According to WIMSE specification, the AOAT hash in the oth claim allows the WPT
-     * to be cryptographically bound to an AOAT token, ensuring that the workload
-     * presenting the WPT also possesses the corresponding AOAT authorization.
-     * </p>
+     * Computes the SHA-256 hash of a token used in the WPT oth (other tokens hashes) claim.
      *
-     * @param aoatToken the Agent Operation Authorization Token (JWT string)
-     * @return the base64url-encoded SHA-256 hash of the AOAT token
-     * @throws IllegalArgumentException if the AOAT token is null or empty
+     * @param aoatToken the token to hash (JWT string)
+     * @return the base64url-encoded SHA-256 hash of the token
+     * @throws IllegalArgumentException if the token is null or empty
      * @throws IllegalStateException if SHA-256 algorithm is not available
-     * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/">draft-ietf-wimse-wpt</a>
      */
     public static String computeAoatHash(String aoatToken) {
         return computeSha256Hash(aoatToken);

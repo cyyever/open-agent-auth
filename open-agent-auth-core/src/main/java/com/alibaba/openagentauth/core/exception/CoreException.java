@@ -21,22 +21,7 @@ import java.util.Map;
 
 /**
  * Base exception for all Core module exceptions.
- * <p>
- * This exception serves as the root for all exceptions in the Core module,
- * which handles protocol-level operations (OAuth2, OIDC, WIMSE, etc.).
- * All Core module exceptions should extend from this class.
- * </p>
- * <p>
- * <b>System Code:</b> 10
- * </p>
- * <p>
- * <b>Error Code Format:</b> OPEN_AGENT_AUTH_10_YYZZ
- * </p>
- * <ul>
- *   <li><b>10</b>: Core system code</li>
- *   <li><b>YY</b>: Domain code (01=OIDC, 02=OAuth2, 03=WIMSE, 04=Policy, 05=Workload, etc.)</li>
- *   <li><b>ZZ</b>: Error code (unique within the domain)</li>
- * </ul>
+ * Error code format: {@code OPEN_AGENT_AUTH_10_YYZZ} (system 10, YY=domain, ZZ=error).
  *
  * @since 1.0
  */

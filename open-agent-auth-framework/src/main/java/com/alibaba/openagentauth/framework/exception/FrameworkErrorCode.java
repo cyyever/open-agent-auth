@@ -19,28 +19,7 @@ import com.alibaba.openagentauth.core.exception.ErrorCode;
 
 /**
  * Interface for Framework module error codes.
- * <p>
- * This interface extends the base ErrorCode interface and defines the
- * system code constant for the Framework module. All Framework module
- * error code implementations should implement this interface.
- * </p>
- * <p>
- * <b>System Code:</b> 11
- * </p>
- * <p>
- * <b>Error Code Format:</b> OPEN_AGENT_AUTH_11_YYZZ
- * </p>
- * <p>
- * <b>Domain Codes:</b></p>
- * <ul>
- *   <li><b>01</b>: Auth (Authentication & Authorization)</li>
- *   <li><b>02</b>: Token (Token Generation & Validation)</li>
- *   <li><b>03</b>: Validation (Request Validation)</li>
- *   <li><b>04</b>: OAuth2 (OAuth2 Protocol)</li>
- * </ul>
- *
- * <p><b>Note:</b> When adding a new domain, use the next available domain code.
- * Domain codes are managed centrally to avoid conflicts.</p>
+ * Error code format: {@code OPEN_AGENT_AUTH_11_YYZZ} (system 11, YY=domain, ZZ=error).
  *
  * @since 1.0
  */
@@ -67,7 +46,7 @@ public interface FrameworkErrorCode extends ErrorCode {
     String DOMAIN_CODE_VALIDATION = "03";
 
     /**
-     * Domain code for OAuth2 (OAuth2 Protocol).
+     * Domain code for OAuth2.
      */
     String DOMAIN_CODE_OAUTH2 = "04";
 

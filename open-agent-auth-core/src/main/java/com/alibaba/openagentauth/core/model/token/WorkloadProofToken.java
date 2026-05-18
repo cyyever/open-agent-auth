@@ -24,17 +24,11 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Represents a Workload Proof Token (WPT) as defined in draft-ietf-wimse-wpt.
- * <p>
- * A WPT is a JWT that proves possession of the private key corresponding to the public key
- * in the associated Workload Identity Token (WIT). It is signed by the workload using its
- * private key and contains claims that bind it to the WIT and optionally to other tokens.
- * <p>
- * The WPT consists of a JOSE header and claims (payload). The header specifies the media type
- * ({@code wpt+jwt}) and the signature algorithm. The claims include the workload token hash
- * (wth) which binds the WPT to a specific WIT, and optionally hashes of other tokens.
+ * Represents a Workload Proof Token (WPT). A WPT is a JWT that proves possession
+ * of the private key corresponding to the public key in the associated Workload
+ * Identity Token (WIT). It binds to the WIT via the {@code wth} claim and optionally
+ * to other tokens via {@code oth}.
  *
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/">draft-ietf-wimse-wpt</a>
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519">RFC 7519 - JSON Web Token (JWT)</a>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -161,9 +155,6 @@ public class WorkloadProofToken {
 
     /**
      * Gets the Access Token Hash (ath) claim.
-     * <p>
-     * Convenience method that delegates to {@link Claims#getAccessTokenHash()}.
-     * </p>
      *
      * @return the base64url-encoded access token hash, or null if not present
      */
@@ -342,136 +333,51 @@ public class WorkloadProofToken {
 
     /**
      * Claims (Payload) for Workload Proof Token (WPT).
-     * <p>
-     * The WPT claims contain the following fields as defined in draft-ietf-wimse-wpt Section 2:
-     * </p>
-     * <table border="1">
-     *   <tr><th>Claim</th><th>Description</th><th>Status</th></tr>
-     *   <tr><td>aud</td><td>Audience - the target URI of the request</td><td>OPTIONAL</td></tr>
-     *   <tr><td>exp</td><td>Expiration Time - when the WPT expires</td><td>OPTIONAL (RECOMMENDED)</td></tr>
-     *   <tr><td>jti</td><td>JWT ID - unique identifier for replay protection</td><td>OPTIONAL (SHOULD use)</td></tr>
-     *   <tr><td>wth</td><td>Workload Identity Token Hash - SHA-256 hash of the WIT</td><td>REQUIRED</td></tr>
-     *   <tr><td>ath</td><td>Access Token Hash - SHA-256 hash of the OAuth access token</td><td>OPTIONAL</td></tr>
-     *   <tr><td>tth</td><td>Transaction Token Hash - SHA-256 hash of the transaction token</td><td>OPTIONAL</td></tr>
-     *   <tr><td>oth</td><td>Other Tokens Hashes - JSON object with key-value pairs for each token</td><td>OPTIONAL</td></tr>
-     * </table>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/">draft-ietf-wimse-wpt</a>
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Claims {
 
         /**
-         * Audience claim (aud).
-         * <p>
-         * The target URI of the request. According to draft-ietf-wimse-wpt Section 2,
-         * this claim is OPTIONAL. When validating the WPT, the aud claim MUST match
-         * the target URI, or an acceptable alias or normalization thereof.
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3">RFC 7519 Section 4.1.3</a>
+         * Audience claim (aud): the target URI of the request.
          */
         @JsonProperty("aud")
         private final String audience;
 
         /**
-         * Expiration Time claim (exp).
-         * <p>
-         * The expiration time on or after which the WPT MUST NOT be accepted for processing.
-         * According to draft-ietf-wimse-wpt Section 2, this claim is OPTIONAL but RECOMMENDED.
-         * The proof of possession MUST be time-limited, typically on the order of minutes.
-         * WPTs received outside their validity time MUST be rejected.
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4">RFC 7519 Section 4.1.4</a>
+         * Expiration Time claim (exp): the time after which the WPT must not be accepted.
          */
         @JsonProperty("exp")
         private final Date expirationTime;
 
         /**
-         * JWT ID claim (jti).
-         * <p>
-         * A unique identifier for the WPT. According to draft-ietf-wimse-wpt Section 2,
-         * this claim is OPTIONAL but SHOULD be used. The jti MUST uniquely identify the WPT
-         * within the scope of a particular sender. This claim SHOULD be used by the receiver
-         * to perform basic replay protection against tokens it has already seen.
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7">RFC 7519 Section 4.1.7</a>
+         * JWT ID claim (jti): unique identifier for replay protection.
          */
         @JsonProperty("jti")
         private final String jwtId;
 
         /**
-         * Workload Identity Token Hash claim (wth).
-         * <p>
-         * The base64url-encoded SHA-256 hash of the WIT that this WPT is bound to.
-         * According to draft-ietf-wimse-wpt Section 2, this claim is REQUIRED.
-         * </p>
-         * <p>
-         * The wth claim binds the WPT to a specific WIT, ensuring that the WPT was created by
-         * the workload identified by that WIT. When validating the WPT, the wth claim MUST match
-         * the hash of the WIT presented in the Workload-Identity-Token header.
-         * </p>
-         * <p>
-         * Hash computation: {@code BASE64URL(SHA-256(ASCII(WIT)))}
-         * </p>
+         * Workload Identity Token Hash claim (wth): base64url-encoded SHA-256 hash of the WIT
+         * this WPT is bound to. Hash computation: {@code BASE64URL(SHA-256(ASCII(WIT)))}.
          */
         @JsonProperty("wth")
         private final String workloadTokenHash;
 
         /**
-         * Access Token Hash claim (ath).
-         * <p>
-         * The base64url-encoded SHA-256 hash of the OAuth access token.
-         * According to draft-ietf-wimse-wpt Section 2, this claim is OPTIONAL.
-         * However, if presented in conjunction with an OAuth access token, the value
-         * of the ath claim MUST match the hash of that token's value.
-         * </p>
-         * <p>
-         * Hash computation: {@code BASE64URL(SHA-256(ASCII(access_token)))}
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc9449#section-4.2">RFC 9449 Section 4.2</a>
+         * Access Token Hash claim (ath): base64url-encoded SHA-256 hash of the access token.
          */
         @JsonProperty("ath")
         private final String accessTokenHash;
 
         /**
-         * Transaction Token Hash claim (tth).
-         * <p>
-         * The base64url-encoded SHA-256 hash of the transaction token.
-         * According to draft-ietf-wimse-wpt Section 2, this claim is OPTIONAL.
-         * However, if presented in conjunction with a transaction token, the value
-         * of the tth claim MUST match the hash of that token's value.
-         * </p>
-         * <p>
-         * Hash computation: {@code BASE64URL(SHA-256(ASCII(transaction_token)))}
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-transaction-tokens/">draft-ietf-oauth-transaction-tokens</a>
+         * Transaction Token Hash claim (tth): base64url-encoded SHA-256 hash of the transaction token.
          */
         @JsonProperty("tth")
         private final String transactionTokenHash;
 
         /**
-         * Other Tokens Hashes claim (oth).
-         * <p>
-         * A JSON object containing hashes of other tokens that this WPT is bound to.
-         * The value is a JSON object with a key-value pair for each such token, where
-         * the key is a token type identifier and the value is the base64url-encoded
-         * SHA-256 hash of that token.
-         * </p>
-         * <p>
-         * According to draft-ietf-wimse-wpt Section 2, this claim is OPTIONAL.
-         * The oth claim allows the WPT to be bound to additional tokens beyond the WIT.
-         * If the oth claim contains entries that are not understood by the recipient,
-         * the WPT MUST be rejected. Conversely, additional tokens not covered by the
-         * oth claim MUST NOT be used by the recipient to make authorization decisions.
-         * </p>
-         * <p>
-         * Each hash is computed as: {@code BASE64URL(SHA-256(ASCII(token)))}
-         * </p>
+         * Other Tokens Hashes claim (oth): JSON object with hashes of additional tokens this WPT
+         * is bound to (key = token type identifier, value = base64url-encoded SHA-256 hash).
+         * If entries are not understood by the recipient, the WPT must be rejected.
          */
         @JsonProperty("oth")
         private final Map<String, String> otherTokenHashes;
@@ -677,9 +583,6 @@ public class WorkloadProofToken {
 
             /**
              * Sets the Access Token Hash (ath) claim.
-             * <p>
-             * The value must be a base64url-encoded SHA-256 hash of the OAuth access token.
-             * </p>
              *
              * @param accessTokenHash the base64url-encoded access token hash
              * @return this builder instance
@@ -730,7 +633,7 @@ public class WorkloadProofToken {
              */
             public Claims build() {
                 if (workloadTokenHash == null || workloadTokenHash.isEmpty()) {
-                    throw new IllegalStateException("workloadTokenHash (wth) is REQUIRED according to draft-ietf-wimse-wpt");
+                    throw new IllegalStateException("workloadTokenHash (wth) is REQUIRED");
                 }
                 return new Claims(this);
             }

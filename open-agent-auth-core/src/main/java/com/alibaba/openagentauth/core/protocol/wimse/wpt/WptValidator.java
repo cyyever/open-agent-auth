@@ -42,11 +42,7 @@ import java.util.Base64;
 import java.util.Map;
 
 /**
- * Validator for Workload Proof Tokens (WPT) following the WIMSE protocol.
- * Verifies the signature and validity of WPTs.
- *
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-s2s-protocol-07.html">draft-ietf-wimse-s2s-protocol-07</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt-00.html">draft-ietf-wimse-wpt-00</a>
+ * Validator for Workload Proof Tokens (WPT). Verifies the signature and validity of WPTs.
  */
 public class WptValidator {
 
@@ -57,10 +53,7 @@ public class WptValidator {
 
     /**
      * Creates a new WPT validator.
-     * <p>
-     * According to WIMSE protocol, the WPT must be verified with the public key
-     * from the WIT's cnf.jwk claim. This ensures cryptographic binding between WIT and WPT.
-     * </p>
+     * The WPT is verified with the public key from the WIT's cnf.jwk claim.
      */
     public WptValidator() {
         // No verification key needed - it will be extracted from WIT's cnf.jwk
@@ -271,8 +264,8 @@ public class WptValidator {
             // Parse the JWT string to get SignedJWT object
             SignedJWT signedJwt = SignedJWT.parse(wptJwtString);
 
-            // Extract the public key from WIT cnf.jwk for WPT signature verification
-            // According to WIMSE protocol, WPT must be signed with the private key corresponding to cnf.jwk
+            // Extract the public key from WIT cnf.jwk for WPT signature verification.
+            // WPT must be signed with the private key corresponding to cnf.jwk.
             if (wit.getConfirmation() == null || wit.getConfirmation().getJwk() == null) {
                 logger.warn("WIT missing cnf.jwk, cannot verify WPT signature");
                 return "WIT missing cnf.jwk";
@@ -377,18 +370,8 @@ public class WptValidator {
 
     /**
      * Verifies the oth (other tokens hashes) claim if present.
-     * <p>
-     * According to WIMSE specification, the oth claim contains hashes of other tokens
-     * that this WPT is bound to. This method validates those hashes against the actual
-     * tokens if they are provided. If the oth claim contains entries that are not
-     * understood by the recipient, the WPT MUST be rejected.
-     * </p>
-     * <p>
-     * Supported token types in oth claim:
-     * <ul>
-     *   <li><b>aoat</b>: Agent Operation Authorization Token hash</li>
-     * </ul>
-     * </p>
+     * The oth claim contains hashes of other tokens this WPT is bound to; if it contains
+     * entries not understood by the recipient, the WPT must be rejected.
      *
      * @param wpt the WorkloadProofToken
      * @param wit the Workload Identity Token (used for context)
@@ -428,21 +411,9 @@ public class WptValidator {
     }
 
     /**
-     * Validates a specific token type in the oth claim.
-     * <p>
-     * According to WIMSE spec, if oth contains entries not understood by the recipient,
-     * the WPT MUST be rejected.
-     * </p>
-     * <p>
-     * This method validates the format of the oth claim entry. The actual hash comparison
-     * with the provided token will be done in the validation pipeline (Layer 3).
-     * </p>
-     * <p>
-     * This design supports any token type implementing {@link OthBindableToken}, providing
-     * flexibility and extensibility without requiring modifications to this validator.
-     * </p>
+     * Validates the format of a specific entry in the oth claim.
      *
-     * @param tokenType the token type identifier (e.g., "aoat", "tth", "dpop")
+     * @param tokenType the token type identifier
      * @param expectedHash the expected hash value
      * @return error message if validation fails, null if valid
      */
@@ -463,19 +434,13 @@ public class WptValidator {
             return String.format("WPT oth claim token type '%s' has invalid format", tokenType);
         }
 
-        // Note: The actual token validation and hash comparison happens in Layer 3
-        // Here we only validate that the oth claim format is correct
-        // This design supports any token type implementing OthBindableToken interface
         logger.debug("WPT oth claim contains valid entry for token type: {}", tokenType);
         return null;
     }
 
     /**
      * Verifies that the WPT algorithm matches the algorithm specified in WIT cnf.jwk.alg.
-     * <p>
-     * According to draft-ietf-wimse-wpt, the WPT header alg parameter MUST match the alg value
-     * of the jwk in the cnf claim of the WIT. This prevents algorithm confusion attacks.
-     * </p>
+     * This prevents algorithm confusion attacks.
      *
      * @param wpt the WorkloadProofToken
      * @param wit the Workload Identity Token

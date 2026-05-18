@@ -17,16 +17,6 @@ package com.alibaba.openagentauth.framework.exception.validation;
 
 /**
  * Exception thrown when authorization context preparation fails in framework orchestration layer.
- * <p>
- * This exception is thrown when there is an error preparing the authorization
- * context for tool execution in the framework orchestration layer. This may include errors such as:
- * <ul>
- *   <li>Missing or invalid WIT (Workload Identity Token)</li>
- *   <li>Missing or invalid WPT (Workload Proof Token)</li>
- *   <li>Missing or invalid AOAT (Agent Operation Authorization Token)</li>
- *   <li>Errors during context construction or validation</li>
- * </ul>
- * </p>
  *
  * @since 1.0
  */

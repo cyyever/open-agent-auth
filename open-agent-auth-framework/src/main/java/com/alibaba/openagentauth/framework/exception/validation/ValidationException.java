@@ -18,24 +18,14 @@ package com.alibaba.openagentauth.framework.exception.validation;
 import com.alibaba.openagentauth.framework.exception.FrameworkException;
 
 /**
- * Base exception for all Validation domain exceptions (Request Validation).
- * <p>
- * This exception serves as the root for all exceptions in the Validation domain.
- * All validation-related exceptions should extend from this class.
- * </p>
- * <p>
- * <b>Domain Code:</b> 03
- * </p>
- * <p>
- * <b>Error Code Format:</b> OPEN_AGENT_AUTH_02_03ZZ
- * </p>
+ * Base exception for all Validation domain exceptions.
  *
  * @since 1.0
  */
 public abstract class ValidationException extends FrameworkException {
 
     /**
-     * The layer where validation failed (0-4 for the five-layer verification architecture).
+     * The layer where validation failed.
      */
     private final int failedLayer;
 
@@ -88,7 +78,7 @@ public abstract class ValidationException extends FrameworkException {
     /**
      * Gets the layer where validation failed.
      *
-     * @return the failed layer (0-4)
+     * @return the failed layer
      */
     public int getFailedLayer() {
         return failedLayer;

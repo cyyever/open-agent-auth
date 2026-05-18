@@ -17,16 +17,6 @@ package com.alibaba.openagentauth.core.exception.crypto;
 
 /**
  * Exception thrown when prompt decryption fails.
- * <p>
- * This exception indicates an error occurred during the decryption of
- * JWE-encrypted user prompts. Common causes include:
- * </p>
- * <ul>
- *   <li>Invalid decryption key</li>
- *   <li>Corrupted or malformed JWE token</li>
- *   <li>Cryptographic operation failures</li>
- *   <li>Expired or invalid encryption algorithm</li>
- * </ul>
  *
  * @see PromptEncryptionException
  * @since 1.0

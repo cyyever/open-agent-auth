@@ -24,32 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Validation context for the five-layer verification architecture.
- * <p>
- * This class encapsulates all the information required for the complete verification process,
- * including tokens, request metadata, and intermediate validation results. It follows the
- * immutable pattern to ensure thread-safety and prevent accidental modifications during
- * the validation pipeline.
- * </p>
- * <p>
- * <b>Five-Layer Verification Architecture:</b>
- * <ol>
- *   <li><b>Layer 1</b>: WIT signature and validity verification</li>
- *   <li><b>Layer 2</b>: WPT signature and request integrity verification</li>
- *   <li><b>Layer 3</b>: AOAT signature and validity verification</li>
- *   <li><b>Layer 4</b>: Identity consistency verification</li>
- *   <li><b>Layer 5</b>: OPA policy evaluation for authorization decision</li>
- * </ol>
- * </p>
- * <p>
- * <b>Design Principles:</b>
- * <ul>
- *   <li><b>Immutability</b>: Once created, the context cannot be modified</li>
- *   <li><b>Builder Pattern</b>: Provides a fluent API for constructing complex contexts</li>
- *   <li><b>Type Safety</b>: Strong typing ensures compile-time correctness</li>
- *   <li><b>Extensibility</b>: Supports custom attributes for future enhancements</li>
- * </ul>
- * </p>
+ * Validation context carrying tokens and request metadata through the validation pipeline.
  *
  * @see LayerValidationResult
  * @see LayerValidator
@@ -59,19 +34,11 @@ public class ValidationContext {
 
     /**
      * The Workload Identity Token (WIT).
-     * <p>
-     * This token represents the workload identity and is verified in Layer 1.
-     * It contains the workload identifier, trust domain, and public key for WPT verification.
-     * </p>
      */
     private final WorkloadIdentityToken wit;
 
     /**
      * The Workload Proof Token (WPT).
-     * <p>
-     * This token proves possession of the WIT's private key and ensures request integrity.
-     * It is verified in Layer 2.
-     * </p>
      */
     private final WorkloadProofToken wpt;
 

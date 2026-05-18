@@ -20,29 +20,6 @@ import com.alibaba.openagentauth.core.exception.crypto.KeyManagementException;
 
 /**
  * Service interface for managing key rotation lifecycle.
- * <p>
- * This interface provides methods for managing the rotation of cryptographic keys,
- * including scheduling rotations, monitoring rotation status, and handling graceful
- * transitions between old and new keys.
- * </p>
- * <p>
- * <b>Key Rotation Best Practices:</b></p>
- * <ul>
- *   <li>Rotate keys periodically (recommended: every 90 days)</li>
- *   <li>Maintain a grace period for old keys (recommended: 7 days)</li>
- *   <li>Monitor rotation status and alert on failures</li>
- *   <li>Keep audit logs of all rotation events</li>
- * </ul>
- * <p>
- * <b>Rotation Process:</b></p>
- * <ol>
- *   <li>Generate new key pair</li>
- *   <li>Activate new key for signing operations</li>
- *   <li>Maintain old key for verification during grace period</li>
- *   <li>Deactivate old key after grace period expires</li>
- *   <li>Archive or delete old key based on policy</li>
- * </ol>
- * </p>
  *
  * @see KeyManager
  * @see KeyInfo

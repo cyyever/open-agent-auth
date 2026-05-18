@@ -17,11 +17,6 @@ package com.alibaba.openagentauth.framework.exception.validation;
 
 /**
  * Exception thrown when request validation fails in framework orchestration layer.
- * <p>
- * This exception indicates that the request validation failed in the framework
- * orchestration layer, such as invalid parameters, missing required fields, or validation errors.
- * This exception supports the five-layer verification architecture and includes the failed layer information.
- * </p>
  *
  * @since 1.0
  */

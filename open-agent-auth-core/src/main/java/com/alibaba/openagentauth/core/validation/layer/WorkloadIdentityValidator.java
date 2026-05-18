@@ -25,27 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Layer 1 validator for Workload Identity Token (WIT) verification.
- * <p>
- * This validator delegates to the existing {@link WitValidator} to perform
- * comprehensive verification of the WIT, including:
- * <ul>
- *   <li>Token presence check</li>
- *   <li>Signature verification using the issuer's public key</li>
- *   <li>Expiration time validation</li>
- *   <li>Required claims validation (sub, exp)</li>
- *   <li>Trust domain validation (iss claim)</li>
- *   <li>Confirmation claim (cnf) validation</li>
- * </ul>
- * </p>
- * <p>
- * <b>Protocol References:</b>
- * <ul>
- *   <li><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/">draft-ietf-wimse-workload-creds</a> - WIMSE Workload Credentials</li>
- *   <li><a href="https://datatracker.ietf.org/doc/html/rfc7519">RFC 7519 - JSON Web Token (JWT)</a></li>
- *   <li><a href="https://datatracker.ietf.org/doc/html/rfc7515">RFC 7515 - JSON Web Signature (JWS)</a></li>
- * </ul>
- * </p>
+ * Validator for Workload Identity Token (WIT) verification.
+ * Delegates to {@link WitValidator} for signature, expiration, claims, trust
+ * domain, and confirmation checks.
  *
  * @see ValidationContext
  * @see LayerValidationResult

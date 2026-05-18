@@ -37,13 +37,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Generator for Workload Proof Tokens (WPT) following the WIMSE protocol.
- * Creates JWT-based proof tokens that prove request authenticity.
- *
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/">draft-ietf-wimse-workload-creds-00</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-http-signature/">draft-ietf-wimse-http-signature-01</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-mutual-tls/">draft-ietf-wimse-mutual-tls-00</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt-00.html">draft-ietf-wimse-wpt-00</a>
+ * Generator for Workload Proof Tokens (WPT). Creates JWT-based proof tokens that
+ * prove request authenticity.
  */
 public class WptGenerator {
 
@@ -59,11 +54,8 @@ public class WptGenerator {
 
     /**
      * Creates a new WPT generator.
-     * <p>
-     * According to WIMSE protocol, the WPT must be signed with the private key
-     * corresponding to the public key in the WIT's cnf.jwk claim. This ensures
-     * that only the entity that possesses the private key can generate valid WPTs.
-     * </p>
+     * The WPT must be signed with the private key corresponding to the public key
+     * in the WIT's cnf.jwk claim.
      */
     public WptGenerator() {
         // No signing key needed - it will be extracted from WIT's cnf.jwk
@@ -92,22 +84,13 @@ public class WptGenerator {
 
     /**
      * Generates a Workload Proof Token for an HTTP request with optional token binding.
-     * <p>
-     * This method allows binding the WPT to another token (e.g., AOAT, Transaction Token, DPoP)
-     * by including its hash in the oth (other tokens hashes) claim. This creates
-     * a cryptographic binding between the WPT and the bound token, ensuring that the workload
-     * presenting the WPT also possesses the corresponding token.
-     * </p>
-     * <p>
-     * This is a flexible, extensible design that follows the Dependency Inversion Principle.
-     * Any token implementing {@link OthBindableToken} can be bound to the WPT without requiring
-     * modifications to this generator.
-     * </p>
+     * Any token implementing {@link OthBindableToken} can be bound to the WPT via the
+     * oth (other tokens hashes) claim.
      *
      * @param wit the Workload Identity Token
      * @param wptPrivateKey the private key corresponding to WIT's cnf.jwk for signing WPT
      * @param expirationSeconds the WPT expiration time in seconds from now
-     * @param othBindableToken the optional token to bind to the WPT (e.g., AOAT)
+     * @param othBindableToken the optional token to bind to the WPT
      * @return a WorkloadProofToken object
      * @throws JOSEException if token generation fails
      */
@@ -129,7 +112,7 @@ public class WptGenerator {
         Instant now = Instant.now();
         Instant expiration = now.plusSeconds(expirationSeconds);
 
-        // Use the JWT string to calculate hash (wth) as per WIMSE spec
+        // Use the JWT string to calculate hash (wth)
         String witJwtString = wit.getJwtString();
         if (ValidationUtils.isNullOrEmpty(witJwtString)) {
             throw new JOSEException("WIT missing JWT string, cannot compute wth");
@@ -176,16 +159,11 @@ public class WptGenerator {
 
     /**
      * Generates a Workload Proof Token and returns it as a JWT string with optional token binding.
-     * <p>
-     * This is a convenience method that returns the JWT string representation
-     * of the WPT with optional token binding. Use this method when you only need the
-     * serialized JWT string.
-     * </p>
      *
      * @param wit the Workload Identity Token
      * @param wptPrivateKey the private key corresponding to WIT's cnf.jwk for signing WPT
      * @param expirationSeconds the WPT expiration time in seconds from now
-     * @param othBindableToken the optional token to bind to the WPT (e.g., AOAT)
+     * @param othBindableToken the optional token to bind to the WPT
      * @return a signed JWT string representing the WPT
      * @throws JOSEException if token generation fails
      */
@@ -196,17 +174,6 @@ public class WptGenerator {
 
     /**
      * Builds the other token hashes (oth) claim for the WPT.
-     * <p>
-     * This method creates a map of token type to token hash by using the
-     * {@link OthBindableToken} interface. The token type is determined by
-     * {@link OthBindableToken#getTokenType()}, and the hash is computed using
-     * {@link JwtHashUtil#computeAoatHash(String)}.
-     * </p>
-     * <p>
-     * This design is flexible and extensible - any token implementing
-     * {@link OthBindableToken} can be bound to the WPT without requiring
-     * modifications to this generator.
-     * </p>
      *
      * @param othBindableToken the token to bind to the WPT
      * @return a map of token type to token hash
@@ -236,10 +203,8 @@ public class WptGenerator {
 
     /**
      * Extracts the algorithm from WIT's cnf.jwk.alg.
-     * <p>
-     * According to draft-ietf-wimse-wpt, the WPT header alg parameter MUST match the alg value
-     * of the jwk in the cnf claim of the WIT.
-     * </p>
+     * The WPT header alg parameter must match the alg value of the jwk in the cnf
+     * claim of the WIT.
      *
      * @param wit the WorkloadIdentityToken
      * @return the algorithm name

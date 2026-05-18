@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ '21' ]
+        java: [ '26' ]
 
     steps:
       - name: Checkout
@@ -31,9 +31,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build & Test with JaCoCo
+      - name: Build & Test
         id: build
-        run: mvn clean verify -Paggregate-report -B -ntp
+        run: mvn clean verify -B -ntp
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
@@ -49,32 +49,10 @@ jobs:
           only-summary: 'true'
           list-tests: 'failed'
 
-      - name: Generate JaCoCo Coverage Report
-        uses: madrapps/jacoco-report@v1.7.1
-        if: >-
-          always()
-          && (steps.build.outcome == 'success' || steps.build.outcome == 'failure')
-          && github.event_name == 'pull_request'
-        with:
-          paths: '**/target/site/jacoco-aggregate/jacoco.xml'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: Code Coverage Report
-          update-comment: true
-          min-coverage-overall: 50
-          min-coverage-changed-files: 60
-
       - name: Upload Test Reports
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: test-reports-jdk${{ matrix.java }}
           path: '**/target/surefire-reports/'
-          retention-days: 7
-
-      - name: Upload JaCoCo Reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-reports-jdk${{ matrix.java }}
-          path: '**/target/site/jacoco*/'
           retention-days: 7

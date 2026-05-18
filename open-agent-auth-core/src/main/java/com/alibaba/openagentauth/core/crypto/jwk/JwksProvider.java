@@ -22,18 +22,8 @@ import com.nimbusds.jose.proc.SecurityContext;
 import java.io.IOException;
 
 /**
- * Interface for providing JSON Web Key Set (JWKS) for verifying VC signatures.
- * <p>
- * This interface abstracts the mechanism for retrieving public keys used to verify
- * Verifiable Credential signatures. Implementations can fetch keys from various
- * sources such as remote JWKS endpoints, local files, or in-memory storage.
- * </p>
- * <p>
- * According to draft-liu-agent-operation-authorization-01, the agent client publishes
- * its public keys in JWKS format at the well-known endpoint /.well-known/jwks.json.
- * </p>
+ * Interface for providing a JSON Web Key Set (JWKS) for signature verification.
  *
- * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization-01</a>
  * @see <a href="https://www.rfc-editor.org/rfc/rfc7517">RFC 7517 - JSON Web Key (JWK)</a>
  * @since 1.0
  */
@@ -41,10 +31,6 @@ public interface JwksProvider {
 
     /**
      * Gets the JWK source for verifying signatures.
-     * <p>
-     * This method returns a JWKSource that can be used by JWT verifiers to obtain
-     * the public keys needed to verify Verifiable Credential signatures.
-     * </p>
      *
      * @return the JWK source
      * @throws IOException if an error occurs while retrieving keys

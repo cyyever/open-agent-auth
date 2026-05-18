@@ -38,11 +38,8 @@ import java.util.Date;
 import java.util.UUID;
 
 /**
- * Generator for Workload Identity Tokens (WIT) following the WIMSE protocol.
- * Creates JWT-SVID tokens that authenticate workloads and embed agent identity claims.
- *
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-s2s-protocol-07.html">draft-ietf-wimse-s2s-protocol-07</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds.html">draft-ietf-wimse-workload-creds</a>
+ * Generator for Workload Identity Tokens (WIT). Creates JWT-SVID tokens that
+ * authenticate workloads and embed agent identity claims.
  */
 public class WitGenerator {
 
@@ -57,7 +54,7 @@ public class WitGenerator {
     private final JWK signingKey;
 
     /**
-     * The trust domain for WIMSE ID generation.
+     * The trust domain for workload identifier generation.
      */
     private final TrustDomain trustDomain;
 
@@ -70,7 +67,7 @@ public class WitGenerator {
      * Creates a new WIT generator.
      *
      * @param signingKey the JWK key used for signing WITs (can be RSA or EC)
-     * @param trustDomain the trust domain for WIMSE ID generation
+     * @param trustDomain the trust domain for workload identifier generation
      * @param algorithm the JWS algorithm to use (e.g., RS256, ES256)
      */
     public WitGenerator(JWK signingKey, TrustDomain trustDomain, JWSAlgorithm algorithm) {
@@ -88,11 +85,7 @@ public class WitGenerator {
 
     /**
      * Generates a Workload Identity Token for the given subject.
-     * According to WIMSE protocol, the subject (sub) claim should be a Workload Identifier.
-     * <p>
-     * This is the primary method that returns the structured WorkloadIdentityToken object.
-     * Use this method when you need access to the token's structured representation.
-     * </p>
+     * The subject (sub) claim should be a Workload Identifier.
      *
      * @param subject the subject (Workload Identifier) to embed in the WIT
      * @param wptPublicKey the public key to include in the WIT for WPT verification (JWK format)

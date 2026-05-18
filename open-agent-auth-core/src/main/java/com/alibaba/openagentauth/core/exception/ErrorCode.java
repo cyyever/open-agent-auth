@@ -17,30 +17,7 @@ package com.alibaba.openagentauth.core.exception;
 
 /**
  * Interface for error codes used in the Open Agent Auth framework.
- * <p>
- * This interface defines the contract for error codes that provide structured
- * error information across the framework. Error codes follow a hierarchical
- * structure that mirrors the exception hierarchy.
- * </p>
- * <p>
- * <b>Error Code Format:</b></p>
- * <pre>
- * OPEN_AGENT_AUTH_XX_YYZZ
- * </pre>
- * <p>
- * Where:
- * </p>
- * <ul>
- *   <li><b>XX</b>: System code (01 for core, 02 for framework)</li>
- *   <li><b>YY</b>: Domain code (unique within a system)</li>
- *   <li><b>ZZ</b>: Error code (unique within a system+domain)</li>
- * </ul>
- * <p>
- * <b>Example:</b></p>
- * <pre>
- * OPEN_AGENT_AUTH_01_0101 - Core module, OIDC domain, authentication error
- * OPEN_AGENT_AUTH_02_0101 - Framework module, auth domain, authentication error
- * </pre>
+ * Error code format: {@code OPEN_AGENT_AUTH_XX_YYZZ} (XX=system, YY=domain, ZZ=error).
  *
  * @since 1.0
  */

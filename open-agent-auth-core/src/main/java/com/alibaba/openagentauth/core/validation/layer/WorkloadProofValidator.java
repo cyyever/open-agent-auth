@@ -30,28 +30,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * Layer 2 validator for Workload Proof Token (WPT) verification.
- * <p>
- * This validator delegates to the existing {@link WptValidator} to perform
- * comprehensive verification of the WPT, including:
- * <ul>
- *   <li>WPT presence check</li>
- *   <li>WPT signature verification using the WIT's public key</li>
- *   <li>Expiration time validation</li>
- *   <li>Required claims validation (wth)</li>
- *   <li>Algorithm consistency check (WPT alg vs WIT cnf.jwk.alg)</li>
- *   <li>WIT hash validation (wth claim)</li>
- *   <li>Other tokens hashes validation (oth claim) including AOAT</li>
- * </ul>
- * </p>
- * <p>
- * <b>Protocol References:</b>
- * <ul>
- *   <li><a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/">draft-ietf-wimse-wpt</a> - WIMSE Workload Proof Token</li>
- *   <li><a href="https://datatracker.ietf.org/doc/html/rfc9421">RFC 9421 - HTTP Message Signatures</a></li>
- *   <li><a href="https://datatracker.ietf.org/doc/html/rfc7800">RFC 7800 - Proof-of-Possession Key Semantics</a></li>
- * </ul>
- * </p>
+ * Validator for Workload Proof Token (WPT) verification.
+ * Delegates to {@link WptValidator} for signature, expiration, claims, algorithm
+ * consistency, wth, and oth checks.
  *
  * @see ValidationContext
  * @see LayerValidationResult
@@ -141,13 +122,6 @@ public class WorkloadProofValidator implements LayerValidator {
 
     /**
      * Verifies the oth (other tokens hashes) claim in the WPT.
-     * <p>
-     * This method validates that the hashes in the oth claim match the actual tokens
-     * provided in the validation context. Currently supports:
-     * <ul>
-     *   <li><b>aoat</b>: Agent Operation Authorization Token hash</li>
-     * </ul>
-     * </p>
      *
      * @param wpt the WorkloadProofToken
      * @param context the validation context containing the actual tokens
@@ -187,7 +161,7 @@ public class WorkloadProofValidator implements LayerValidator {
     /**
      * Verifies the hash for a specific token type.
      *
-     * @param tokenType the token type identifier (e.g., "aoat")
+     * @param tokenType the token type identifier
      * @param expectedHash the expected hash value from the oth claim
      * @param context the validation context containing the actual tokens
      * @return error message if validation fails, null if valid

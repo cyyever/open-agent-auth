@@ -14,7 +14,7 @@ This repository is the upstream baseline being trimmed into an
 | `open-agent-auth-core` | Protocol primitives: JWS sign/verify, key management, JWKS provider, trust roots, WIT/WPT (→ CT/DPoP after M1). Pure Java, no Spring. |
 | `open-agent-auth-framework` | Actor interface (`ResourceServer`), default orchestration, request/result models. Pure Java, no Spring. |
 
-Both modules require **Java 21+**. Only direct deps are
+Both modules require **Java 26**. Only direct deps are
 [Nimbus JOSE+JWT](https://connect2id.com/products/nimbus-jose-jwt),
 Jackson, and SLF4J. Spring Boot is no longer required — consumers
 (Spring Boot apps, Quarkus, Helidon, plain `main`) wire `WitValidator`

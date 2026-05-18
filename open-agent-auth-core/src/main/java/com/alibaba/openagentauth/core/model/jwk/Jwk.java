@@ -23,10 +23,6 @@ import java.util.Objects;
 
 /**
  * JSON Web Key (JWK) as defined in RFC 7517.
- * <p>
- * Represents a cryptographic key in JSON format with type-safe accessors.
- * Supports EC (Elliptic Curve) keys as commonly used in WIMSE protocol.
- * </p>
  *
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517 - JSON Web Key (JWK)</a>
  */

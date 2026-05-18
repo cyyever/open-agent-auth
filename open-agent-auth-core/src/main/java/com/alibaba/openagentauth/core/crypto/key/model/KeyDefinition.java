@@ -18,41 +18,9 @@ package com.alibaba.openagentauth.core.crypto.key.model;
 import java.util.Objects;
 
 /**
- * Immutable value object representing a key definition that describes how a key
- * should be resolved and managed.
- * <p>
- * A {@code KeyDefinition} captures the metadata needed to locate and resolve a
- * cryptographic key from various sources. It decouples the key's identity from
- * its storage mechanism, enabling the {@link com.alibaba.openagentauth.core.crypto.key.resolve.KeyResolver}
- * SPI to determine the appropriate resolution strategy at runtime.
- * </p>
- *
- * <p><b>Resolution Strategy:</b></p>
- * <ul>
- *   <li>If {@code jwksConsumer} is set, the key is resolved from a remote JWKS endpoint
- *       identified by the consumer name.</li>
- *   <li>If {@code provider} is set (and {@code jwksConsumer} is null), the key is resolved
- *       from a local key store (e.g., in-memory, file-based).</li>
- *   <li>Custom {@code KeyResolver} implementations can introduce additional resolution
- *       strategies (e.g., HashiCorp Vault, AWS KMS).</li>
- * </ul>
- *
- * <p><b>Usage Example:</b></p>
- * <pre>{@code
- * // Local key definition
- * KeyDefinition localKey = KeyDefinition.builder()
- *     .keyId("aoat-signing-key")
- *     .algorithm(KeyAlgorithm.RS256)
- *     .provider("local")
- *     .build();
- *
- * // Remote JWKS key definition
- * KeyDefinition remoteKey = KeyDefinition.builder()
- *     .keyId("wit-signing-key")
- *     .algorithm(KeyAlgorithm.ES256)
- *     .jwksConsumer("agent-idp")
- *     .build();
- * }</pre>
+ * Immutable value object describing how a key should be resolved and managed.
+ * If {@code jwksConsumer} is set, the key is resolved from a remote JWKS endpoint;
+ * otherwise, it is resolved from a local key store via the configured {@code provider}.
  *
  * @see KeyAlgorithm
  * @see com.alibaba.openagentauth.core.crypto.key.resolve.KeyResolver

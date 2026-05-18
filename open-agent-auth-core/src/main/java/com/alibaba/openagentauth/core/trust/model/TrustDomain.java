@@ -21,22 +21,8 @@ import com.alibaba.openagentauth.core.util.ValidationUtils;
 import java.util.Objects;
 
 /**
- * Represents a trust domain in the WIMSE protocol.
- * <p>
- * A trust domain is a logical boundary that defines a scope of trust for workload
- * identities. Each trust domain has its own trust anchor and can establish trust
- * relationships with other trust domains.
- * </p>
- * <p>
- * <b>Trust Domain Format:</b></p>
- * The trust domain identifier follows the format: {@code wimse://<domain>}
- * </p>
- * <p>
- * <b>Example:</b></p>
- * <pre>{@code
- * TrustDomain domain = new TrustDomain("wimse://example.com");
- * }</pre>
- * </p>
+ * Represents a trust domain: a logical boundary that defines a scope of trust for
+ * workload identities. The identifier follows the format {@code wimse://<domain>}.
  *
  * @see TrustAnchor
  * @see TrustDomainRegistry

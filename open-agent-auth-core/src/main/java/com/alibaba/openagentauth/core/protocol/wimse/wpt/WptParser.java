@@ -27,26 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Parser for Workload Proof Tokens (WPT) following the WIMSE protocol.
- * <p>
- * This class is responsible for converting signed JWT strings into structured
- * {@link WorkloadProofToken} objects. It handles the extraction and conversion
- * of all WPT claims including standard JWT claims (aud, exp, jti) and custom
- * claims such as wth, ath, tth, and oth.
- * </p>
- * <p>
- * The parsing process follows these steps:
- * </p>
- * <ol>
- *   <li>Extract JWT claims from the signed JWT</li>
- *   <li>Parse header information (typ, alg)</li>
- *   <li>Parse standard JWT claims (aud, exp, jti)</li>
- *   <li>Parse custom claims (wth, ath, tth, oth)</li>
- *   <li>Build the structured WorkloadProofToken object</li>
- * </ol>
- *
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-s2s-protocol-07.html">draft-ietf-wimse-s2s-protocol-07</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt-00.html">draft-ietf-wimse-wpt-00</a>
+ * Parser for Workload Proof Tokens (WPT). Converts signed JWT strings into
+ * structured {@link WorkloadProofToken} objects.
  */
 public class WptParser {
 

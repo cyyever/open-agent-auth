@@ -25,17 +25,10 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * Represents a Workload Identity Token (WIT) as defined in draft-ietf-wimse-workload-creds.
- * <p>
- * A WIT is a JWT that identifies a workload (e.g., an AI agent) and contains a public key
- * in the confirmation claim. This public key is used to verify the Workload Proof Token (WPT)
- * that the workload presents to prove its identity.
- * <p>
- * The WIT consists of a JOSE header and claims (payload). The header specifies the media type
- * ({@code wit+jwt}) and the signature algorithm. The claims include the workload identifier,
- * expiration time, and the confirmation claim containing the public key.
+ * Represents a Workload Identity Token (WIT). A WIT is a JWT that identifies a workload
+ * and contains a public key in the {@code cnf} claim used to verify the corresponding
+ * Workload Proof Token (WPT).
  *
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/">draft-ietf-wimse-workload-creds</a>
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519">RFC 7519 - JSON Web Token (JWT)</a>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -324,25 +317,12 @@ public class WorkloadIdentityToken {
 
     /**
      * JOSE Header for Workload Identity Token (WIT).
-     * <p>
-     * The WIT JOSE header contains the following parameters as defined in
-     * draft-ietf-wimse-workload-creds Section 3.1:
-     * </p>
-     * <ul>
-     *   <li><b>typ</b>: Media type, MUST be {@code wit+jwt}</li>
-     *   <li><b>alg</b>: JWS asymmetric digital signature algorithm</li>
-     * </ul>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515">RFC 7515 - JSON Web Signature (JWS)</a>
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Header {
 
         /**
          * The media type for WIT.
-         * <p>
-         * According to draft-ietf-wimse-workload-creds, the typ header MUST be "wit+jwt".
-         * </p>
          */
         public static final String MEDIA_TYPE = "wit+jwt";
 
@@ -477,107 +457,36 @@ public class WorkloadIdentityToken {
 
     /**
      * Claims (Payload) for Workload Identity Token (WIT).
-     * <p>
-     * The WIT claims contain the following fields as defined in draft-ietf-wimse-workload-creds Section 3.1:
-     * </p>
-     * <table border="1">
-     *   <tr><th>Claim</th><th>Description</th><th>Status</th></tr>
-     *   <tr><td>iss</td><td>Issuer - the issuer of the WIT</td><td>OPTIONAL (RECOMMENDED)</td></tr>
-     *   <tr><td>sub</td><td>Subject - the Workload Identifier</td><td>REQUIRED</td></tr>
-     *   <tr><td>exp</td><td>Expiration Time - when the WIT expires</td><td>REQUIRED</td></tr>
-     *   <tr><td>jti</td><td>JWT ID - unique identifier for the WIT</td><td>OPTIONAL</td></tr>
-     *   <tr><td>cnf</td><td>Confirmation - contains the public key (jwk)</td><td>REQUIRED</td></tr>
-     * </table>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/">draft-ietf-wimse-workload-creds</a>
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Claims {
 
         /**
-         * Issuer claim (iss).
-         * <p>
-         * Identifies the principal that issued the WIT.
-         * According to draft-ietf-wimse-workload-creds Section 3.1, this claim is OPTIONAL
-         * but RECOMMENDED. It is RECOMMENDED that the WIT carries an iss claim.
-         * </p>
-         * <p>
-         * When present, it typically contains the URL of the WIMSE IDP that issued the token.
-         * This specification itself does not make use of a potential iss claim but other
-         * specifications or deployments may require it for key distribution or trust establishment.
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1">RFC 7519 Section 4.1.1</a>
+         * Issuer claim (iss): principal that issued the WIT.
          */
         @JsonProperty("iss")
         private final String issuer;
 
         /**
-         * Subject claim (sub).
-         * <p>
-         * Identifies the principal that is the subject of the WIT.
-         * According to draft-ietf-wimse-workload-creds Section 3.1, this claim is REQUIRED
-         * and represents the Workload Identifier.
-         * </p>
-         * <p>
-         * The Workload Identifier is scoped within an issuer and its sub-components (path portion)
-         * are only unique within a trust domain defined by the issuer. The identifier format is
-         * implementation-specific and may follow standards such as SPIFFE
-         * (spiffe://<trust-domain>/<workload-identifier>) or other formats.
-         * </p>
-         * <p>
-         * <b>Security Note:</b> Using a Workload Identifier without taking into account the trust
-         * domain could allow one domain to issue tokens to spoof identities in another domain.
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.2">RFC 7519 Section 4.1.2</a>
+         * Subject claim (sub): the Workload Identifier.
          */
         @JsonProperty("sub")
         private final String subject;
 
         /**
-         * Expiration Time claim (exp).
-         * <p>
-         * Identifies the expiration time on or after which the WIT MUST NOT be accepted for processing.
-         * According to draft-ietf-wimse-workload-creds Section 3.1, this claim is REQUIRED.
-         * The value MUST be a NumericDate (seconds since Epoch, 1970-01-01T00:00:00Z UTC).
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4">RFC 7519 Section 4.1.4</a>
+         * Expiration Time claim (exp): time after which the WIT must not be accepted.
          */
         @JsonProperty("exp")
         private final Date expirationTime;
 
         /**
-         * JWT ID claim (jti).
-         * <p>
-         * Provides a unique identifier for the WIT.
-         * According to draft-ietf-wimse-workload-creds Section 3.1, this claim is OPTIONAL.
-         * The identifier value MUST be assigned in a manner that ensures that there is a negligible
-         * probability that the same value will be accidentally assigned to a different WIT.
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.7">RFC 7519 Section 4.1.7</a>
+         * JWT ID claim (jti): unique identifier for the WIT.
          */
         @JsonProperty("jti")
         private final String jwtId;
 
         /**
-         * Confirmation claim (cnf).
-         * <p>
-         * Contains the public key used to verify the Workload Proof Token (WPT).
-         * According to draft-ietf-wimse-workload-creds Section 3.1, this claim is OPTIONAL.
-         * </p>
-         * <p>
-         * When present, the cnf claim is a JSON object that MUST contain:
-         * <ul>
-         *   <li><b>jwk</b>: A JSON Web Key (JWK) representing the public key (REQUIRED)</li>
-         * </ul>
-         * </p>
-         * <p>
-         * The cnf claim is used for proof-of-possession verification. In scenarios where
-         * WPT verification is not required (e.g., when using mTLS), this claim may be omitted.
-         * </p>
+         * Confirmation claim (cnf): contains the public key used to verify the WPT.
          *
          * @see <a href="https://datatracker.ietf.org/doc/html/rfc7800">RFC 7800 - Proof-of-Possession Key Semantics</a>
          */
@@ -795,26 +704,18 @@ public class WorkloadIdentityToken {
             }
 
             /**
-             * Builds the {@link Claims}.
-             * <p>
-             * Validates that the required claims are present.
-             * According to draft-ietf-wimse-workload-creds, the required claims are:
-             * - sub (Subject): Workload Identifier (REQUIRED)
-             * - exp (Expiration Time): Token expiration time (REQUIRED)
-             * </p>
+             * Builds the {@link Claims}. Required fields: {@code sub}, {@code exp}.
              *
              * @return the built claims
              * @throws IllegalStateException if required claims are not set
              */
             public Claims build() {
                 if (ValidationUtils.isNullOrEmpty(subject)) {
-                    throw new IllegalStateException("subject (sub) is REQUIRED according to draft-ietf-wimse-workload-creds");
+                    throw new IllegalStateException("subject (sub) is REQUIRED");
                 }
                 if (expirationTime == null) {
-                    throw new IllegalStateException("expirationTime (exp) is REQUIRED according to draft-ietf-wimse-workload-creds");
+                    throw new IllegalStateException("expirationTime (exp) is REQUIRED");
                 }
-                // cnf (confirmation) is OPTIONAL according to draft-ietf-wimse-workload-creds
-                // It is only required for WPT verification scenarios
                 return new Claims(this);
             }
         }
@@ -846,13 +747,7 @@ public class WorkloadIdentityToken {
         public static class Confirmation {
 
             /**
-             * JSON Web Key (jwk).
-             * <p>
-             * The public key represented as a JSON Web Key (JWK).
-             * According to draft-ietf-wimse-workload-creds, this field is REQUIRED within the cnf claim.
-             * </p>
-             *
-             * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517 - JSON Web Key (JWK)</a>
+             * JSON Web Key (jwk): the public key represented as a JWK.
              */
             @JsonProperty("jwk")
             private final Jwk jwk;

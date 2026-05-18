@@ -2,92 +2,34 @@
 
 ## Supported Versions
 
-| Version | Supported |
-|---------|-----------|
-| 1.0.0.x | ✅ Yes |
-| < 1.0.0 | ❌ No |
-
-Only the latest minor version receives security updates.
+This repository is the AAP fork baseline (`0.1.0-beta.1-SNAPSHOT`). No
+release line is stable yet; the M1 protocol patches are still pending.
+Security fixes will land on `main`.
 
 ## Reporting a Vulnerability
 
-### How to Report
+Report security vulnerabilities privately by emailing the maintainer
+(`cyyever`). Include:
 
-Report security vulnerabilities privately to:
-
-- **Email**: open-agent-auth@alibaba-inc.com
-- **Subject**: Security Vulnerability Report - [Component Name]
-
-### What to Include
-
-- Vulnerability description
-- Affected versions
-- Proof of concept / reproduction steps
+- Description of the issue
+- Affected commit / version
+- Reproduction steps or PoC
 - Impact assessment
-- Suggested fix (if any)
+- Suggested fix (optional)
 
-### Process
+The maintainer aims to acknowledge within 48 hours. Coordinated
+disclosure with credit once a fix is in place.
 
-1. **Acknowledgment**: We'll respond within 48 hours
-2. **Investigation**: We'll validate and assess severity
-3. **Fix**: Critical issues within 7 days, high within 14 days
-4. **Disclosure**: Coordinated disclosure with credit
+## Spec-level security constraints
 
-### Template
+Per the AAP spec (`agent_auth_protocol.tex`):
 
-```
-Subject: Security Vulnerability Report - [Component Name]
+- Algorithm whitelist: **`alg=EdDSA` only** (Ed25519 + SHA-512). Reject
+  `alg=none`, key-confusion attacks, anything else — MALFORMED.
+- JOSE header whitelist: `{alg, typ}` only (DPoP also allows `jwk`).
+  Any other header → MALFORMED.
+- HTTPS only — no plaintext transport.
+- No AuthZ, no consent UI, no CA / X.509.
 
-Vulnerability Description:
-[Brief description]
-
-Affected Versions:
-[List versions]
-
-Severity:
-[Critical / High / Medium / Low]
-
-Proof of Concept:
-[Steps to reproduce]
-
-Impact:
-[Describe impact]
-
-Suggested Fix:
-[Optional]
-```
-
-## Security Best Practices
-
-### For Users
-
-- Keep dependencies updated
-- Use HTTPS for all endpoints
-- Implement rate limiting
-- Enable comprehensive logging
-- Monitor audit trails
-
-### For Developers
-
-- Never commit secrets
-- Validate all inputs
-- Use strong cryptography
-- Follow OWASP guidelines
-- Conduct security reviews
-
-## Security Features
-
-- **Cryptographic Identity Binding**: Three-layer verification
-- **Request-Level Isolation**: Virtual workload pattern
-- **Multi-Layer Verification**: Five-layer security checks
-- **Semantic Audit Trail**: W3C VC-based immutable logs
-
-## Resources
-
-- [Security Advisories](https://github.com/alibaba/open-agent-auth/security/advisories)
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
-- [CVE Database](https://cve.mitre.org/)
-
----
-
-**Remember**: Security is everyone's responsibility.
+These constraints are enforced by the M1 patches (`alg` lock + header
+whitelist enforcer).

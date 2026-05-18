@@ -27,49 +27,8 @@ import java.security.PublicKey;
 import java.util.List;
 
 /**
- * Interface for managing cryptographic keys in the Agent Operation Authorization framework.
- * <p>
- * This interface provides a unified API for key generation, storage, retrieval, and rotation.
- * It abstracts the underlying key storage mechanism, allowing implementations to use
- * in-memory storage.
- * </p>
- * <p>
- * <b>Core Responsibilities:</b></p>
- * <ul>
- *   <li><b>Key Generation:</b> Generate new key pairs with specified algorithms</li>
- *   <li><b>Key Storage:</b> Store keys with metadata (key ID, algorithm, creation time)</li>
- *   <li><b>Key Retrieval:</b> Retrieve signing and verification keys by key ID</li>
- *   <li><b>Key Rotation:</b> Rotate keys while maintaining backward compatibility</li>
- *   <li><b>Key Lifecycle:</b> Manage key activation and deactivation</li>
- * </ul>
- * <p>
- * <b>Thread Safety:</b></p>
- * Implementations must be thread-safe for concurrent access.
- * </p>
- * <p>
- * <b>Usage Example:</b></p>
- * <pre>{@code
- * KeyManager keyManager = new InMemoryKeyManager();
- * 
- * // Generate a new key pair
- * KeyPair keyPair = keyManager.generateKeyPair(
- *     KeyAlgorithm.ES256,
- *     "wit-signing-key-001"
- * );
- * 
- * // Retrieve signing key
- * PrivateKey signingKey = keyManager.getSigningKey("wit-signing-key-001");
- * 
- * // Retrieve verification key
- * PublicKey verificationKey = keyManager.getVerificationKey("wit-signing-key-001");
- * 
- * // Rotate key
- * keyManager.rotateKey("wit-signing-key-001");
- * 
- * // Get all active keys
- * List<KeyInfo> activeKeys = keyManager.getActiveKeys();
- * }</pre>
- * </p>
+ * Manages cryptographic keys: generation, storage, retrieval, rotation, and lifecycle.
+ * Implementations must be thread-safe.
  *
  * @see KeyAlgorithm
  * @see KeyInfo
@@ -80,19 +39,7 @@ public interface KeyManager {
     
     /**
      * Generates a new key pair with the specified algorithm and key ID.
-     * <p>
-     * This method creates a new cryptographic key pair and stores it in the underlying
-     * key store. The key ID must be unique within the key manager.
-     * </p>
-     * <p>
-     * <b>Key ID Format:</b></p>
-     * Key IDs should follow a consistent naming convention, such as:
-     * <ul>
-     *   <li>{@code wit-signing-key-001} for WIT signing keys</li>
-     *   <li>{@code wpt-signing-key-001} for WPT signing keys</li>
-     *   <li>{@code aoat-signing-key-001} for AOAT signing keys</li>
-     * </ul>
-     * </p>
+     * The key ID must be unique within the key manager.
      *
      * @param algorithm the cryptographic algorithm to use
      * @param keyId the unique identifier for this key pair

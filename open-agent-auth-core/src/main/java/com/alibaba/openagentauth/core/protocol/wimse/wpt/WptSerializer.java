@@ -29,33 +29,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Serializer for Workload Proof Tokens (WPT).
- * <p>
- * This class provides methods to convert structured {@link WorkloadProofToken} objects
- * into their JWT string representations. This is useful for transmission or storage.
- * </p>
- * <p>
- * The serialization process reconstructs the JWT from the structured object's header and claims,
- * ensuring that the resulting JWT string matches the original format used when the token was created.
- * </p>
- * <p>
- * According to draft-ietf-wimse-wpt, the WPT claims include:
- * </p>
- * <ul>
- *   <li><b>exp</b>: Expiration time (REQUIRED)</li>
- *   <li><b>jti</b>: JWT ID (REQUIRED)</li>
- *   <li><b>wth</b>: Workload Identity Token hash (REQUIRED)</li>
- *   <li><b>ath</b>: Access Token hash (OPTIONAL)</li>
- *   <li><b>tth</b>: Transaction Token hash (OPTIONAL)</li>
- *   <li><b>oth</b>: Other Tokens hashes (OPTIONAL)</li>
- * </ul>
- * <p>
- * Note that WPT does NOT include iss (issuer) or sub (subject) claims.
- * </p>
- *
- * @see <a href="https://datatracker.ietf.org/doc/html/rfc7519">RFC 7519 - JSON Web Token (JWT)</a>
- * @see <a href="https://datatracker.ietf.org/doc/html/rfc7515">RFC 7515 - JSON Web Signature (JWS)</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/">draft-ietf-wimse-wpt</a>
+ * Serializer for Workload Proof Tokens (WPT). Converts structured
+ * {@link WorkloadProofToken} objects into signed JWT strings.
  */
 public class WptSerializer {
 

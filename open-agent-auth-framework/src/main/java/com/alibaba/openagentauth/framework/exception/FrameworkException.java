@@ -24,23 +24,7 @@ import java.util.Map;
 
 /**
  * Base exception for all Framework module exceptions.
- * <p>
- * This exception serves as the root for all exceptions in the Framework module,
- * which handles orchestration-level operations (Agent, AuthorizationServer,
- * ResourceServer, AgentIdentityProvider, etc.). All Framework module exceptions
- * should extend from this class.
- * </p>
- * <p>
- * <b>System Code:</b> 11
- * </p>
- * <p>
- * <b>Error Code Format:</b> OPEN_AGENT_AUTH_11_YYZZ
- * </p>
- * <ul>
- *   <li><b>11</b>: Framework system code</li>
- *   <li><b>YY</b>: Domain code (01=Auth, 02=Token, 03=Validation, 04=OAuth2, etc.)</li>
- *   <li><b>ZZ</b>: Error code (unique within the domain)</li>
- * </ul>
+ * Error code format: {@code OPEN_AGENT_AUTH_11_YYZZ} (system 11, YY=domain, ZZ=error).
  *
  * @since 1.0
  */

@@ -23,122 +23,55 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * Represents the identity of an AI agent in the Agent Operation Authorization framework.
- * <p>
- * This identity contains information about the agent's version, unique identifier,
- * issuer, the user it is issued to, deployment context, and validity period.
- * It follows the draft-liu-agent-operation-authorization specification and provides
- * a standardized way to identify and authenticate agents.
- * <p>
- * The agent identity is used to establish trust and authorization for agent operations,
- * ensuring that agents can be properly identified and their actions can be traced
- * back to the authorized user.
- *
- * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+ * Represents the identity of an AI agent.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AgentIdentity {
 
     /**
-     * Version claim.
-     * <p>
-     * The version of the agent identity structure.
-     * According to draft-liu-agent-operation-authorization, this claim is REQUIRED
-     * and MUST be a string indicating the version of this structure.
-     * </p>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+     * Version of the agent identity structure.
      */
     @JsonProperty("version")
     private final String version;
 
     /**
-     * Agent ID claim.
-     * <p>
-     * The unique identifier for this agent instance.
-     * According to draft-liu-agent-operation-authorization, this claim is REQUIRED
-     * and MUST be a unique identifier for this agent instance.
-     * </p>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+     * Unique identifier for this agent instance.
      */
     @JsonProperty("id")
     private final String id;
 
     /**
-     * Issuer claim.
-     * <p>
-     * The issuer of this agent identity.
-     * According to draft-liu-agent-operation-authorization, this claim is REQUIRED
-     * and MUST be a URI identifying the entity that issued this agent identity.
-     * </p>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+     * URI identifying the entity that issued this agent identity.
      */
     @JsonProperty("issuer")
     private final String issuer;
 
     /**
-     * Issued To claim.
-     * <p>
-     * The user ID this agent is issued to.
-     * According to draft-liu-agent-operation-authorization, this claim is REQUIRED
-     * and MUST be a unique identifier for the human principal this agent is authorized to act on behalf of.
-     * </p>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+     * Unique identifier for the human principal this agent is authorized to act on behalf of.
      */
     @JsonProperty("issued_to")
     private final String issuedTo;
 
     /**
-     * Issued For claim.
-     * <p>
-     * The context for which this agent identity was issued.
-     * According to draft-liu-agent-operation-authorization, this claim is REQUIRED
-     * and provides deployment context information including platform, client, and client instance.
-     * </p>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+     * Deployment context (platform, client, client instance).
      */
     @JsonProperty("issued_for")
     private final IssuedFor issuedFor;
 
     /**
-     * Issuance Date claim.
-     * <p>
-     * The date when this identity was issued.
-     * According to draft-liu-agent-operation-authorization, this claim is REQUIRED
-     * and MUST conform to ISO 8601 UTC format.
-     * </p>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+     * Date when this identity was issued.
      */
     @JsonProperty("issuance_date")
     private final Instant issuanceDate;
 
     /**
-     * Valid From claim.
-     * <p>
-     * The date from which this identity is valid.
-     * According to draft-liu-agent-operation-authorization, this claim is REQUIRED
-     * and MUST conform to ISO 8601 UTC format.
-     * </p>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+     * Date from which this identity is valid.
      */
     @JsonProperty("valid_from")
     private final Instant validFrom;
 
     /**
-     * Expires claim.
-     * <p>
-     * The expiration date of this identity.
-     * According to draft-liu-agent-operation-authorization, this claim is REQUIRED
-     * and MUST conform to ISO 8601 UTC format.
-     * </p>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+     * Expiration date of this identity.
      */
     @JsonProperty("expires")
     private final Instant expires;
@@ -294,59 +227,25 @@ public class AgentIdentity {
     }
 
     /**
-     * Represents the Issued For claim.
-     * <p>
-     * Provides deployment context information including platform, client, and client instance.
-     * According to draft-liu-agent-operation-authorization, this claim is OPTIONAL.
-     * </p>
-     * <p>
-     * <b>Issued For Fields:</b></p>
-     * <ul>
-     *   <li><b>platform</b>: Platform identifier (OPTIONAL)</li>
-     *   <li><b>client</b>: Client identifier (OPTIONAL)</li>
-     *   <li><b>clientInstance</b>: Client instance identifier (OPTIONAL)</li>
-     * </ul>
-     *
-     * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+     * Deployment context (platform, client, client instance).
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class IssuedFor {
 
         /**
-         * Platform claim.
-         * <p>
-         * The platform identifier.
-         * According to draft-liu-agent-operation-authorization, this field is OPTIONAL
-         * and identifies the platform where the agent is deployed.
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+         * Platform identifier.
          */
         @JsonProperty("platform")
         private final String platform;
 
         /**
-         * Client claim.
-         * <p>
-         * The client identifier.
-         * According to draft-liu-agent-operation-authorization, this field is OPTIONAL
-         * and identifies the client application or service.
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+         * Client identifier.
          */
         @JsonProperty("client")
         private final String client;
 
         /**
-         * Client Instance claim.
-         * <p>
-         * The client instance identifier.
-         * According to draft-liu-agent-operation-authorization, this field is OPTIONAL
-         * and identifies a specific instance of the client.
-         * </p>
-         *
-         * @see <a href="https://datatracker.ietf.org/doc/draft-liu-agent-operation-authorization/">draft-liu-agent-operation-authorization</a>
+         * Client instance identifier.
          */
         @JsonProperty("client_instance")
         private final String clientInstance;

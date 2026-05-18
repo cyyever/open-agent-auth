@@ -21,21 +21,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Result of a validation operation in the five-layer verification architecture.
- * <p>
- * This class encapsulates the outcome of a validation step, including success/failure status,
- * error messages, and any additional metadata. It follows the immutable pattern to ensure
- * thread-safety and prevent accidental modifications.
- * </p>
- * <p>
- * <b>Design Principles:</b>
- * <ul>
- *   <li><b>Immutability</b>: Once created, the result cannot be modified</li>
- *   <li><b>Builder Pattern</b>: Provides a fluent API for constructing results</li>
-   *   <li><b>Rich Error Information</b>: Supports multiple error messages with detailed context</li>
- *   <li><b>Type Safety</b>: Strong typing ensures compile-time correctness</li>
- * </ul>
- * </p>
+ * Result of a validation operation: success/failure status, error messages,
+ * and optional metadata.
  *
  * @see ValidationContext
  * @since 1.0

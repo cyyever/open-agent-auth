@@ -33,13 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Validator for Workload Identity Tokens (WIT) following the WIMSE protocol.
- * Verifies the signature, expiration, and structure of WITs.
- *
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/">draft-ietf-wimse-workload-creds-00</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-http-signature/">draft-ietf-wimse-http-signature-01</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-mutual-tls/">draft-ietf-wimse-mutual-tls-00</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt/">draft-ietf-wimse-wpt-00</a>
+ * Validator for Workload Identity Tokens (WIT). Verifies the signature,
+ * expiration, and structure of WITs.
  */
 public class WitValidator {
 
@@ -208,13 +203,8 @@ public class WitValidator {
     }
 
     /**
-     * Verifies that all required claims are present in the WIT.
-     * <p>
-     * According to draft-ietf-wimse-workload-creds, the required claims are:
-     * - sub (Subject): Workload Identifier (REQUIRED)
-     * - exp (Expiration Time): Token expiration time (REQUIRED)
-     * - cnf (Confirmation): Contains the public key for WPT/HTTP-Sig verification (REQUIRED)
-     * </p>
+     * Verifies that required claims are present in the WIT: {@code sub}, {@code exp},
+     * and {@code cnf}.
      *
      * @param signedJwt the signed JWT
      * @return true if all required claims are present, false otherwise
@@ -236,8 +226,7 @@ public class WitValidator {
                 return false;
             }
 
-            // cnf (confirmation) claim is REQUIRED for application-level authentication
-            // as per draft-ietf-wimse-s2s-protocol-04 and later versions
+            // cnf (confirmation) claim is REQUIRED for proof-of-possession verification.
             if (!claims.containsKey("cnf")) {
                 logger.warn("WIT missing required claim: cnf (confirmation)");
                 return false;
@@ -253,11 +242,6 @@ public class WitValidator {
 
     /**
      * Verifies the cnf claim contains a valid JWK.
-     * <p>
-     * The cnf claim is REQUIRED in this implementation for WPT verification.
-     * According to draft-ietf-wimse-workload-creds, cnf is OPTIONAL, but this
-     * implementation requires it for proof-of-possession verification scenarios.
-     * </p>
      *
      * @param signedJwt the signed JWT
      * @return a CnfValidationResult indicating whether the cnf claim is valid, missing, or invalid

@@ -626,7 +626,7 @@ class WorkloadIdentityTokenTest {
                     .expirationTime(futureExpirationTime)
                     .build())
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("subject (sub) is REQUIRED according to draft-ietf-wimse-workload-creds");
+                    .hasMessage("subject (sub) is REQUIRED");
         }
 
         @Test
@@ -637,7 +637,7 @@ class WorkloadIdentityTokenTest {
                     .expirationTime(futureExpirationTime)
                     .build())
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("subject (sub) is REQUIRED according to draft-ietf-wimse-workload-creds");
+                    .hasMessage("subject (sub) is REQUIRED");
         }
 
         @Test
@@ -648,7 +648,7 @@ class WorkloadIdentityTokenTest {
                     .expirationTime(null)
                     .build())
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("expirationTime (exp) is REQUIRED according to draft-ietf-wimse-workload-creds");
+                    .hasMessage("expirationTime (exp) is REQUIRED");
         }
 
         @Test

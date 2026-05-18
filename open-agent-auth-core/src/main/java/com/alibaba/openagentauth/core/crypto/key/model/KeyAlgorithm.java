@@ -19,33 +19,8 @@ import com.nimbusds.jose.JWSAlgorithm;
 
 /**
  * Enumeration of supported key algorithms for cryptographic operations.
- * <p>
- * This enum defines the standard key algorithms used throughout the Agent Operation
- * Authorization framework, ensuring consistency and interoperability across all
- * components.
- * </p>
- * <p>
- * <b>Supported Algorithms:</b></p>
- * <ul>
- *   <li><b>RS256:</b> RSA Signature with SHA-256 (recommended for production)</li>
- *   <li><b>RS384:</b> RSA Signature with SHA-384</li>
- *   <li><b>RS512:</b> RSA Signature with SHA-512</li>
- *   <li><b>ES256:</b> ECDSA using P-256 and SHA-256 (recommended for production)</li>
- *   <li><b>ES384:</b> ECDSA using P-384 and SHA-384</li>
- *   <li><b>ES512:</b> ECDSA using P-521 and SHA-512</li>
- * </ul>
- * <p>
- * <b>Algorithm Selection Guidelines:</b></p>
- * <ul>
- *   <li><b>ECDSA (ES256/ES384/ES512):</b> Preferred for new deployments due to
- *       smaller key sizes and equivalent security levels</li>
- *   <li><b>RSA (RS256/RS384/RS512):</b> Use for compatibility with legacy systems</li>
- *   <li><b>ES256:</b> Recommended default for WIT and WPT signing per WIMSE spec</li>
- * </ul>
  *
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518">RFC 7518 - JSON Web Algorithms (JWA)</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/">
- *     draft-ietf-wimse-workload-creds</a>
  * @since 1.0
  */
 public enum KeyAlgorithm {
@@ -78,7 +53,6 @@ public enum KeyAlgorithm {
      * ECDSA using P-256 and SHA-256.
      * <p>
      * Elliptic Curve P-256 with SHA-256 hashing.
-     * Recommended for WIT and WPT signing per WIMSE specification.
      * </p>
      */
     ES256(JWSAlgorithm.ES256, "EC", 256),

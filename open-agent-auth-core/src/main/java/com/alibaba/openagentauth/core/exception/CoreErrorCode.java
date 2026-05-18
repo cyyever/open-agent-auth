@@ -17,31 +17,7 @@ package com.alibaba.openagentauth.core.exception;
 
 /**
  * Interface for Core module error codes.
- * <p>
- * This interface extends the base ErrorCode interface and defines the
- * system code constant for the Core module. All Core module error code
- * implementations should implement this interface.
- * </p>
- * <p>
- * <b>System Code:</b> 10
- * </p>
- * <p>
- * <b>Error Code Format:</b> OPEN_AGENT_AUTH_10_YYZZ
- * </p>
- * <p>
- * <b>Domain Codes:</b></p>
- * <ul>
- *   <li><b>01</b>: OIDC (OpenID Connect)</li>
- *   <li><b>02</b>: Audit</li>
- *   <li><b>03</b>: Crypto</li>
- *   <li><b>04</b>: OAuth 2.0</li>
- *   <li><b>05</b>: Policy</li>
- *   <li><b>06</b>: Workload</li>
- *   <li><b>07</b>: Binding</li>
- * </ul>
- *
- * <p><b>Note:</b> When adding a new domain, use the next available domain code.
- * Domain codes are managed centrally to avoid conflicts.</p>
+ * Error code format: {@code OPEN_AGENT_AUTH_10_YYZZ} (system 10, YY=domain, ZZ=error).
  *
  * @since 1.0
  */
@@ -53,7 +29,7 @@ public interface CoreErrorCode extends ErrorCode {
     String SYSTEM_CODE = "10";
 
     /**
-     * Domain code for OIDC (OpenID Connect).
+     * Domain code for OIDC.
      */
     String DOMAIN_CODE_OIDC = "01";
 
@@ -68,7 +44,7 @@ public interface CoreErrorCode extends ErrorCode {
     String DOMAIN_CODE_CRYPTO = "03";
 
     /**
-     * Domain code for OAuth 2.0.
+     * Domain code for OAuth2.
      */
     String DOMAIN_CODE_OAUTH2 = "04";
 

@@ -29,26 +29,8 @@ import java.text.ParseException;
 import java.util.Map;
 
 /**
- * Parser for Workload Identity Tokens (WIT) following the WIMSE protocol.
- * <p>
- * This class is responsible for converting signed JWT strings into structured
- * {@link WorkloadIdentityToken} objects. It handles the extraction and conversion
- * of all WIT claims including standard JWT claims (iss, sub, exp, jti), the
- * confirmation claim (cnf) containing the public key, and custom claims such
- * as agent_identity.
- * </p>
- * <p>
- * The parsing process follows these steps:
- * </p>
- * <ol>
- *   <li>Extract JWT claims from the signed JWT</li>
- *   <li>Parse the confirmation (cnf) claim to extract the public key</li>
- *   <li>Parse the agent_identity claim if present</li>
- *   <li>Build the structured WorkloadIdentityToken object</li>
- * </ol>
- *
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-s2s-protocol-07.html">draft-ietf-wimse-s2s-protocol-07</a>
- * @see <a href="https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/">draft-ietf-wimse-workload-creds</a>
+ * Parser for Workload Identity Tokens (WIT). Converts signed JWT strings into
+ * structured {@link WorkloadIdentityToken} objects.
  */
 public class WitParser {
 
@@ -93,11 +75,7 @@ public class WitParser {
 
     /**
      * Parses the confirmation (cnf) claim from the JWT claims set.
-     * <p>
-     * The confirmation claim contains the public key (JWK) that will be used
-     * to verify Workload Proof Tokens (WPTs). This claim is REQUIRED according
-     * to the WIMSE specification.
-     * </p>
+     * Contains the public key (JWK) used to verify Workload Proof Tokens.
      *
      * @param claims the JWT claims set
      * @return the confirmation object, or null if not present
