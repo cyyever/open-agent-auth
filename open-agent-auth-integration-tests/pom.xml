@@ -15,17 +15,14 @@
     <packaging>jar</packaging>
 
     <name>Open Agent Auth Integration Tests</name>
-    <description>Integration Tests for Project</description>
+    <description>Integration tests for AAP. Tests will be rewritten against CT/DPoP after M1.</description>
 
     <dependencies>
-        <!-- Core Dependencies for Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- Open Agent Auth Core and Framework -->
         <dependency>
             <groupId>com.alibaba.openagentauth</groupId>
             <artifactId>open-agent-auth-core</artifactId>
@@ -41,8 +38,6 @@
             <artifactId>open-agent-auth-spring-boot-starter</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- RestAssured for HTTP API Testing -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
@@ -50,100 +45,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <configuration>
-                        <skip>false</skip>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>repackage</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-        
-        <plugins>
-            <!-- Maven Failsafe Plugin for running integration tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <!-- Skip integration tests by default when running mvn verify/install -->
-                    <skipITs>true</skipITs>
-                    <includes>
-                        <include>**/*IntegrationTest.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-            <!-- Maven Surefire Plugin for running E2E tests via mvn test -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <!-- Include E2E, Integration, and Conformance tests when running mvn test -->
-                    <includes>
-                        <include>**/*E2ETest.java</include>
-                        <include>**/*IntegrationTest.java</include>
-                        <include>**/*ConformanceTest.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-    
-    <profiles>
-        <!-- Profile for running integration tests -->
-        <profile>
-            <id>integration-test</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <configuration>
-                            <!-- Enable integration tests in this profile -->
-                            <skipITs>false</skipITs>
-                            <includes>
-                                <include>**/*IntegrationTest.java</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <!-- Profile for running protocol conformance tests -->
-        <profile>
-            <id>protocol-conformance</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <includes>
-                                <include>**/*ConformanceTest.java</include>
-                            </includes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
