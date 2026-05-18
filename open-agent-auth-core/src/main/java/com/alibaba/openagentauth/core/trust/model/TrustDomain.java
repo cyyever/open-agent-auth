@@ -15,7 +15,6 @@
  */
 package com.alibaba.openagentauth.core.trust.model;
 
-import com.alibaba.openagentauth.core.trust.store.TrustDomainRegistry;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
 
 import java.util.Objects;
@@ -24,8 +23,6 @@ import java.util.Objects;
  * Represents a trust domain: a logical boundary that defines a scope of trust for
  * workload identities. The identifier follows the format {@code wimse://<domain>}.
  *
- * @see TrustAnchor
- * @see TrustDomainRegistry
  * @since 1.0
  */
 public class TrustDomain {

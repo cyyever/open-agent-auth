@@ -41,8 +41,6 @@
         <junit.version>5.10.1</junit.version>
         <mockito.version>5.20.0</mockito.version>
         <assertj.version>3.25.1</assertj.version>
-
-        <!-- Code Coverage -->
     </properties>
 
     <dependencyManagement>
@@ -148,70 +146,6 @@
                         </argLine>
                     </configuration>
                 </plugin>
-                <!-- Maven Javadoc Plugin for API Documentation -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.6.3</version>
-                    <configuration>
-                        <encoding>UTF-8</encoding>
-                        <charset>UTF-8</charset>
-                        <docencoding>UTF-8</docencoding>
-                        <doclint>none</doclint>
-                        <show>private</show>
-                        <nohelp>true</nohelp>
-                        <notimestamp>true</notimestamp>
-                        <author>true</author>
-                        <version>true</version>
-                        <useStandardDocletOptions>true</useStandardDocletOptions>
-                        <excludePackageNames>*.internal.*</excludePackageNames>
-                        <links>
-                            <link>https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/latest/</link>
-                        </links>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>attach-javadocs</id>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <!-- License Maven Plugin for Apache 2.0 License Headers -->
-                <plugin>
-                    <groupId>com.mycila</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
-                    <version>5.0.0</version>
-                    <configuration>
-                        <inlineHeader><![CDATA[
-Copyright 2026 Alibaba Group Holding Ltd.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-]]></inlineHeader>
-                        <includes>
-                            <include>**/*.java</include>
-                        </includes>
-                        <excludes>
-                            <exclude>**/target/**</exclude>
-                            <exclude>**/.git/**</exclude>
-                            <exclude>**/.mvn/**</exclude>
-                        </excludes>
-                        <mapping>
-                            <java>SLASHSTAR_STYLE</java>
-                        </mapping>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -222,19 +156,4 @@ limitations under the License.
             <url>https://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
-
-    <scm>
-        <connection>scm:git:git://github.com/alibaba/open-agent-auth.git</connection>
-        <developerConnection>scm:git:ssh://github.com:alibaba/open-agent-auth.git</developerConnection>
-        <url>https://github.com/alibaba/open-agent-auth</url>
-    </scm>
-
-    <developers>
-        <developer>
-            <name>Open Agent Auth Team</name>
-            <email>open-agent-auth@alibaba-inc.com</email>
-            <organization>Alibaba</organization>
-            <organizationUrl>https://www.alibaba.com</organizationUrl>
-        </developer>
-    </developers>
 </project>
