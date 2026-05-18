@@ -7,10 +7,27 @@ This repository is the upstream baseline being trimmed into an
 - Scope: authentication-only, single algorithm **Ed25519 + SHA-512** (`alg=EdDSA`), two wire messages — CT (delegation) and DPoP (per-request), JWS compact serialization, HTTPS only.
 - Not provided: authorization, consent UI, CA / X.509, OAuth 2.0 / OIDC flows, W3C VC.
 
-The README will be rewritten once the M1 patches (~250 LoC: `alg` lock,
-DPoP module, PIC cascade, CRL anti-rollback, JSONL error events, header
-whitelist) settle. The original upstream content has been removed
-because it described features (5-layer validator, AOA, MCP adapter,
-consent pages, etc.) that the AAP trim removed.
+## Modules
+
+| Module | Purpose |
+|---|---|
+| `open-agent-auth-core` | Protocol primitives: JWS sign/verify, key management, JWKS provider, trust roots, WIT/WPT (→ CT/DPoP after M1). Pure Java, no Spring. |
+| `open-agent-auth-framework` | Actor interface (`ResourceServer`), default orchestration, request/result models. Pure Java, no Spring. |
+
+Both modules require **Java 21+**. Only direct deps are
+[Nimbus JOSE+JWT](https://connect2id.com/products/nimbus-jose-jwt),
+Jackson, and SLF4J. Spring Boot is no longer required — consumers
+(Spring Boot apps, Quarkus, Helidon, plain `main`) wire `WitValidator`
++ `WptValidator` + `DefaultResourceServer` directly, usually in ~20
+lines.
+
+## Status
+
+- Trim phase done (commits `c8f7c95` through current `HEAD`)
+- **M1 retrofit pending**: ~250 LoC of patches — lock `alg=EdDSA`,
+  strict JOSE header whitelist, DPoP module, PIC cascade revocation,
+  CRL anti-rollback, JSONL error events.
+- README, package layout (`core.protocol.wimse.*`), and class names
+  (`WIT`, `WPT`) will be renamed to spec terms (`CT`, `DPoP`) during M1.
 
 Licensed under the Apache License 2.0 — see [LICENSE](LICENSE).

@@ -17,17 +17,12 @@
     <modules>
         <module>open-agent-auth-framework</module>
         <module>open-agent-auth-core</module>
-        <module>open-agent-auth-spring-boot-starter</module>
-        <module>open-agent-auth-integration-tests</module>
     </modules>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <!-- Spring Boot -->
-        <spring-boot.version>3.3.11</spring-boot.version>
 
         <!-- JWT -->
         <nimbus-jose-jwt.version>9.37.4</nimbus-jose-jwt.version>
@@ -37,12 +32,15 @@
 
         <!-- Logging -->
         <slf4j.version>2.0.11</slf4j.version>
-        <logback.version>1.4.14</logback.version>
+
+        <!-- Jakarta -->
+        <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
+        <jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
 
         <!-- Testing -->
         <junit.version>5.10.1</junit.version>
         <mockito.version>5.20.0</mockito.version>
-        <spring-boot-starter-test.version>3.3.11</spring-boot-starter-test.version>
+        <assertj.version>3.25.1</assertj.version>
 
         <!-- Code Coverage -->
         <jacoco.version>0.8.12</jacoco.version>
@@ -52,15 +50,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Spring Boot BOM -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
             <!-- Internal Modules -->
             <dependency>
                 <groupId>com.alibaba.openagentauth</groupId>
@@ -72,17 +61,64 @@
                 <artifactId>open-agent-auth-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>com.alibaba.openagentauth</groupId>
-                <artifactId>open-agent-auth-spring-boot-starter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <!-- External Dependencies -->
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus-jose-jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta.servlet-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>${jakarta.validation-api.version}</version>
+            </dependency>
+
+            <!-- Testing -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-junit-jupiter</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -95,7 +131,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                        <release>17</release>
+                        <release>21</release>
                         <parameters>true</parameters>
                     </configuration>
                 </plugin>
@@ -115,11 +151,6 @@
                             --add-opens java.base/sun.net.www.protocol.https=ALL-UNNAMED
                         </argLine>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
                 </plugin>
                 <!-- JaCoCo Plugin for Code Coverage -->
                 <plugin>
@@ -188,8 +219,6 @@
                         <useStandardDocletOptions>true</useStandardDocletOptions>
                         <excludePackageNames>*.internal.*</excludePackageNames>
                         <links>
-                            <link>https://docs.spring.io/spring-framework/docs/current/javadoc-api/</link>
-                            <link>https://docs.spring.io/spring-security/site/docs/current/api/</link>
                             <link>https://javadoc.io/doc/com.nimbusds/nimbus-jose-jwt/latest/</link>
                         </links>
                     </configuration>
