@@ -18,19 +18,14 @@ package com.alibaba.openagentauth.framework.orchestration;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitParser;
-import com.alibaba.openagentauth.core.protocol.wimse.wit.WitValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptParser;
-import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptValidator;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
-import com.alibaba.openagentauth.core.validation.api.FiveLayerVerifier;
-import com.alibaba.openagentauth.core.validation.api.LayerValidator;
-import com.alibaba.openagentauth.core.validation.impl.FiveLayerVerifierFactory;
+import com.alibaba.openagentauth.core.validation.layer.WorkloadIdentityValidator;
+import com.alibaba.openagentauth.core.validation.layer.WorkloadProofValidator;
 import com.alibaba.openagentauth.core.validation.model.LayerValidationResult;
 import com.alibaba.openagentauth.core.validation.model.ValidationContext;
-import com.alibaba.openagentauth.core.validation.model.VerificationResult;
 import com.alibaba.openagentauth.framework.actor.ResourceServer;
 import com.alibaba.openagentauth.framework.exception.validation.FrameworkValidationException;
-import com.alibaba.openagentauth.framework.model.audit.AuditLogEntry;
 import com.alibaba.openagentauth.framework.model.request.ResourceRequest;
 import com.alibaba.openagentauth.framework.model.validation.ValidationResult;
 import com.nimbusds.jwt.SignedJWT;
@@ -41,131 +36,53 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- * Default orchestration implementation for Resource Server.
- * <p>
- * This orchestrator implements the five-layer verification architecture for resource access,
- * providing comprehensive security validation and policy enforcement.
- * </p>
- *
- * <h3>Core Responsibilities:</h3>
- * <ul>
- *   <li><b>Layer 1: Workload Authentication:</b> Validates WIT signature and claims</li>
- *   <li><b>Layer 2: Request Integrity:</b> Validates WPT signature and integrity</li>
- *   <li><b>Audit Logging:</b> Records all access attempts and decisions</li>
- * </ul>
+ * Default {@link ResourceServer} implementation. Chains WIT then WPT validation,
+ * fail-fast on the first error.
  *
  * @see ResourceServer
  * @since 1.0
  */
 public class DefaultResourceServer implements ResourceServer {
 
-    // Logger
     private static final Logger logger = LoggerFactory.getLogger(DefaultResourceServer.class);
 
-    private final WitParser witParser;
-    private final WptParser wptParser;
-    private final FiveLayerVerifier fiveLayerVerifier;
+    private static final String WIT_NAME = "WIT";
+    private static final String WPT_NAME = "WPT";
 
-    public DefaultResourceServer(WitValidator witValidator, WptValidator wptValidator) {
+    private final WitParser witParser = new WitParser();
+    private final WptParser wptParser = new WptParser();
+    private final WorkloadIdentityValidator witValidator;
+    private final WorkloadProofValidator wptValidator;
 
-        this.witParser = new WitParser();
-        this.wptParser = new WptParser();
-
-        this.fiveLayerVerifier = FiveLayerVerifierFactory.createVerifier(
-            ValidationUtils.validateNotNull(witValidator, "WIT validator"),
-            ValidationUtils.validateNotNull(wptValidator, "WPT validator")
-        );
-
-        logger.info("ResourceServerOrchestrator initialized");
+    public DefaultResourceServer(WorkloadIdentityValidator witValidator, WorkloadProofValidator wptValidator) {
+        this.witValidator = ValidationUtils.validateNotNull(witValidator, "WIT validator");
+        this.wptValidator = ValidationUtils.validateNotNull(wptValidator, "WPT validator");
     }
 
-    /**
-     * Validates a resource request.
-     *
-     * @param request the resource request
-     * @return a ValidationResult containing the validation outcome and parsed tokens
-     * @throws FrameworkValidationException if validation fails
-     */
     @Override
     public ValidationResult validateRequest(ResourceRequest request) throws FrameworkValidationException {
-
         ValidationUtils.validateNotNull(request, "Resource request");
 
-        logger.debug("Validating request with five-layer verification");
-
+        ValidationContext context;
         try {
-            ValidationContext context = buildValidationContext(request);
-
-            VerificationResult verificationResult = fiveLayerVerifier.verify(context);
-
-            return convertToValidationResult(verificationResult);
-
+            context = buildValidationContext(request);
         } catch (FrameworkValidationException e) {
             throw e;
         } catch (Exception e) {
             logger.error("Request validation failed", e);
             throw new FrameworkValidationException("Request validation failed: " + e.getMessage(), e);
         }
-    }
 
-    @Override
-    public ValidationResult.LayerResult validateWit(ResourceRequest request) throws FrameworkValidationException {
-        return executeLayerValidation(request, 1);
-    }
-
-    @Override
-    public ValidationResult.LayerResult validateWpt(ResourceRequest request) throws FrameworkValidationException {
-        return executeLayerValidation(request, 2);
-    }
-
-    @Override
-    public void logAccess(AuditLogEntry auditLog) {
-        ValidationUtils.validateNotNull(auditLog, "Audit log");
-
-        logger.info("Access logged: userId={}, workloadId={}, resourceId={}, decision={}",
-                auditLog.getUserId(),
-                auditLog.getWorkloadId(),
-                auditLog.getResourceId(),
-                auditLog.getDecision());
-    }
-
-    /**
-     * Executes a single layer validation by layer number.
-     *
-     * @param request the resource request
-     * @param layerNumber the layer number (1-5)
-     * @return the layer validation result
-     * @throws FrameworkValidationException if validation fails
-     */
-    private ValidationResult.LayerResult executeLayerValidation(ResourceRequest request, int layerNumber)
-            throws FrameworkValidationException {
-
-        ValidationUtils.validateNotNull(request, "Resource request");
-
-        try {
-            ValidationContext context = buildValidationContext(request);
-            LayerValidator validator = findValidatorByLayer(layerNumber);
-
-            LayerValidationResult coreResult = validator.validate(context);
-
-            return convertToLayerResult(validator, coreResult);
-        } catch (FrameworkValidationException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new FrameworkValidationException(
-                    "Layer " + layerNumber + " validation failed: " + e.getMessage(), e);
+        LayerValidationResult witResult = witValidator.validate(context);
+        if (!witResult.isSuccess()) {
+            return buildResult(witResult, null);
         }
+
+        LayerValidationResult wptResult = wptValidator.validate(context);
+        return buildResult(witResult, wptResult);
     }
 
-    /**
-     * Builds a ValidationContext from a ResourceRequest.
-     *
-     * @param request the resource request
-     * @return the validation context
-     * @throws FrameworkValidationException if token parsing fails
-     */
     private ValidationContext buildValidationContext(ResourceRequest request) throws FrameworkValidationException {
         WorkloadIdentityToken wit = parseWit(request.getWit());
         WorkloadProofToken wpt = parseWpt(request.getWpt());
@@ -183,76 +100,21 @@ public class DefaultResourceServer implements ResourceServer {
                 .build();
     }
 
-    /**
-     * Finds a layer validator by its layer number.
-     *
-     * @param layerNumber the layer number (1-5)
-     * @return the matching layer validator
-     * @throws FrameworkValidationException if no validator is found for the specified layer
-     */
-    private LayerValidator findValidatorByLayer(int layerNumber) throws FrameworkValidationException {
-        List<LayerValidator> validators = fiveLayerVerifier.getValidators();
-        for (LayerValidator validator : validators) {
-            if ((int) validator.getOrder() == layerNumber) {
-                return validator;
-            }
-        }
-        throw new FrameworkValidationException("No validator found for layer " + layerNumber);
-    }
-
-    /**
-     * Converts a core LayerValidationResult to a framework LayerResult.
-     *
-     * @param validator the layer validator
-     * @param coreResult the core validation result
-     * @return the framework layer result
-     */
-    private ValidationResult.LayerResult convertToLayerResult(LayerValidator validator,
-                                                               LayerValidationResult coreResult) {
-        return ValidationResult.LayerResult.builder()
-                .layer((int) validator.getOrder())
-                .layerName(validator.getName())
-                .valid(coreResult.isSuccess())
-                .message(coreResult.isSuccess()
-                        ? "Validation passed"
-                        : String.join(", ", coreResult.getErrors()))
-                .build();
-    }
-
-    /**
-     * Parses WIT string to WorkloadIdentityToken object.
-     *
-     * @param witString the WIT JWT string
-     * @return the parsed WorkloadIdentityToken
-     * @throws FrameworkValidationException if parsing fails
-     */
     private WorkloadIdentityToken parseWit(String witString) throws FrameworkValidationException {
-        
         if (ValidationUtils.isNullOrEmpty(witString)) {
             throw new FrameworkValidationException("WIT is required");
         }
-        
         try {
-            SignedJWT signedJwt = SignedJWT.parse(witString);
-            return witParser.parse(signedJwt);
+            return witParser.parse(SignedJWT.parse(witString));
         } catch (ParseException e) {
             throw new FrameworkValidationException("Failed to parse WIT: " + e.getMessage(), e);
         }
     }
 
-    /**
-     * Parses WPT string to WorkloadProofToken object.
-     *
-     * @param wptString the WPT JWT string
-     * @return the parsed WorkloadProofToken
-     * @throws FrameworkValidationException if parsing fails
-     */
     private WorkloadProofToken parseWpt(String wptString) throws FrameworkValidationException {
-
         if (ValidationUtils.isNullOrEmpty(wptString)) {
             throw new FrameworkValidationException("WPT is required");
         }
-
         try {
             return wptParser.parse(wptString);
         } catch (Exception e) {
@@ -260,42 +122,36 @@ public class DefaultResourceServer implements ResourceServer {
         }
     }
 
-    /**
-     * Converts VerificationResult to framework ValidationResult.
-     *
-     * @param verificationResult the verification result from core package
-     * @return the framework validation result
-     */
-    private ValidationResult convertToValidationResult(VerificationResult verificationResult) {
-        
-        // Convert layer results
+    private ValidationResult buildResult(LayerValidationResult witResult, LayerValidationResult wptResult) {
         List<ValidationResult.LayerResult> layerResults = new ArrayList<>();
         List<String> errors = new ArrayList<>();
-        
-        // Convert errors
-        for (VerificationResult.LayerResult layerResult : verificationResult.getLayerResults()) {
 
-            // Convert layer result
-            LayerValidationResult coreResult = layerResult.getResult();
-            ValidationResult.LayerResult frameworkLayerResult = ValidationResult.LayerResult.builder()
-                    .layer((int) layerResult.getOrder())
-                    .layerName(layerResult.getValidatorName())
-                    .valid(coreResult.isSuccess())
-                    .message(coreResult.isSuccess() ? "Validation passed" : String.join(", ", coreResult.getErrors()))
-                    .build();
+        layerResults.add(toLayerResult(1, WIT_NAME, witResult));
+        if (!witResult.isSuccess()) {
+            errors.addAll(witResult.getErrors());
+        }
 
-            // Add to layer results
-            layerResults.add(frameworkLayerResult);
-            if (!coreResult.isSuccess()) {
-                errors.addAll(coreResult.getErrors());
+        if (wptResult != null) {
+            layerResults.add(toLayerResult(2, WPT_NAME, wptResult));
+            if (!wptResult.isSuccess()) {
+                errors.addAll(wptResult.getErrors());
             }
         }
-        
+
+        boolean valid = witResult.isSuccess() && wptResult != null && wptResult.isSuccess();
         return ValidationResult.builder()
-                .valid(verificationResult.isSuccess())
+                .valid(valid)
                 .layerResults(layerResults)
                 .errors(errors)
                 .build();
     }
 
+    private static ValidationResult.LayerResult toLayerResult(int layer, String name, LayerValidationResult r) {
+        return ValidationResult.LayerResult.builder()
+                .layer(layer)
+                .layerName(name)
+                .valid(r.isSuccess())
+                .message(r.isSuccess() ? "Validation passed" : String.join(", ", r.getErrors()))
+                .build();
+    }
 }
