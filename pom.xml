@@ -28,19 +28,19 @@
         <nimbus-jose-jwt.version>10.9</nimbus-jose-jwt.version>
 
         <!-- JSON -->
-        <jackson.version>2.16.1</jackson.version>
+        <jackson.version>2.21.3</jackson.version>
 
         <!-- Logging -->
-        <slf4j.version>2.0.11</slf4j.version>
+        <slf4j.version>2.0.18</slf4j.version>
 
         <!-- Jakarta -->
-        <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
-        <jakarta.validation-api.version>3.0.2</jakarta.validation-api.version>
+        <jakarta.servlet-api.version>6.1.0</jakarta.servlet-api.version>
+        <jakarta.validation-api.version>3.1.1</jakarta.validation-api.version>
 
         <!-- Testing -->
-        <junit.version>5.10.1</junit.version>
-        <mockito.version>5.20.0</mockito.version>
-        <assertj.version>3.25.1</assertj.version>
+        <junit.version>6.0.3</junit.version>
+        <mockito.version>5.23.0</mockito.version>
+        <assertj.version>3.27.7</assertj.version>
     </properties>
 
     <dependencyManagement>
@@ -57,26 +57,20 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- Jackson BOM keeps databind/annotations/jsr310 version-aligned -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
             <!-- External Dependencies -->
             <dependency>
                 <groupId>com.nimbusds</groupId>
                 <artifactId>nimbus-jose-jwt</artifactId>
                 <version>${nimbus-jose-jwt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -124,7 +118,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.15.0</version>
                     <configuration>
                         <release>26</release>
                         <parameters>true</parameters>
@@ -133,7 +127,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.2.3</version>
+                    <version>3.5.5</version>
                     <configuration>
                         <argLine>
                             -Dnet.bytebuddy.experimental=true
