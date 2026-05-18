@@ -43,11 +43,15 @@ dropped per the trim. Consumers wire `WitValidator` + `WptValidator` +
 ## Build
 
 ```bash
+# Linux dev host
 JAVA_HOME=/usr/lib/jvm/java-26-openjdk mvn -B test
+# macOS (Temurin via `brew install --cask temurin`)
+JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-26.jdk/Contents/Home mvn -B test
 ```
 
-The default `/usr/bin/javac` still points at Java 21 on the dev host;
-explicit `JAVA_HOME` is required until the system default is bumped.
+The default `/usr/bin/javac` still points at Java 21 on the Linux dev
+host, and macOS has no system `javac` at all; explicit `JAVA_HOME` is
+required until the system default is bumped.
 
 The pom only declares: nimbus-jose-jwt, Jackson (databind/annotations/
 jsr310), SLF4J, jakarta.servlet/validation (provided/test), JUnit 5,
