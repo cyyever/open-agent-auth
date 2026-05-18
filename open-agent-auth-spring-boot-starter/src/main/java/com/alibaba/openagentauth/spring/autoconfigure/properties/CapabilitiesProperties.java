@@ -17,8 +17,6 @@ package com.alibaba.openagentauth.spring.autoconfigure.properties;
 
 import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.OAuth2ClientProperties;
 import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.OAuth2ServerProperties;
-import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.OperationAuthorizationProperties;
-import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.UserAuthenticationProperties;
 import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.WorkloadIdentityProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
@@ -39,9 +37,6 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
  *   <li><b>OAuth2 Server</b> - Provides OAuth 2.0 authorization server functionality</li>
  *   <li><b>OAuth2 Client</b> - Provides OAuth 2.0 client functionality for authentication</li>
  *   <li><b>Workload Identity</b> - Manages workload identities and token issuance</li>
- *   <li><b>Operation Authorization</b> - Provides fine-grained authorization for agent operations</li>
- *   <li><b>User Authentication</b> - Provides user identity authentication and login page</li>
- *   <li><b>Audit</b> - Provides audit logging for security and compliance</li>
  * </ul>
  * <p>
  * <b>Configuration Example:</b></p>
@@ -57,26 +52,14 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
  *       enabled: true
  *       authentication:
  *         enabled: true
- *     operation-authorization:
- *       enabled: true
- *       prompt-encryption:
- *         enabled: true
  *     workload-identity:
  *       enabled: true
- *     user-authentication:
- *       enabled: true
- *     audit:
- *       enabled: true
- *       provider: logging
  * </pre>
  *
  * @since 1.0
  * @see OAuth2ServerProperties
  * @see OAuth2ClientProperties
  * @see WorkloadIdentityProperties
- * @see OperationAuthorizationProperties
- * @see UserAuthenticationProperties
- * @see AuditProperties
  */
 public class CapabilitiesProperties {
 
@@ -108,26 +91,6 @@ public class CapabilitiesProperties {
      */
     @NestedConfigurationProperty
     private WorkloadIdentityProperties workloadIdentity = new WorkloadIdentityProperties();
-
-    /**
-     * Operation Authorization capability configuration.
-     * <p>
-     * Provides fine-grained authorization for agent operations including prompt protection
-     * and policy evaluation.
-     * </p>
-     */
-    @NestedConfigurationProperty
-    private OperationAuthorizationProperties operationAuthorization = new OperationAuthorizationProperties();
-
-    /**
-     * User Authentication capability configuration.
-     * <p>
-     * Provides user identity authentication including login page, user registry,
-     * and session management.
-     * </p>
-     */
-    @NestedConfigurationProperty
-    private UserAuthenticationProperties userAuthentication = new UserAuthenticationProperties();
 
     /**
      * Gets the OAuth 2.0 Server capability configuration.
@@ -181,41 +144,5 @@ public class CapabilitiesProperties {
      */
     public void setWorkloadIdentity(WorkloadIdentityProperties workloadIdentity) {
         this.workloadIdentity = workloadIdentity;
-    }
-
-    /**
-     * Gets the Operation Authorization capability configuration.
-     *
-     * @return the Operation Authorization capability configuration
-     */
-    public OperationAuthorizationProperties getOperationAuthorization() {
-        return operationAuthorization;
-    }
-
-    /**
-     * Sets the Operation Authorization capability configuration.
-     *
-     * @param operationAuthorization the Operation Authorization capability configuration to set
-     */
-    public void setOperationAuthorization(OperationAuthorizationProperties operationAuthorization) {
-        this.operationAuthorization = operationAuthorization;
-    }
-
-    /**
-     * Gets the User Authentication capability configuration.
-     *
-     * @return the User Authentication capability configuration
-     */
-    public UserAuthenticationProperties getUserAuthentication() {
-        return userAuthentication;
-    }
-
-    /**
-     * Sets the User Authentication capability configuration.
-     *
-     * @param userAuthentication the User Authentication capability configuration to set
-     */
-    public void setUserAuthentication(UserAuthenticationProperties userAuthentication) {
-        this.userAuthentication = userAuthentication;
     }
 }

@@ -17,8 +17,6 @@ package com.alibaba.openagentauth.spring.autoconfigure.properties;
 
 import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.OAuth2ClientProperties;
 import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.OAuth2ServerProperties;
-import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.OperationAuthorizationProperties;
-import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.UserAuthenticationProperties;
 import com.alibaba.openagentauth.spring.autoconfigure.properties.capabilities.WorkloadIdentityProperties;
 import com.alibaba.openagentauth.spring.autoconfigure.properties.infrastructures.JwksConsumerProperties;
 import com.alibaba.openagentauth.spring.autoconfigure.properties.infrastructures.KeyDefinitionProperties;
@@ -184,18 +182,6 @@ class OpenAgentAuthPropertiesTest {
         }
 
         @Test
-        @DisplayName("Should initialize operation authorization properties")
-        void shouldInitializeOperationAuthorizationProperties() {
-            assertNotNull(capabilitiesProperties.getOperationAuthorization());
-        }
-
-        @Test
-        @DisplayName("Should initialize user authentication properties")
-        void shouldInitializeUserAuthenticationProperties() {
-            assertNotNull(capabilitiesProperties.getUserAuthentication());
-        }
-
-        @Test
         @DisplayName("Should set and get oauth2 server properties")
         void shouldSetAndGetOAuth2ServerProperties() {
             OAuth2ServerProperties oauth2Server = new OAuth2ServerProperties();
@@ -217,22 +203,6 @@ class OpenAgentAuthPropertiesTest {
             WorkloadIdentityProperties workloadIdentity = new WorkloadIdentityProperties();
             capabilitiesProperties.setWorkloadIdentity(workloadIdentity);
             assertSame(workloadIdentity, capabilitiesProperties.getWorkloadIdentity());
-        }
-
-        @Test
-        @DisplayName("Should set and get operation authorization properties")
-        void shouldSetAndGetOperationAuthorizationProperties() {
-            OperationAuthorizationProperties operationAuthorization = new OperationAuthorizationProperties();
-            capabilitiesProperties.setOperationAuthorization(operationAuthorization);
-            assertSame(operationAuthorization, capabilitiesProperties.getOperationAuthorization());
-        }
-
-        @Test
-        @DisplayName("Should set and get user authentication properties")
-        void shouldSetAndGetUserAuthenticationProperties() {
-            UserAuthenticationProperties userAuthentication = new UserAuthenticationProperties();
-            capabilitiesProperties.setUserAuthentication(userAuthentication);
-            assertSame(userAuthentication, capabilitiesProperties.getUserAuthentication());
         }
 
     }

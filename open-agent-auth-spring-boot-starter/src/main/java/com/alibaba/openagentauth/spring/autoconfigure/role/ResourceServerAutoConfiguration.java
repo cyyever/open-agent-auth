@@ -15,8 +15,6 @@
  */
 package com.alibaba.openagentauth.spring.autoconfigure.role;
 
-import com.alibaba.openagentauth.core.binding.BindingInstanceStore;
-import com.alibaba.openagentauth.core.binding.RemoteBindingInstanceStore;
 import com.alibaba.openagentauth.core.crypto.key.KeyManager;
 import com.alibaba.openagentauth.core.protocol.wimse.wit.WitValidator;
 import com.alibaba.openagentauth.core.protocol.wimse.wpt.WptValidator;
@@ -191,16 +189,4 @@ public class ResourceServerAutoConfiguration {
         return new DefaultResourceServer(witValidator, wptValidator);
     }
 
-    /**
-     * Creates a RemoteBindingInstanceStore bean for querying binding instances from the Authorization Server.
-     *
-     * @param serviceEndpointResolver the service endpoint resolver for communicating with Authorization Server
-     * @return the RemoteBindingInstanceStore
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    @ConditionalOnProperty(prefix = "open-agent-auth.resource-server", name = "enabled", havingValue = "true", matchIfMissing = true)
-    public BindingInstanceStore bindingInstanceStore(ServiceEndpointResolver serviceEndpointResolver) {
-        return new RemoteBindingInstanceStore(serviceEndpointResolver);
-    }
 }

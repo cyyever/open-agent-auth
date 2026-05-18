@@ -86,8 +86,8 @@ public class ConfigurationValidator {
     private static final Map<String, List<String>> ROLE_REQUIRED_CAPABILITIES = new LinkedHashMap<>();
 
     static {
-        ROLE_REQUIRED_CAPABILITIES.put(ROLE_AGENT_USER_IDP, List.of("oauth2-server", "user-authentication"));
-        ROLE_REQUIRED_CAPABILITIES.put(ROLE_AS_USER_IDP, List.of("oauth2-server", "user-authentication"));
+        ROLE_REQUIRED_CAPABILITIES.put(ROLE_AGENT_USER_IDP, List.of("oauth2-server"));
+        ROLE_REQUIRED_CAPABILITIES.put(ROLE_AS_USER_IDP, List.of("oauth2-server"));
         ROLE_REQUIRED_CAPABILITIES.put(ROLE_AGENT, List.of("oauth2-client"));
         ROLE_REQUIRED_CAPABILITIES.put(ROLE_AUTHORIZATION_SERVER, List.of("oauth2-server"));
         ROLE_REQUIRED_CAPABILITIES.put(ROLE_AGENT_IDP, List.of("workload-identity"));
@@ -161,9 +161,7 @@ public class ConfigurationValidator {
         return switch (capabilityName) {
             case "oauth2-server" -> caps.getOAuth2Server() != null && caps.getOAuth2Server().isEnabled();
             case "oauth2-client" -> caps.getOAuth2Client() != null && caps.getOAuth2Client().isEnabled();
-            case "user-authentication" -> caps.getUserAuthentication() != null && caps.getUserAuthentication().isEnabled();
             case "workload-identity" -> caps.getWorkloadIdentity() != null && caps.getWorkloadIdentity().isEnabled();
-            case "operation-authorization" -> caps.getOperationAuthorization() != null && caps.getOperationAuthorization().isEnabled();
             default -> {
                 logger.warn("Unknown capability: {}", capabilityName);
                 yield false;

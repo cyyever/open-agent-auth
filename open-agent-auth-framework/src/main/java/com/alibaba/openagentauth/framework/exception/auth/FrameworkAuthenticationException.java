@@ -15,20 +15,8 @@
  */
 package com.alibaba.openagentauth.framework.exception.auth;
 
-import com.alibaba.openagentauth.core.exception.oidc.AuthenticationException;
-
 /**
  * Exception thrown when authentication fails in framework orchestration layer.
- * <p>
- * This exception is thrown when there is an error during the authentication process
- * in the framework orchestration layer, such as invalid credentials, expired tokens, or authentication
- * service failures in the framework workflow.
- * </p>
- * <p>
- * <b>Note:</b> This exception is different from {@link AuthenticationException}
- * which is used at the OpenID Connect protocol layer. This exception is specifically for
- * framework orchestration layer authentication errors.
- * </p>
  *
  * @since 1.0
  */
