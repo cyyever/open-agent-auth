@@ -40,6 +40,9 @@
 
         <!-- Benchmark (opt-in via -P bench) -->
         <jmh.version>1.37</jmh.version>
+
+        <!-- Coverage (opt-in via -P coverage) -->
+        <jacoco.version>0.8.13</jacoco.version>
     </properties>
 
     <dependencyManagement>
@@ -131,6 +134,7 @@
                     <version>3.5.5</version>
                     <configuration>
                         <argLine>
+                            @{argLine}
                             -Dnet.bytebuddy.experimental=true
                             --add-opens java.base/java.lang=ALL-UNNAMED
                             --add-opens java.base/java.lang.reflect=ALL-UNNAMED
@@ -189,6 +193,39 @@
             <modules>
                 <module>open-agent-auth-bench</module>
             </modules>
+        </profile>
+        <!--
+            Opt-in JaCoCo line/branch coverage. Excluded from the default build
+            because instrumentation slows tests ~10% and most local runs don't
+            need a report. Run with: mvn -P coverage verify
+            Report at: open-agent-auth-{core,framework}/target/site/jacoco/
+        -->
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>errorprone</id>
