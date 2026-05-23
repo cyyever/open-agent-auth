@@ -29,26 +29,19 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public record Jwk(
         @JsonProperty("kty") KeyType keyType,
         @JsonProperty("use") KeyUse use,
-        @JsonProperty("alg") String algorithm,
         @JsonProperty("crv") Curve curve,
         @JsonProperty("x") String x,
-        @JsonProperty("y") String y,
         @JsonProperty("kid") String keyId) {
 
     public Jwk {
         if (keyType == null) {
             throw new IllegalStateException("kty (key type) is REQUIRED");
         }
-        if (keyType == KeyType.EC) {
-            if (curve == null) {
-                throw new IllegalStateException("crv (curve) is REQUIRED for EC keys");
-            }
-            if (ValidationUtils.isNullOrEmpty(x)) {
-                throw new IllegalStateException("x coordinate is REQUIRED for EC keys");
-            }
-            if (ValidationUtils.isNullOrEmpty(y)) {
-                throw new IllegalStateException("y coordinate is REQUIRED for EC keys");
-            }
+        if (curve == null) {
+            throw new IllegalStateException("crv (curve) is REQUIRED");
+        }
+        if (ValidationUtils.isNullOrEmpty(x)) {
+            throw new IllegalStateException("x coordinate is REQUIRED");
         }
     }
 
@@ -57,7 +50,7 @@ public record Jwk(
     }
 
     public enum KeyType {
-        EC("EC"), RSA("RSA"), OCT("oct");
+        OKP("OKP");
 
         private final String value;
 
@@ -93,7 +86,7 @@ public record Jwk(
     }
 
     public enum Curve {
-        P_256("P-256"), P_384("P-384"), P_521("P-521");
+        Ed25519("Ed25519");
 
         private final String value;
 
@@ -113,22 +106,18 @@ public record Jwk(
     public static class Builder {
         private KeyType keyType;
         private KeyUse use;
-        private String algorithm;
         private Curve curve;
         private String x;
-        private String y;
         private String keyId;
 
         public Builder keyType(KeyType keyType)  { this.keyType  = keyType;  return this; }
         public Builder use(KeyUse use)            { this.use      = use;      return this; }
-        public Builder algorithm(String algorithm){ this.algorithm = algorithm; return this; }
         public Builder curve(Curve curve)         { this.curve    = curve;    return this; }
         public Builder x(String x)                { this.x        = x;        return this; }
-        public Builder y(String y)                { this.y        = y;        return this; }
         public Builder keyId(String keyId)        { this.keyId    = keyId;    return this; }
 
         public Jwk build() {
-            return new Jwk(keyType, use, algorithm, curve, x, y, keyId);
+            return new Jwk(keyType, use, curve, x, keyId);
         }
     }
 }

@@ -15,40 +15,21 @@
  */
 package com.alibaba.openagentauth.core.crypto.key.store;
 
-import com.alibaba.openagentauth.core.crypto.key.model.KeyAlgorithm;
 import com.alibaba.openagentauth.core.crypto.key.model.KeyInfo;
 import com.alibaba.openagentauth.core.exception.crypto.KeyManagementException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.jwk.OctetKeyPair;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.security.KeyPair;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
-/**
- * Unit tests for {@link InMemoryKeyStore}.
- * <p>
- * These tests validate the in-memory key storage functionality including:
- * </p>
- * <ul>
- *   <li>Storage and retrieval of key pairs</li>
- *   <li>Storage and retrieval of JWK objects</li>
- *   <li>Key lifecycle management (create, delete, clear)</li>
- *   <li>Thread safety under concurrent access</li>
- *   <li>Support for both RSA and EC keys</li>
- * </ul>
- *
- * @since 1.0
- */
 class InMemoryKeyStoreTest {
 
     private static final String TEST_KEY_ID = "test-key-001";
@@ -56,28 +37,24 @@ class InMemoryKeyStoreTest {
     private static final Instant NOW = Instant.now();
 
     private InMemoryKeyStore keyStore;
-    private RSAKey rsaKey;
-    private ECKey ecKey;
+    private OctetKeyPair okpKey;
+    private OctetKeyPair okpKey2;
     private KeyInfo keyInfo;
 
     @BeforeEach
     void setUp() throws JOSEException {
         keyStore = new InMemoryKeyStore();
 
-        // Generate RSA key for testing
-        rsaKey = new RSAKeyGenerator(2048)
+        okpKey = new OctetKeyPairGenerator(Curve.Ed25519)
                 .keyID(TEST_KEY_ID)
                 .generate();
 
-        // Generate EC key for testing
-        ecKey = new ECKeyGenerator(Curve.P_256)
+        okpKey2 = new OctetKeyPairGenerator(Curve.Ed25519)
                 .keyID(TEST_KEY_ID_2)
                 .generate();
 
-        // Create key info
         keyInfo = KeyInfo.builder()
                 .keyId(TEST_KEY_ID)
-                .algorithm(KeyAlgorithm.RS256)
                 .createdAt(NOW)
                 .activatedAt(NOW)
                 .active(true)
@@ -85,282 +62,146 @@ class InMemoryKeyStoreTest {
     }
 
     @Test
-    void testStoreAndRetrieveKeyPair() throws KeyManagementException, JOSEException {
-        // Arrange
-        KeyPair keyPair = rsaKey.toKeyPair();
+    void testStoreAndRetrieveJWK() throws KeyManagementException {
+        keyStore.storeJWK(TEST_KEY_ID, okpKey, keyInfo);
+        Optional<Object> retrievedJWK = keyStore.retrieveJWK(TEST_KEY_ID);
 
-        // Act
-        keyStore.store(TEST_KEY_ID, keyPair, keyInfo);
-        Optional<KeyPair> retrievedKeyPair = keyStore.retrieve(TEST_KEY_ID);
-
-        // Assert
-        assertThat(retrievedKeyPair).isPresent();
-        // Compare key material instead of KeyPair objects
-        assertThat(retrievedKeyPair.orElseThrow().getPublic().getEncoded())
-                .isEqualTo(keyPair.getPublic().getEncoded());
-        assertThat(retrievedKeyPair.orElseThrow().getPrivate().getEncoded())
-                .isEqualTo(keyPair.getPrivate().getEncoded());
+        assertThat(retrievedJWK).isPresent();
+        assertThat(retrievedJWK.orElseThrow()).isInstanceOf(OctetKeyPair.class);
+        OctetKeyPair retrieved = (OctetKeyPair) retrievedJWK.orElseThrow();
+        assertThat(retrieved.getKeyID()).isEqualTo(TEST_KEY_ID);
     }
 
     @Test
-    void testStoreAndRetrieveKeyInfo() throws KeyManagementException, JOSEException {
-        // Arrange
-        KeyPair keyPair = rsaKey.toKeyPair();
-
-        // Act
-        keyStore.store(TEST_KEY_ID, keyPair, keyInfo);
+    void testStoreAndRetrieveKeyInfo() throws KeyManagementException {
+        keyStore.storeJWK(TEST_KEY_ID, okpKey, keyInfo);
         Optional<KeyInfo> retrievedKeyInfo = keyStore.retrieveInfo(TEST_KEY_ID);
 
-        // Assert
         assertThat(retrievedKeyInfo).isPresent();
         assertThat(retrievedKeyInfo.orElseThrow()).isEqualTo(keyInfo);
         assertThat(retrievedKeyInfo.orElseThrow().getKeyId()).isEqualTo(TEST_KEY_ID);
-        assertThat(retrievedKeyInfo.orElseThrow().getAlgorithm()).isEqualTo(KeyAlgorithm.RS256);
         assertThat(retrievedKeyInfo.orElseThrow().isActive()).isTrue();
     }
 
     @Test
-    void testStoreAndRetrieveRSAJWK() throws KeyManagementException {
-        // Act
-        keyStore.storeJWK(TEST_KEY_ID, rsaKey, keyInfo);
-        Optional<Object> retrievedJWK = keyStore.retrieveJWK(TEST_KEY_ID);
-
-        // Assert
-        assertThat(retrievedJWK).isPresent();
-        assertThat(retrievedJWK.orElseThrow()).isInstanceOf(RSAKey.class);
-        RSAKey retrievedRSAKey = (RSAKey) retrievedJWK.orElseThrow();
-        assertThat(retrievedRSAKey.getKeyID()).isEqualTo(TEST_KEY_ID);
-    }
-
-    @Test
-    void testStoreAndRetrieveECJWK() throws KeyManagementException {
-        // Arrange
-        KeyInfo ecKeyInfo = KeyInfo.builder()
-                .keyId(TEST_KEY_ID_2)
-                .algorithm(KeyAlgorithm.ES256)
-                .createdAt(NOW)
-                .activatedAt(NOW)
-                .active(true)
-                .build();
-
-        // Act
-        keyStore.storeJWK(TEST_KEY_ID_2, ecKey, ecKeyInfo);
-        Optional<Object> retrievedJWK = keyStore.retrieveJWK(TEST_KEY_ID_2);
-
-        // Assert
-        assertThat(retrievedJWK).isPresent();
-        assertThat(retrievedJWK.orElseThrow()).isInstanceOf(ECKey.class);
-        ECKey retrievedECKey = (ECKey) retrievedJWK.orElseThrow();
-        assertThat(retrievedECKey.getKeyID()).isEqualTo(TEST_KEY_ID_2);
-    }
-
-    @Test
-    void testRetrieveNonExistentKey() throws KeyManagementException {
-        // Act
-        Optional<KeyPair> retrievedKeyPair = keyStore.retrieve("non-existent-key");
-
-        // Assert
-        assertThat(retrievedKeyPair).isEmpty();
-    }
-
-    @Test
     void testRetrieveNonExistentKeyInfo() throws KeyManagementException {
-        // Act
         Optional<KeyInfo> retrievedKeyInfo = keyStore.retrieveInfo("non-existent-key");
 
-        // Assert
         assertThat(retrievedKeyInfo).isEmpty();
     }
 
     @Test
     void testRetrieveNonExistentJWK() throws KeyManagementException {
-        // Act
         Optional<Object> retrievedJWK = keyStore.retrieveJWK("non-existent-key");
 
-        // Assert
         assertThat(retrievedJWK).isEmpty();
     }
 
     @Test
-    void testExists() throws KeyManagementException, JOSEException {
-        // Arrange
-        KeyPair keyPair = rsaKey.toKeyPair();
-
-        // Act & Assert
+    void testExists() throws KeyManagementException {
         assertThat(keyStore.exists(TEST_KEY_ID)).isFalse();
 
-        keyStore.store(TEST_KEY_ID, keyPair, keyInfo);
+        keyStore.storeJWK(TEST_KEY_ID, okpKey, keyInfo);
         assertThat(keyStore.exists(TEST_KEY_ID)).isTrue();
     }
 
     @Test
     void testExistsWithNullKeyId() {
-        // Act
-        boolean exists = keyStore.exists(null);
-
-        // Assert
-        assertThat(exists).isFalse();
+        assertThat(keyStore.exists(null)).isFalse();
     }
 
     @Test
     void testExistsWithEmptyKeyId() {
-        // Act
-        boolean exists = keyStore.exists("");
-
-        // Assert
-        assertThat(exists).isFalse();
+        assertThat(keyStore.exists("")).isFalse();
     }
 
     @Test
-    void testDelete() throws KeyManagementException, JOSEException {
-        // Arrange
-        KeyPair keyPair = rsaKey.toKeyPair();
-        keyStore.store(TEST_KEY_ID, keyPair, keyInfo);
+    void testDelete() throws KeyManagementException {
+        keyStore.storeJWK(TEST_KEY_ID, okpKey, keyInfo);
 
-        // Act
         keyStore.delete(TEST_KEY_ID);
 
-        // Assert
         assertThat(keyStore.exists(TEST_KEY_ID)).isFalse();
-        assertThat(keyStore.retrieve(TEST_KEY_ID)).isEmpty();
         assertThat(keyStore.retrieveInfo(TEST_KEY_ID)).isEmpty();
         assertThat(keyStore.retrieveJWK(TEST_KEY_ID)).isEmpty();
     }
 
     @Test
-    void testDeleteWithNullKeyId() throws JOSEException {
-        // Arrange
-        KeyPair keyPair = rsaKey.toKeyPair();
-        keyStore.store(TEST_KEY_ID, keyPair, keyInfo);
+    void testDeleteWithNullKeyId() throws KeyManagementException {
+        keyStore.storeJWK(TEST_KEY_ID, okpKey, keyInfo);
 
-        // Act & Assert
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> keyStore.delete(null))
                 .withMessageContaining("Key ID cannot be null or empty");
     }
 
     @Test
-    void testDeleteWithEmptyKeyId() throws JOSEException {
-        // Arrange
-        KeyPair keyPair = rsaKey.toKeyPair();
-        keyStore.store(TEST_KEY_ID, keyPair, keyInfo);
+    void testDeleteWithEmptyKeyId() throws KeyManagementException {
+        keyStore.storeJWK(TEST_KEY_ID, okpKey, keyInfo);
 
-        // Act & Assert
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> keyStore.delete(""))
                 .withMessageContaining("Key ID cannot be null or empty");
     }
 
     @Test
-    void testListKeyIds() throws KeyManagementException, JOSEException {
-        // Arrange
-        KeyPair keyPair1 = rsaKey.toKeyPair();
-        KeyPair keyPair2 = ecKey.toKeyPair();
+    void testListKeyIds() throws KeyManagementException {
         KeyInfo keyInfo2 = KeyInfo.builder()
                 .keyId(TEST_KEY_ID_2)
-                .algorithm(KeyAlgorithm.ES256)
                 .createdAt(NOW)
                 .activatedAt(NOW)
                 .active(true)
                 .build();
 
-        keyStore.store(TEST_KEY_ID, keyPair1, keyInfo);
-        keyStore.store(TEST_KEY_ID_2, keyPair2, keyInfo2);
+        keyStore.storeJWK(TEST_KEY_ID, okpKey, keyInfo);
+        keyStore.storeJWK(TEST_KEY_ID_2, okpKey2, keyInfo2);
 
-        // Act
         List<String> keyIds = keyStore.listKeyIds();
 
-        // Assert
         assertThat(keyIds).hasSize(2);
         assertThat(keyIds).containsExactlyInAnyOrder(TEST_KEY_ID, TEST_KEY_ID_2);
     }
 
     @Test
     void testListKeyIdsEmpty() {
-        // Act
-        List<String> keyIds = keyStore.listKeyIds();
-
-        // Assert
-        assertThat(keyIds).isEmpty();
+        assertThat(keyStore.listKeyIds()).isEmpty();
     }
 
     @Test
-    void testClear() throws KeyManagementException, JOSEException {
-        // Arrange
-        KeyPair keyPair1 = rsaKey.toKeyPair();
-        KeyPair keyPair2 = ecKey.toKeyPair();
+    void testClear() throws KeyManagementException {
         KeyInfo keyInfo2 = KeyInfo.builder()
                 .keyId(TEST_KEY_ID_2)
-                .algorithm(KeyAlgorithm.ES256)
                 .createdAt(NOW)
                 .activatedAt(NOW)
                 .active(true)
                 .build();
 
-        keyStore.store(TEST_KEY_ID, keyPair1, keyInfo);
-        keyStore.store(TEST_KEY_ID_2, keyPair2, keyInfo2);
+        keyStore.storeJWK(TEST_KEY_ID, okpKey, keyInfo);
+        keyStore.storeJWK(TEST_KEY_ID_2, okpKey2, keyInfo2);
 
-        // Act
         keyStore.clear();
 
-        // Assert
         assertThat(keyStore.listKeyIds()).isEmpty();
         assertThat(keyStore.exists(TEST_KEY_ID)).isFalse();
         assertThat(keyStore.exists(TEST_KEY_ID_2)).isFalse();
     }
 
     @Test
-    void testStoreWithNullKeyId() throws JOSEException {
-        // Arrange
-        KeyPair keyPair = rsaKey.toKeyPair();
-
-        // Act & Assert
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> keyStore.store(null, keyPair, keyInfo))
-                .withMessageContaining("Key ID cannot be null or empty");
-    }
-
-    @Test
-    void testStoreWithEmptyKeyId() throws JOSEException {
-        // Arrange
-        KeyPair keyPair = rsaKey.toKeyPair();
-
-        // Act & Assert
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> keyStore.store("", keyPair, keyInfo))
-                .withMessageContaining("Key ID cannot be null or empty");
-    }
-
-    @Test
-    void testStoreWithNullKeyPair() {
-        // Act & Assert
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> keyStore.store(TEST_KEY_ID, null, keyInfo))
-                .withMessageContaining("Key pair cannot be null");
-    }
-
-    @Test
-    void testStoreWithNullKeyInfo() throws JOSEException {
-        // Arrange
-        KeyPair keyPair = rsaKey.toKeyPair();
-
-        // Act & Assert
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> keyStore.store(TEST_KEY_ID, keyPair, null))
-                .withMessageContaining("Key info cannot be null");
-    }
-
-    @Test
     void testStoreJWKWithNullKeyId() {
-        // Act & Assert
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> keyStore.storeJWK(null, rsaKey, keyInfo))
+                .isThrownBy(() -> keyStore.storeJWK(null, okpKey, keyInfo))
+                .withMessageContaining("Key ID cannot be null or empty");
+    }
+
+    @Test
+    void testStoreJWKWithEmptyKeyId() {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> keyStore.storeJWK("", okpKey, keyInfo))
                 .withMessageContaining("Key ID cannot be null or empty");
     }
 
     @Test
     void testStoreJWKWithNullJWK() {
-        // Act & Assert
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> keyStore.storeJWK(TEST_KEY_ID, null, keyInfo))
                 .withMessageContaining("JWK cannot be null");
@@ -368,23 +209,13 @@ class InMemoryKeyStoreTest {
 
     @Test
     void testStoreJWKWithNullKeyInfo() {
-        // Act & Assert
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> keyStore.storeJWK(TEST_KEY_ID, rsaKey, null))
+                .isThrownBy(() -> keyStore.storeJWK(TEST_KEY_ID, okpKey, null))
                 .withMessageContaining("Key info cannot be null");
     }
 
     @Test
-    void testRetrieveWithNullKeyId() {
-        // Act & Assert
-        assertThatIllegalArgumentException()
-                .isThrownBy(() -> keyStore.retrieve(null))
-                .withMessageContaining("Key ID cannot be null or empty");
-    }
-
-    @Test
     void testRetrieveInfoWithNullKeyId() {
-        // Act & Assert
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> keyStore.retrieveInfo(null))
                 .withMessageContaining("Key ID cannot be null or empty");
@@ -392,83 +223,40 @@ class InMemoryKeyStoreTest {
 
     @Test
     void testRetrieveJWKWithNullKeyId() {
-        // Act & Assert
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> keyStore.retrieveJWK(null))
                 .withMessageContaining("Key ID cannot be null or empty");
     }
 
     @Test
-    void testStoreJWKAlsoStoresKeyPair() throws KeyManagementException, JOSEException {
-        // Act
-        keyStore.storeJWK(TEST_KEY_ID, rsaKey, keyInfo);
-        Optional<KeyPair> retrievedKeyPair = keyStore.retrieve(TEST_KEY_ID);
-
-        // Assert
-        assertThat(retrievedKeyPair).isPresent();
-        KeyPair originalKeyPair = rsaKey.toKeyPair();
-        assertThat(retrievedKeyPair.orElseThrow().getPublic()).isEqualTo(originalKeyPair.getPublic());
-        assertThat(retrievedKeyPair.orElseThrow().getPrivate()).isEqualTo(originalKeyPair.getPrivate());
-    }
-
-    @Test
-    void testStoreECJWKAlsoStoresKeyPair() throws KeyManagementException {
-        // Arrange
-        KeyInfo ecKeyInfo = KeyInfo.builder()
-                .keyId(TEST_KEY_ID_2)
-                .algorithm(KeyAlgorithm.ES256)
-                .createdAt(NOW)
-                .activatedAt(NOW)
-                .active(true)
-                .build();
-
-        // Act
-        keyStore.storeJWK(TEST_KEY_ID_2, ecKey, ecKeyInfo);
-        Optional<KeyPair> retrievedKeyPair = keyStore.retrieve(TEST_KEY_ID_2);
-
-        // Assert
-        assertThat(retrievedKeyPair).isPresent();
-    }
-
-    @Test
-    void testOverwriteExistingKey() throws KeyManagementException, JOSEException {
-        // Arrange
-        KeyPair keyPair1 = rsaKey.toKeyPair();
+    void testOverwriteExistingJWK() throws KeyManagementException, JOSEException {
         KeyInfo keyInfo1 = KeyInfo.builder()
                 .keyId(TEST_KEY_ID)
-                .algorithm(KeyAlgorithm.RS256)
                 .createdAt(NOW.minusSeconds(3600))
                 .activatedAt(NOW.minusSeconds(3600))
                 .active(false)
                 .build();
 
-        keyStore.store(TEST_KEY_ID, keyPair1, keyInfo1);
+        keyStore.storeJWK(TEST_KEY_ID, okpKey, keyInfo1);
 
-        // Act - Store with same key ID
-        KeyPair keyPair2 = new RSAKeyGenerator(2048)
+        OctetKeyPair rotated = new OctetKeyPairGenerator(Curve.Ed25519)
                 .keyID(TEST_KEY_ID)
-                .generate()
-                .toKeyPair();
+                .generate();
         KeyInfo keyInfo2 = KeyInfo.builder()
                 .keyId(TEST_KEY_ID)
-                .algorithm(KeyAlgorithm.RS256)
                 .createdAt(NOW)
                 .activatedAt(NOW)
                 .active(true)
                 .build();
 
-        keyStore.store(TEST_KEY_ID, keyPair2, keyInfo2);
+        keyStore.storeJWK(TEST_KEY_ID, rotated, keyInfo2);
 
-        // Assert - Should have overwritten
-        Optional<KeyPair> retrievedKeyPair = keyStore.retrieve(TEST_KEY_ID);
+        Optional<Object> retrievedJWK = keyStore.retrieveJWK(TEST_KEY_ID);
         Optional<KeyInfo> retrievedKeyInfo = keyStore.retrieveInfo(TEST_KEY_ID);
 
-        assertThat(retrievedKeyPair).isPresent();
-        // Compare key material instead of KeyPair objects
-        assertThat(retrievedKeyPair.orElseThrow().getPublic().getEncoded())
-                .isEqualTo(keyPair2.getPublic().getEncoded());
-        assertThat(retrievedKeyPair.orElseThrow().getPrivate().getEncoded())
-                .isEqualTo(keyPair2.getPrivate().getEncoded());
+        assertThat(retrievedJWK).isPresent();
+        OctetKeyPair retrieved = (OctetKeyPair) retrievedJWK.orElseThrow();
+        assertThat(retrieved.getX()).isEqualTo(rotated.getX());
         assertThat(retrievedKeyInfo).isPresent();
         assertThat(retrievedKeyInfo.orElseThrow().isActive()).isTrue();
         assertThat(retrievedKeyInfo.orElseThrow().getCreatedAt()).isEqualTo(NOW);

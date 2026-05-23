@@ -20,17 +20,16 @@ import com.alibaba.openagentauth.core.exception.crypto.KeyManagementException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.ECDSAVerifier;
-import com.nimbusds.jose.crypto.RSASSAVerifier;
-import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.crypto.Ed25519Verifier;
 import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Resolves a verification key from {@link KeyManager} and verifies a JWT signature.
+ * Only Ed25519 ({@code alg=EdDSA}) is supported.
  *
  * @since 1.0
  */
@@ -39,21 +38,8 @@ public final class SignatureVerificationUtils {
     private static final Logger logger = LoggerFactory.getLogger(SignatureVerificationUtils.class);
 
     private SignatureVerificationUtils() {
-        // Utility class, prevent instantiation
     }
 
-    /**
-     * Verifies the signature of a signed JWT using the specified {@link KeyManager} and key ID.
-     * <p>
-     * This method dynamically resolves the verification key from the {@code KeyManager}
-     * on each invocation, ensuring that key rotations are picked up without restarts.
-     * </p>
-     *
-     * @param signedJwt the signed JWT to verify
-     * @param keyManager the key manager for resolving verification keys
-     * @param verificationKeyId the key ID used to resolve the verification key
-     * @return {@code true} if the signature is valid, {@code false} otherwise
-     */
     public static boolean verifySignature(SignedJWT signedJwt, KeyManager keyManager, String verificationKeyId) {
 
         JWSAlgorithm algorithm = signedJwt.getHeader().getAlgorithm();
@@ -61,8 +47,8 @@ public final class SignatureVerificationUtils {
         logger.debug("Verifying signature - header kid: {}, algorithm: {}, verificationKeyId: {}",
                 headerKeyId, algorithm, verificationKeyId);
 
-        if (!isSupportedAlgorithm(algorithm)) {
-            logger.warn("Unsupported algorithm: {}", algorithm);
+        if (!JWSAlgorithm.EdDSA.equals(algorithm)) {
+            logger.warn("Unsupported algorithm: {} (only EdDSA is allowed)", algorithm);
             return false;
         }
 
@@ -86,31 +72,10 @@ public final class SignatureVerificationUtils {
         }
     }
 
-    /**
-     * Creates a {@link JWSVerifier} from the given JWK.
-     *
-     * @param jwk the JWK to create a verifier from
-     * @return the created verifier
-     * @throws JOSEException if the verifier cannot be created
-     * @throws IllegalArgumentException if the JWK type is not supported
-     */
     public static JWSVerifier createVerifier(JWK jwk) throws JOSEException {
-        if (jwk instanceof RSAKey rsaKey) {
-            return new RSASSAVerifier(rsaKey);
-        }
-        if (jwk instanceof ECKey ecKey) {
-            return new ECDSAVerifier(ecKey);
+        if (jwk instanceof OctetKeyPair okp) {
+            return new Ed25519Verifier(okp.toPublicJWK());
         }
         throw new IllegalArgumentException("Unsupported JWK type: " + jwk.getKeyType());
-    }
-
-    /**
-     * Checks whether the given JWS algorithm is supported for verification.
-     *
-     * @param algorithm the JWS algorithm to check
-     * @return {@code true} if the algorithm is in the RSA or EC family
-     */
-    public static boolean isSupportedAlgorithm(JWSAlgorithm algorithm) {
-        return JWSAlgorithm.Family.RSA.contains(algorithm) || JWSAlgorithm.Family.EC.contains(algorithm);
     }
 }

@@ -88,20 +88,14 @@ public class WitSerializer {
      */
     private static JWSObject buildJWSObject(WorkloadIdentityToken wit, String keyId) throws JOSEException {
         try {
-            // Build JWSHeader from WIT header
-            JWSAlgorithm headerAlgorithm = new JWSAlgorithm(wit.header().algorithm());
-            logger.debug("Building JWSHeader with algorithm: {} (from string: {})", headerAlgorithm, wit.header().algorithm());
-            
-            JWSHeader.Builder headerBuilder = new JWSHeader.Builder(headerAlgorithm)
+            JWSHeader.Builder headerBuilder = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                     .type(new JOSEObjectType(wit.header().type()));
-            
-            // Add key ID if provided
+
             if (!ValidationUtils.isNullOrEmpty(keyId)) {
                 headerBuilder.keyID(keyId);
             }
-            
+
             JWSHeader header = headerBuilder.build();
-            logger.debug("Built JWSHeader: kid={}, alg={}, typ={}", header.getKeyID(), header.getAlgorithm(), header.getType());
 
             // Build JWTClaimsSet from WIT claims
             JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder()

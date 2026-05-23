@@ -20,6 +20,7 @@ import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.token.common.JwkConverter;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
 import com.nimbusds.jose.JOSEObjectType;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -57,6 +58,12 @@ public class WitParser {
         ValidationUtils.validateNotNull(signedJwt, "Signed JWT");
 
         logger.debug("Parsing Workload Identity Token");
+
+        JWSAlgorithm alg = signedJwt.getHeader().getAlgorithm();
+        if (!JWSAlgorithm.EdDSA.equals(alg)) {
+            throw new ParseException(
+                    "WIT alg header must be 'EdDSA', got: " + alg, 0);
+        }
 
         JOSEObjectType typ = signedJwt.getHeader().getType();
         if (typ == null || !EXPECTED_TYP.equals(typ.getType())) {
@@ -145,7 +152,6 @@ public class WitParser {
         // Build header
         WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder()
                 .type(typ)
-                .algorithm(signedJwt.getHeader().getAlgorithm().getName())
                 .build();
 
         // Serialize the JWT to preserve the original JWT string

@@ -17,38 +17,35 @@ package com.alibaba.openagentauth.core.protocol.wimse.wpt;
 
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jose.crypto.Ed25519Signer;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.OctetKeyPair;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link WptSerializer}.
- * Tests verify that WorkloadProofToken objects can be correctly serialized
- * to JWT string representations.
  */
 @DisplayName("WPT Serializer Tests")
 class WptSerializerTest {
 
-    private ECKey signingKey;
+    private OctetKeyPair signingKey;
     private WorkloadProofToken testWpt;
 
     @BeforeEach
     void setUp() throws JOSEException {
-        // Generate EC key pair for signing (ES256 uses P-256 curve)
-        ECKeyGenerator ecKeyGenerator = new ECKeyGenerator(com.nimbusds.jose.jwk.Curve.P_256);
-        signingKey = ecKeyGenerator.keyID("test-key-id").generate();
+        signingKey = new OctetKeyPairGenerator(Curve.Ed25519)
+                .keyID("test-key-id")
+                .generate();
 
-        // Create test WPT
         testWpt = createTestWpt();
     }
 
@@ -59,10 +56,8 @@ class WptSerializerTest {
         @Test
         @DisplayName("Should serialize WPT with required claims")
         void shouldSerializeWptWithRequiredClaims() throws JOSEException {
-            // Act
-            String jwtString = WptSerializer.serialize(testWpt, new ECDSASigner(signingKey));
+            String jwtString = WptSerializer.serialize(testWpt, new Ed25519Signer(signingKey));
 
-            // Assert
             assertThat(jwtString).isNotNull();
             assertThat(jwtString).isNotEmpty();
             assertThat(jwtString).matches("^[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+$");
@@ -71,27 +66,22 @@ class WptSerializerTest {
         @Test
         @DisplayName("Should produce valid JWT structure")
         void shouldProduceValidJwtStructure() throws JOSEException {
-            // Act
-            String jwtString = WptSerializer.serialize(testWpt, new ECDSASigner(signingKey));
+            String jwtString = WptSerializer.serialize(testWpt, new Ed25519Signer(signingKey));
 
-            // Assert
             String[] parts = jwtString.split("\\.");
             assertThat(parts).hasSize(3);
-            assertThat(parts[0]).isNotEmpty(); // header
-            assertThat(parts[1]).isNotEmpty(); // payload
-            assertThat(parts[2]).isNotEmpty(); // signature
+            assertThat(parts[0]).isNotEmpty();
+            assertThat(parts[1]).isNotEmpty();
+            assertThat(parts[2]).isNotEmpty();
         }
 
         @Test
         @DisplayName("Should serialize WPT with audience")
         void shouldSerializeWptWithAudience() throws JOSEException {
-            // Arrange
             WorkloadProofToken wptWithAudience = createTestWptWithAudience();
 
-            // Act
-            String jwtString = WptSerializer.serialize(wptWithAudience, new ECDSASigner(signingKey));
+            String jwtString = WptSerializer.serialize(wptWithAudience, new Ed25519Signer(signingKey));
 
-            // Assert
             assertThat(jwtString).isNotNull();
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"aud\":\"https://api.example.com\"");
@@ -100,18 +90,14 @@ class WptSerializerTest {
         @Test
         @DisplayName("Should serialize WPT with access token hash")
         void shouldSerializeWptWithAccessTokenHash() throws JOSEException {
-            // Arrange
             WorkloadProofToken wptWithAth = createTestWptWithAccessTokenHash();
 
-            // Act
-            String jwtString = WptSerializer.serialize(wptWithAth, new ECDSASigner(signingKey));
+            String jwtString = WptSerializer.serialize(wptWithAth, new Ed25519Signer(signingKey));
 
-            // Assert
             assertThat(jwtString).isNotNull();
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"ath\"");
         }
-
     }
 
     @Nested
@@ -121,8 +107,7 @@ class WptSerializerTest {
         @Test
         @DisplayName("Should throw exception when WPT is null")
         void shouldThrowExceptionWhenWptIsNull() {
-            // Act & Assert
-            assertThatThrownBy(() -> WptSerializer.serialize(null, new ECDSASigner(signingKey)))
+            assertThatThrownBy(() -> WptSerializer.serialize(null, new Ed25519Signer(signingKey)))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("WorkloadProofToken");
         }
@@ -130,7 +115,6 @@ class WptSerializerTest {
         @Test
         @DisplayName("Should throw exception when signer is null")
         void shouldThrowExceptionWhenSignerIsNull() {
-            // Act & Assert
             assertThatThrownBy(() -> WptSerializer.serialize(testWpt, null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("JWSSigner");
@@ -144,10 +128,8 @@ class WptSerializerTest {
         @Test
         @DisplayName("Should include expiration claim")
         void shouldIncludeExpirationClaim() throws JOSEException {
-            // Act
-            String jwtString = WptSerializer.serialize(testWpt, new ECDSASigner(signingKey));
+            String jwtString = WptSerializer.serialize(testWpt, new Ed25519Signer(signingKey));
 
-            // Assert
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"exp\"");
         }
@@ -155,10 +137,8 @@ class WptSerializerTest {
         @Test
         @DisplayName("Should include JWT ID claim")
         void shouldIncludeJwtIdClaim() throws JOSEException {
-            // Act
-            String jwtString = WptSerializer.serialize(testWpt, new ECDSASigner(signingKey));
+            String jwtString = WptSerializer.serialize(testWpt, new Ed25519Signer(signingKey));
 
-            // Assert
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"jti\"");
         }
@@ -166,10 +146,8 @@ class WptSerializerTest {
         @Test
         @DisplayName("Should include workload token hash claim")
         void shouldIncludeWorkloadTokenHashClaim() throws JOSEException {
-            // Act
-            String jwtString = WptSerializer.serialize(testWpt, new ECDSASigner(signingKey));
+            String jwtString = WptSerializer.serialize(testWpt, new Ed25519Signer(signingKey));
 
-            // Assert
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"wth\"");
         }
@@ -180,38 +158,29 @@ class WptSerializerTest {
     class JwtHeaderTests {
 
         @Test
-        @DisplayName("Should include algorithm in header")
+        @DisplayName("Should include EdDSA algorithm in header")
         void shouldIncludeAlgorithmInHeader() throws JOSEException {
-            // Act
-            String jwtString = WptSerializer.serialize(testWpt, new ECDSASigner(signingKey));
+            String jwtString = WptSerializer.serialize(testWpt, new Ed25519Signer(signingKey));
 
-            // Assert
             String header = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[0]));
-            assertThat(header).contains("\"alg\":\"ES256\"");
+            assertThat(header).contains("\"alg\":\"EdDSA\"");
         }
 
         @Test
         @DisplayName("Should include type in header")
         void shouldIncludeTypeInHeader() throws JOSEException {
-            // Act
-            String jwtString = WptSerializer.serialize(testWpt, new ECDSASigner(signingKey));
+            String jwtString = WptSerializer.serialize(testWpt, new Ed25519Signer(signingKey));
 
-            // Assert
             String header = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[0]));
             assertThat(header).contains("\"typ\":\"wpt+jwt\"");
         }
     }
 
-    // Helper methods
-
     private WorkloadProofToken createTestWpt() {
-        // Create header
         WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
                 .type("wpt+jwt")
-                .algorithm("ES256")
                 .build();
 
-        // Create claims
         WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
                 .expirationTime(new Date(System.currentTimeMillis() + 3600000))
                 .jwtId("test-jti-001")
@@ -229,7 +198,6 @@ class WptSerializerTest {
     private WorkloadProofToken createTestWptWithAudience() {
         WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
                 .type("wpt+jwt")
-                .algorithm("ES256")
                 .build();
 
         WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
@@ -250,7 +218,6 @@ class WptSerializerTest {
     private WorkloadProofToken createTestWptWithAccessTokenHash() {
         WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
                 .type("wpt+jwt")
-                .algorithm("ES256")
                 .build();
 
         WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
@@ -267,5 +234,4 @@ class WptSerializerTest {
                 .jwtString("test.wpt.jwt.string")
                 .build();
     }
-
 }

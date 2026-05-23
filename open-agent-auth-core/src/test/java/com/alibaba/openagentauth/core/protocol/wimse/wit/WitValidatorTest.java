@@ -15,19 +15,19 @@
  */
 package com.alibaba.openagentauth.core.protocol.wimse.wit;
 
+import com.alibaba.openagentauth.core.crypto.key.KeyManager;
 import com.alibaba.openagentauth.core.model.identity.AgentIdentity;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.token.common.TokenValidationResult;
 import com.alibaba.openagentauth.core.trust.model.TrustDomain;
-import com.alibaba.openagentauth.core.crypto.key.KeyManager;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.Ed25519Signer;
 import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.jwk.OctetKeyPair;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,42 +47,39 @@ import static org.mockito.ArgumentMatchers.*;
 
 /**
  * Unit tests for {@link WitValidator}.
- * Tests verify compliance with WIMSE WIT protocol specification:
- * https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/
  */
-@DisplayName("WIT Validator Tests - draft-ietf-wimse-workload-creds")
+@DisplayName("WIT Validator Tests")
 class WitValidatorTest {
 
     private static final String VERIFICATION_KEY_ID = "test-verification-key";
-    
+
     private WitValidator witValidator;
-    private RSAKey signingKey;
-    private RSAKey verificationKey;
-    private ECKey wptPublicKey;
+    private OctetKeyPair signingKey;
+    private OctetKeyPair verificationKey;
+    private OctetKeyPair wptPublicKey;
     private TrustDomain trustDomain;
     private WitGenerator witGenerator;
     private KeyManager keyManager;
 
     @BeforeEach
     void setUp() throws JOSEException {
-        // Generate RSA key pair for WIT signing
-        RSAKeyGenerator rsaKeyGenerator = new RSAKeyGenerator(2048);
-        signingKey = rsaKeyGenerator.keyID(VERIFICATION_KEY_ID).generate();
+        signingKey = new OctetKeyPairGenerator(Curve.Ed25519)
+                .keyID(VERIFICATION_KEY_ID)
+                .generate();
         verificationKey = signingKey.toPublicJWK();
 
-        // Generate EC key pair for WPT
-        ECKeyGenerator ecKeyGenerator = new ECKeyGenerator(Curve.P_256);
-        wptPublicKey = ecKeyGenerator.keyID("wpt-key").generate().toPublicJWK();
+        wptPublicKey = new OctetKeyPairGenerator(Curve.Ed25519)
+                .keyID("wpt-key")
+                .generate()
+                .toPublicJWK();
 
         trustDomain = new TrustDomain("wimse://example.com");
-        
-        // Create mock KeyManager
+
         keyManager = mock(KeyManager.class);
         when(keyManager.resolveVerificationKey(anyString())).thenReturn(verificationKey);
-        
-        // Create validator with new constructor
+
         witValidator = new WitValidator(keyManager, VERIFICATION_KEY_ID, trustDomain);
-        witGenerator = new WitGenerator(signingKey, trustDomain, JWSAlgorithm.RS256);
+        witGenerator = new WitGenerator(signingKey, trustDomain);
     }
 
     @Nested
@@ -92,13 +89,10 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should validate valid WIT successfully")
         void shouldValidateValidWitSuccessfully() throws Exception {
-            // Given
             String witJwt = createValidWit();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.isValid()).isTrue();
             assertThat(result.getToken()).isNotNull();
             assertThat(result.getToken().getSubject()).isEqualTo("agent-001");
@@ -107,13 +101,10 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should return parsed token on successful validation")
         void shouldReturnParsedTokenOnSuccessfulValidation() throws Exception {
-            // Given
             String witJwt = createValidWit();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.getToken()).isNotNull();
             assertThat(result.getToken().getIssuer()).isEqualTo(trustDomain.getDomainId());
             assertThat(result.getToken().getConfirmation()).isNotNull();
@@ -128,31 +119,13 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject WIT with invalid signature")
         void shouldRejectWitWithInvalidSignature() throws Exception {
-            // Given
             String witJwt = createValidWit();
             String tamperedWit = tamperWithSignature(witJwt);
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(tamperedWit);
 
-            // Then
             assertThat(result.isValid()).isFalse();
             assertThat(result.getErrorMessage()).contains("Invalid WIT signature");
-        }
-
-        @Test
-        @DisplayName("Should reject WIT with wrong algorithm")
-        void shouldRejectWitWithWrongAlgorithm() throws Exception {
-            // Given
-            // This test would require creating a WIT with a different algorithm
-            // For now, we verify the validator checks for RS256
-            String witJwt = createValidWit();
-
-            // When
-            TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
-
-            // Then - valid WIT should pass
-            assertThat(result.isValid()).isTrue();
         }
     }
 
@@ -163,13 +136,10 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject expired WIT")
         void shouldRejectExpiredWit() throws Exception {
-            // Given
             String witJwt = createExpiredWit();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.isValid()).isFalse();
             assertThat(result.getErrorMessage()).contains("WIT has expired");
         }
@@ -177,13 +147,10 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject WIT without expiration time")
         void shouldRejectWitWithoutExpirationTime() throws Exception {
-            // Given
             String witJwt = createWitWithoutExpiration();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.isValid()).isFalse();
             assertThat(result.getErrorMessage()).contains("WIT has expired");
         }
@@ -196,9 +163,8 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject WIT with wrong trust domain")
         void shouldRejectWitWithWrongTrustDomain() throws Exception {
-            // Given
             TrustDomain wrongTrustDomain = new TrustDomain("wimse://wrong-domain.com");
-            WitGenerator wrongGenerator = new WitGenerator(signingKey, wrongTrustDomain, JWSAlgorithm.RS256);
+            WitGenerator wrongGenerator = new WitGenerator(signingKey, wrongTrustDomain);
             WorkloadIdentityToken wit = wrongGenerator.generateWit(
                     createAgentIdentity().id(),
                     wptPublicKey.toJSONString(),
@@ -206,10 +172,8 @@ class WitValidatorTest {
             );
             String witJwt = wit.jwtString();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.isValid()).isFalse();
             assertThat(result.getErrorMessage()).contains("Invalid trust domain");
         }
@@ -217,13 +181,10 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should accept WIT with correct trust domain")
         void shouldAcceptWitWithCorrectTrustDomain() throws Exception {
-            // Given
             String witJwt = createValidWit();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.isValid()).isTrue();
         }
     }
@@ -235,13 +196,10 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject WIT missing subject claim")
         void shouldRejectWitMissingSubjectClaim() throws Exception {
-            // Given
             String witJwt = createWitWithoutSubject();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.isValid()).isFalse();
             assertThat(result.getErrorMessage()).contains("Missing required claims");
         }
@@ -249,26 +207,20 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject WIT missing expiration claim")
         void shouldRejectWitMissingExpirationClaim() throws Exception {
-            // Given
             String witJwt = createWitWithoutExpiration();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.isValid()).isFalse();
         }
 
         @Test
         @DisplayName("Should reject WIT missing cnf claim")
         void shouldRejectWitMissingCnfClaim() throws Exception {
-            // Given
             String witJwt = createWitWithoutCnf();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.isValid()).isFalse();
             assertThat(result.getErrorMessage()).contains("Missing required claims");
         }
@@ -281,13 +233,10 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject WIT with invalid cnf.jwk")
         void shouldRejectWitWithInvalidCnfJwk() throws Exception {
-            // Given
             String witJwt = createWitWithInvalidCnfJwk();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.isValid()).isFalse();
             assertThat(result.getErrorMessage()).contains("Invalid cnf claim");
         }
@@ -295,13 +244,10 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should accept WIT with valid cnf.jwk")
         void shouldAcceptWitWithValidCnfJwk() throws Exception {
-            // Given
             String witJwt = createValidWit();
 
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
-            // Then
             assertThat(result.isValid()).isTrue();
             assertThat(result.getToken().getConfirmation().jwk()).isNotNull();
         }
@@ -314,10 +260,8 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject null WIT")
         void shouldRejectNullWit() throws ParseException {
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(null);
 
-            // Then
             assertThat(result.isValid()).isFalse();
             assertThat(result.getErrorMessage()).contains("WIT cannot be null or empty");
         }
@@ -325,10 +269,8 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject empty WIT")
         void shouldRejectEmptyWit() throws ParseException {
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate("");
 
-            // Then
             assertThat(result.isValid()).isFalse();
             assertThat(result.getErrorMessage()).contains("WIT cannot be null or empty");
         }
@@ -336,16 +278,12 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject whitespace WIT")
         void shouldRejectWhitespaceWit() throws ParseException {
-            // When
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate("   ");
 
-            // Then
             assertThat(result.isValid()).isFalse();
             assertThat(result.getErrorMessage()).contains("WIT cannot be null or empty");
         }
     }
-
-    // Helper methods
 
     private String createValidWit() throws JOSEException {
         WorkloadIdentityToken wit = witGenerator.generateWit(
@@ -357,9 +295,7 @@ class WitValidatorTest {
     }
 
     private String createExpiredWit() throws JOSEException {
-        // Create a WIT that expired in the past
-        // Use manual JWT construction to set expiration time to the past
-        Instant expirationTime = Instant.now().minusSeconds(3600); // Expired 1 hour ago
+        Instant expirationTime = Instant.now().minusSeconds(3600);
 
         Map<String, Object> cnfClaim = new HashMap<>();
         cnfClaim.put("jwk", wptPublicKey.toJSONObject());
@@ -373,24 +309,18 @@ class WitValidatorTest {
                 .build();
 
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.RS256)
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                         .keyID(signingKey.getKeyID())
+                        .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
         );
 
-        try {
-            signedJwt.sign(new com.nimbusds.jose.crypto.RSASSASigner(signingKey));
-        } catch (JOSEException e) {
-            throw new JOSEException("Failed to sign expired WIT", e);
-        }
-
+        signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
     }
 
     private String createWitWithoutExpiration() throws JOSEException {
-        // Create a WIT without expiration time
-        // Use manual JWT construction to omit the expiration claim
         Map<String, Object> cnfClaim = new HashMap<>();
         cnfClaim.put("jwk", wptPublicKey.toJSONObject());
 
@@ -402,24 +332,18 @@ class WitValidatorTest {
                 .build();
 
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.RS256)
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                         .keyID(signingKey.getKeyID())
+                        .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
         );
 
-        try {
-            signedJwt.sign(new com.nimbusds.jose.crypto.RSASSASigner(signingKey));
-        } catch (JOSEException e) {
-            throw new JOSEException("Failed to sign WIT without expiration", e);
-        }
-
+        signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
     }
 
     private String createWitWithoutSubject() throws JOSEException {
-        // Create a WIT without subject claim
-        // Use manual JWT construction to omit the subject claim
         Map<String, Object> cnfClaim = new HashMap<>();
         cnfClaim.put("jwk", wptPublicKey.toJSONObject());
 
@@ -431,25 +355,18 @@ class WitValidatorTest {
                 .build();
 
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.RS256)
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                         .keyID(signingKey.getKeyID())
+                        .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
         );
 
-        try {
-            signedJwt.sign(new com.nimbusds.jose.crypto.RSASSASigner(signingKey));
-        } catch (JOSEException e) {
-            throw new JOSEException("Failed to sign WIT without subject", e);
-        }
-
+        signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
     }
 
     private String createWitWithoutCnf() throws JOSEException {
-        // Create a WIT without cnf claim
-        // According to draft-ietf-wimse-workload-creds, cnf is OPTIONAL
-        // Use manual JWT construction to omit the cnf claim
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .issuer(trustDomain.getDomainId())
                 .subject("agent-001")
@@ -458,28 +375,21 @@ class WitValidatorTest {
                 .build();
 
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.RS256)
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                         .keyID(signingKey.getKeyID())
+                        .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
         );
 
-        try {
-            signedJwt.sign(new com.nimbusds.jose.crypto.RSASSASigner(signingKey));
-        } catch (JOSEException e) {
-            throw new JOSEException("Failed to sign WIT without cnf", e);
-        }
-
+        signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
     }
 
     private String createWitWithInvalidCnfJwk() throws JOSEException {
-        // Create a WIT with invalid cnf.jwk
-        // Use manual JWT construction to create an invalid JWK
         Map<String, Object> invalidJwk = new HashMap<>();
-        invalidJwk.put("kty", "INVALID"); // Invalid key type
+        invalidJwk.put("kty", "INVALID");
         invalidJwk.put("x", "invalid-x");
-        invalidJwk.put("y", "invalid-y");
 
         Map<String, Object> cnfClaim = new HashMap<>();
         cnfClaim.put("jwk", invalidJwk);
@@ -493,29 +403,21 @@ class WitValidatorTest {
                 .build();
 
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.RS256)
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                         .keyID(signingKey.getKeyID())
+                        .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
         );
 
-        try {
-            signedJwt.sign(new com.nimbusds.jose.crypto.RSASSASigner(signingKey));
-        } catch (JOSEException e) {
-            throw new JOSEException("Failed to sign WIT with invalid cnf.jwk", e);
-        }
-
+        signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
     }
 
     private String tamperWithSignature(String witJwt) {
-        // Tamper with the signature by modifying the last part of the JWT
-        // JWT format: header.payload.signature
-        // We modify the signature part to make it invalid
         if (witJwt.length() > 0) {
             String[] parts = witJwt.split("\\.");
             if (parts.length == 3) {
-                // Modify the signature part by replacing characters
                 String signature = parts[2];
                 String tamperedSignature = signature.replace('A', 'B').replace('a', 'b');
                 return parts[0] + "." + parts[1] + "." + tamperedSignature;

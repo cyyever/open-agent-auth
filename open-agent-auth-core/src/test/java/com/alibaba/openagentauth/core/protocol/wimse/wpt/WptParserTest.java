@@ -20,9 +20,13 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.Ed25519Signer;
+import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jose.jwk.OctetKeyPair;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,34 +37,29 @@ import org.junit.jupiter.api.Test;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link WptParser}.
- * Tests verify compliance with WIMSE WPT protocol specification:
- * https://datatracker.ietf.org/doc/draft-ietf-wimse-wpt-00.html
  */
-@DisplayName("WPT Parser Tests - draft-ietf-wimse-wpt-00")
+@DisplayName("WPT Parser Tests")
 class WptParserTest {
 
     private WptParser wptParser;
-    private ECKey signingKey;
+    private OctetKeyPair signingKey;
     private String sampleWit;
     private String sampleAccessToken;
 
     @BeforeEach
     void setUp() throws JOSEException {
         wptParser = new WptParser();
-        
-        // Generate EC key pair for WPT signing
-        ECKeyGenerator ecKeyGenerator = new ECKeyGenerator(Curve.P_256);
-        signingKey = ecKeyGenerator.keyID("wpt-signing-key").generate();
-        
-        // Sample tokens for hash computation
+
+        signingKey = new OctetKeyPairGenerator(Curve.Ed25519)
+                .keyID("wpt-signing-key")
+                .generate();
+
         sampleWit = "sample-wit-jwt-string";
         sampleAccessToken = "sample-access-token";
     }
@@ -72,13 +71,10 @@ class WptParserTest {
         @Test
         @DisplayName("Should parse valid WPT successfully")
         void shouldParseValidWptSuccessfully() throws Exception {
-            // Given
             String wptJwt = createValidWpt();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt).isNotNull();
             assertThat(wpt.header()).isNotNull();
             assertThat(wpt.claims()).isNotNull();
@@ -89,15 +85,11 @@ class WptParserTest {
         @Test
         @DisplayName("Should parse WPT with all required claims")
         void shouldParseWptWithAllRequiredClaims() throws Exception {
-            // Given
             String wptJwt = createValidWpt();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt.header().type()).isEqualTo("wpt+jwt");
-            assertThat(wpt.header().algorithm()).isEqualTo("ES256");
             assertThat(wpt.claims().audience()).isEqualTo("[resource-server]");
             assertThat(wpt.claims().jwtId()).isNotNull();
             assertThat(wpt.claims().workloadTokenHash()).isNotNull();
@@ -106,13 +98,10 @@ class WptParserTest {
         @Test
         @DisplayName("Should parse WPT with optional claims")
         void shouldParseWptWithOptionalClaims() throws Exception {
-            // Given
             String wptJwt = createWptWithOptionalClaims();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt.claims().accessTokenHash()).isNotNull();
         }
 
@@ -133,7 +122,6 @@ class WptParserTest {
         @Test
         @DisplayName("Should throw exception when WPT is null")
         void shouldThrowExceptionWhenWptIsNull() {
-            // When & Then
             assertThatThrownBy(() -> wptParser.parse(null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("WPT JWT string cannot be null or empty");
@@ -142,7 +130,6 @@ class WptParserTest {
         @Test
         @DisplayName("Should throw exception when WPT is empty")
         void shouldThrowExceptionWhenWptIsEmpty() {
-            // When & Then
             assertThatThrownBy(() -> wptParser.parse(""))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("WPT JWT string cannot be null or empty");
@@ -151,7 +138,6 @@ class WptParserTest {
         @Test
         @DisplayName("Should throw exception when WPT is whitespace")
         void shouldThrowExceptionWhenWptIsWhitespace() {
-            // When & Then
             assertThatThrownBy(() -> wptParser.parse("   "))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("WPT JWT string cannot be null or empty");
@@ -160,10 +146,8 @@ class WptParserTest {
         @Test
         @DisplayName("Should throw exception when WPT is malformed")
         void shouldThrowExceptionWhenWptIsMalformed() {
-            // Given
             String malformedWpt = "not-a-valid-jwt";
 
-            // When & Then
             assertThatThrownBy(() -> wptParser.parse(malformedWpt))
                     .isInstanceOf(ParseException.class);
         }
@@ -176,26 +160,20 @@ class WptParserTest {
         @Test
         @DisplayName("Should parse audience claim correctly")
         void shouldParseAudienceClaimCorrectly() throws Exception {
-            // Given
             String wptJwt = createValidWpt();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt.claims().audience()).isEqualTo("[resource-server]");
         }
 
         @Test
         @DisplayName("Should parse expiration time claim correctly")
         void shouldParseExpirationTimeClaimCorrectly() throws Exception {
-            // Given
             String wptJwt = createValidWpt();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt.claims().expirationTime()).isNotNull();
             assertThat(wpt.claims().expirationTime()).isAfter(new Date());
         }
@@ -203,52 +181,40 @@ class WptParserTest {
         @Test
         @DisplayName("Should parse JWT ID claim correctly")
         void shouldParseJwtIdClaimCorrectly() throws Exception {
-            // Given
             String wptJwt = createValidWpt();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt.claims().jwtId()).isNotNull();
         }
 
         @Test
         @DisplayName("Should parse workload token hash claim correctly")
         void shouldParseWorkloadTokenHashClaimCorrectly() throws Exception {
-            // Given
             String wptJwt = createValidWpt();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt.claims().workloadTokenHash()).isNotNull();
         }
 
         @Test
         @DisplayName("Should parse access token hash claim correctly")
         void shouldParseAccessTokenHashClaimCorrectly() throws Exception {
-            // Given
             String wptJwt = createWptWithOptionalClaims();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt.claims().accessTokenHash()).isNotNull();
         }
 
         @Test
         @DisplayName("Should handle null optional claims")
         void shouldHandleNullOptionalClaims() throws Exception {
-            // Given
             String wptJwt = createValidWpt();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt.claims().accessTokenHash()).isNull();
         }
     }
@@ -258,25 +224,35 @@ class WptParserTest {
     class HeaderParsingTests {
 
         @Test
-        @DisplayName("Should parse header algorithm correctly")
-        void shouldParseHeaderAlgorithmCorrectly() throws Exception {
-            // Given
-            String wptJwt = createValidWpt();
-
-            // When
-            WorkloadProofToken wpt = wptParser.parse(wptJwt);
-
-            // Then
-            assertThat(wpt.header().algorithm()).isEqualTo("ES256");
-        }
-
-        @Test
         @DisplayName("Should reject WPT without typ header")
         void shouldRejectWptWithoutTypHeader() throws Exception {
             String wptJwt = createWptWithoutTyp();
             assertThatThrownBy(() -> wptParser.parse(wptJwt))
                     .isInstanceOf(ParseException.class)
                     .hasMessageContaining("typ header must be 'wpt+jwt'");
+        }
+
+        @Test
+        @DisplayName("Should reject WPT signed with non-EdDSA algorithm")
+        void shouldRejectWptSignedWithNonEdDsaAlgorithm() throws Exception {
+            RSAKey rsaKey = new RSAKeyGenerator(2048).keyID("rs-key").generate();
+            JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                    .audience("resource-server")
+                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                    .jwtID(java.util.UUID.randomUUID().toString())
+                    .claim("wth", computeHash(sampleWit))
+                    .build();
+            SignedJWT rsaSigned = new SignedJWT(
+                    new JWSHeader.Builder(JWSAlgorithm.RS256)
+                            .keyID(rsaKey.getKeyID())
+                            .type(new JOSEObjectType("wpt+jwt"))
+                            .build(),
+                    claims);
+            rsaSigned.sign(new RSASSASigner(rsaKey));
+
+            assertThatThrownBy(() -> wptParser.parse(rsaSigned.serialize()))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("alg header must be 'EdDSA'");
         }
     }
 
@@ -287,26 +263,20 @@ class WptParserTest {
         @Test
         @DisplayName("Should preserve original JWT string")
         void shouldPreserveOriginalJwtString() throws Exception {
-            // Given
             String wptJwt = createValidWpt();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt.jwtString()).isEqualTo(wptJwt);
         }
 
         @Test
         @DisplayName("Should extract signature correctly")
         void shouldExtractSignatureCorrectly() throws Exception {
-            // Given
             String wptJwt = createValidWpt();
 
-            // When
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            // Then
             assertThat(wpt.signature()).isNotNull();
             String[] parts = wptJwt.split("\\.");
             assertThat(parts).hasSize(3);
@@ -314,10 +284,7 @@ class WptParserTest {
         }
     }
 
-    // Helper methods
-
     private String createValidWpt() throws JOSEException {
-        // Create a valid WPT with required claims
         Instant expirationTime = Instant.now().plusSeconds(3600);
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -328,19 +295,18 @@ class WptParserTest {
                 .build();
 
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.ES256)
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                         .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wpt+jwt"))
                         .build(),
                 claimsSet
         );
 
-        signedJwt.sign(new com.nimbusds.jose.crypto.ECDSASigner(signingKey));
+        signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
     }
 
     private String createWptWithOptionalClaims() throws JOSEException {
-        // Create a WPT with all optional claims
         Instant expirationTime = Instant.now().plusSeconds(3600);
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -352,19 +318,18 @@ class WptParserTest {
                 .build();
 
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.ES256)
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                         .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wpt+jwt"))
                         .build(),
                 claimsSet
         );
 
-        signedJwt.sign(new com.nimbusds.jose.crypto.ECDSASigner(signingKey));
+        signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
     }
 
     private String createWptWithCustomTyp() throws JOSEException {
-        // Create a WPT with custom typ header
         Instant expirationTime = Instant.now().plusSeconds(3600);
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -375,19 +340,18 @@ class WptParserTest {
                 .build();
 
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.ES256)
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                         .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("custom-type"))
                         .build(),
                 claimsSet
         );
 
-        signedJwt.sign(new com.nimbusds.jose.crypto.ECDSASigner(signingKey));
+        signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
     }
 
     private String createWptWithoutTyp() throws JOSEException {
-        // Create a WPT without typ header
         Instant expirationTime = Instant.now().plusSeconds(3600);
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -398,19 +362,17 @@ class WptParserTest {
                 .build();
 
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.ES256)
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                         .keyID(signingKey.getKeyID())
                         .build(),
                 claimsSet
         );
 
-        signedJwt.sign(new com.nimbusds.jose.crypto.ECDSASigner(signingKey));
+        signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
     }
 
     private String computeHash(String input) {
-        // Simplified hash computation for testing
-        // In real implementation, this would be BASE64URL(SHA-256(ASCII(input)))
         return "hash-" + java.util.Base64.getUrlEncoder()
                 .withoutPadding()
                 .encodeToString(input.getBytes());

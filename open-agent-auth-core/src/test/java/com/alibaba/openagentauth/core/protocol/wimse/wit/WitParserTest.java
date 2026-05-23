@@ -21,11 +21,12 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.Ed25519Signer;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -44,27 +45,26 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Unit tests for {@link WitParser}.
- * Tests verify compliance with WIMSE WIT protocol specification:
- * https://datatracker.ietf.org/doc/draft-ietf-wimse-workload-creds/
  */
-@DisplayName("WIT Parser Tests - draft-ietf-wimse-workload-creds")
+@DisplayName("WIT Parser Tests")
 class WitParserTest {
 
     private WitParser witParser;
-    private RSAKey signingKey;
-    private ECKey wptPublicKey;
+    private OctetKeyPair signingKey;
+    private OctetKeyPair wptPublicKey;
 
     @BeforeEach
     void setUp() throws JOSEException {
         witParser = new WitParser();
-        
-        // Generate RSA key pair for WIT signing
-        RSAKeyGenerator rsaKeyGenerator = new RSAKeyGenerator(2048);
-        signingKey = rsaKeyGenerator.keyID("wit-signing-key").generate();
-        
-        // Generate EC key pair for WPT
-        ECKeyGenerator ecKeyGenerator = new ECKeyGenerator(Curve.P_256);
-        wptPublicKey = ecKeyGenerator.keyID("wpt-key").generate().toPublicJWK();
+
+        signingKey = new OctetKeyPairGenerator(Curve.Ed25519)
+                .keyID("wit-signing-key")
+                .generate();
+
+        wptPublicKey = new OctetKeyPairGenerator(Curve.Ed25519)
+                .keyID("wpt-key")
+                .generate()
+                .toPublicJWK();
     }
 
     @Nested
@@ -74,13 +74,10 @@ class WitParserTest {
         @Test
         @DisplayName("Should parse valid WIT with all claims")
         void shouldParseValidWitWithAllClaims() throws Exception {
-            // Given
             SignedJWT signedJwt = createSignedJwtWithAllClaims();
 
-            // When
             WorkloadIdentityToken wit = witParser.parse(signedJwt);
 
-            // Then
             assertThat(wit).isNotNull();
             assertThat(wit.getSubject()).isEqualTo("agent-001");
             assertThat(wit.getIssuer()).isEqualTo("wimse://example.com");
@@ -92,49 +89,37 @@ class WitParserTest {
         @Test
         @DisplayName("Should parse cnf claim with jwk")
         void shouldParseCnfClaimWithJwk() throws Exception {
-            // Given
             SignedJWT signedJwt = createSignedJwtWithCnfJwk();
 
-            // When
             WorkloadIdentityToken wit = witParser.parse(signedJwt);
 
-            // Then
             assertThat(wit.getConfirmation()).isNotNull();
             assertThat(wit.getConfirmation().jwk()).isNotNull();
-            assertThat(wit.getConfirmation().jwk().keyType()).isEqualTo(Jwk.KeyType.EC);
-            assertThat(wit.getConfirmation().jwk().algorithm()).isEqualTo("ES256");
+            assertThat(wit.getConfirmation().jwk().keyType()).isEqualTo(Jwk.KeyType.OKP);
         }
 
         @Test
         @DisplayName("Should parse header correctly")
         void shouldParseHeaderCorrectly() throws Exception {
-            // Given
             SignedJWT signedJwt = createSignedJwtWithAllClaims();
 
-            // When
             WorkloadIdentityToken wit = witParser.parse(signedJwt);
 
-            // Then
             assertThat(wit.header()).isNotNull();
             assertThat(wit.header().type()).isEqualTo("wit+jwt");
-            assertThat(wit.header().algorithm()).isEqualTo("RS256");
         }
 
         @Test
         @DisplayName("Should parse WIT without optional claims")
         void shouldParseWitWithoutOptionalClaims() throws Exception {
-            // Given
             SignedJWT signedJwt = createSignedJwtWithRequiredClaimsOnly();
 
-            // When
             WorkloadIdentityToken wit = witParser.parse(signedJwt);
 
-            // Then
             assertThat(wit).isNotNull();
             assertThat(wit.getSubject()).isNotNull();
             assertThat(wit.getExpirationTime()).isNotNull();
             assertThat(wit.getConfirmation()).isNotNull();
-            // Optional claims may be null
             assertThat(wit.getIssuer()).isNull();
             assertThat(wit.getJwtId()).isNull();
         }
@@ -147,7 +132,6 @@ class WitParserTest {
         @Test
         @DisplayName("Should throw exception when signedJwt is null")
         void shouldThrowExceptionWhenSignedJwtIsNull() {
-            // When & Then
             assertThatThrownBy(() -> witParser.parse(null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Signed JWT cannot be null");
@@ -156,10 +140,8 @@ class WitParserTest {
         @Test
         @DisplayName("Should throw exception when cnf claim missing jwk")
         void shouldThrowExceptionWhenCnfClaimMissingJwk() throws Exception {
-            // Given
             SignedJWT signedJwt = createSignedJwtWithCnfMissingJwk();
 
-            // When & Then
             assertThatThrownBy(() -> witParser.parse(signedJwt))
                     .isInstanceOf(ParseException.class)
                     .hasMessageContaining("cnf claim missing required 'jwk' field");
@@ -168,10 +150,8 @@ class WitParserTest {
         @Test
         @DisplayName("Should throw exception when cnf.jwk is invalid")
         void shouldThrowExceptionWhenCnfJwkIsInvalid() throws Exception {
-            // Given
             SignedJWT signedJwt = createSignedJwtWithInvalidCnfJwk();
 
-            // When & Then
             assertThatThrownBy(() -> witParser.parse(signedJwt))
                     .isInstanceOf(ParseException.class)
                     .hasMessageContaining("Failed to parse cnf.jwk claim");
@@ -180,21 +160,36 @@ class WitParserTest {
         @Test
         @DisplayName("Should parse WIT without cnf claim")
         void shouldParseWitWithoutCnfClaim() throws Exception {
-            // Given
             SignedJWT signedJwt = createSignedJwtWithoutCnf();
 
-            // When
             WorkloadIdentityToken wit = witParser.parse(signedJwt);
 
-            // Then
             assertThat(wit).isNotNull();
             assertThat(wit.getConfirmation()).isNull();
         }
+
+        @Test
+        @DisplayName("Should reject WIT signed with non-EdDSA algorithm")
+        void shouldRejectWitSignedWithNonEdDsaAlgorithm() throws Exception {
+            RSAKey rsaKey = new RSAKeyGenerator(2048).keyID("rs-key").generate();
+            JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                    .subject("agent-001")
+                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                    .build();
+            SignedJWT rsaSigned = new SignedJWT(
+                    new JWSHeader.Builder(JWSAlgorithm.RS256)
+                            .keyID(rsaKey.getKeyID())
+                            .type(new JOSEObjectType("wit+jwt"))
+                            .build(),
+                    claims);
+            rsaSigned.sign(new RSASSASigner(rsaKey));
+
+            assertThatThrownBy(() -> witParser.parse(rsaSigned))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("alg header must be 'EdDSA'");
+        }
     }
 
-    /**
-     * Creates a signed JWT with all claims.
-     */
     private SignedJWT createSignedJwtWithAllClaims() throws Exception {
         Map<String, Object> cnfClaim = new HashMap<>();
         cnfClaim.put("jwk", createJwkMap());
@@ -210,9 +205,6 @@ class WitParserTest {
         return signJwt(claimsSet);
     }
 
-    /**
-     * Creates a signed JWT with cnf.jwk.
-     */
     private SignedJWT createSignedJwtWithCnfJwk() throws Exception {
         Map<String, Object> cnfClaim = new HashMap<>();
         cnfClaim.put("jwk", createJwkMap());
@@ -226,9 +218,6 @@ class WitParserTest {
         return signJwt(claimsSet);
     }
 
-    /**
-     * Creates a signed JWT with required claims only.
-     */
     private SignedJWT createSignedJwtWithRequiredClaimsOnly() throws Exception {
         Map<String, Object> cnfClaim = new HashMap<>();
         cnfClaim.put("jwk", createJwkMap());
@@ -242,12 +231,8 @@ class WitParserTest {
         return signJwt(claimsSet);
     }
 
-    /**
-     * Creates a signed JWT with cnf claim missing jwk.
-     */
     private SignedJWT createSignedJwtWithCnfMissingJwk() throws Exception {
         Map<String, Object> cnfClaim = new HashMap<>();
-        // Missing jwk field
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject("agent-001")
@@ -258,9 +243,6 @@ class WitParserTest {
         return signJwt(claimsSet);
     }
 
-    /**
-     * Creates a signed JWT with invalid cnf.jwk.
-     */
     private SignedJWT createSignedJwtWithInvalidCnfJwk() throws Exception {
         Map<String, Object> cnfClaim = new HashMap<>();
         Map<String, Object> invalidJwk = new HashMap<>();
@@ -276,9 +258,6 @@ class WitParserTest {
         return signJwt(claimsSet);
     }
 
-    /**
-     * Creates a signed JWT without cnf claim.
-     */
     private SignedJWT createSignedJwtWithoutCnf() throws Exception {
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject("agent-001")
@@ -288,34 +267,21 @@ class WitParserTest {
         return signJwt(claimsSet);
     }
 
-    /**
-     * Creates a JWK map from the test public key.
-     * <p>
-     * Ensures the JWK includes the algorithm field (alg) as required by WIMSE protocol.
-     * According to draft-ietf-wimse-workload-creds, the cnf.jwk should specify the algorithm
-     * used for WPT verification.
-     * </p>
-     */
-    private Map<String, Object> createJwkMap() throws Exception {
+    private Map<String, Object> createJwkMap() {
         Map<String, Object> jwkMap = wptPublicKey.toJSONObject();
-        // Ensure the algorithm field is present
-        // For EC P-256 keys, the algorithm should be ES256
-        jwkMap.put("alg", "ES256");
+        jwkMap.put("alg", "EdDSA");
         return jwkMap;
     }
 
-    /**
-     * Signs a JWT claims set.
-     */
     private SignedJWT signJwt(JWTClaimsSet claimsSet) throws Exception {
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.RS256)
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                         .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
         );
-        signedJwt.sign(new RSASSASigner(signingKey));
+        signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt;
     }
 }

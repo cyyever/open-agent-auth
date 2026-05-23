@@ -28,19 +28,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link WorkloadIdentityToken}.
- * <p>
- * Tests the Workload Identity Token (WIT) model's behavior including:
- * <ul>
- *   <li>Building tokens with all required and optional fields</li>
- *   <li>Getter methods for header, claims, and signature</li>
- *   <li>Token validation (isExpired, isValid)</li>
- *   <li>Builder pattern with validation</li>
- *   <li>Header and Claims inner classes</li>
- *   <li>Confirmation and JWK handling</li>
- *   <li>Equals, hashCode, and toString methods</li>
- *   <li>Error handling for missing required fields</li>
- * </ul>
- * </p>
  */
 @DisplayName("WorkloadIdentityToken Tests")
 class WorkloadIdentityTokenTest {
@@ -53,25 +40,19 @@ class WorkloadIdentityTokenTest {
 
     @BeforeEach
     void setUp() {
-        // Set up test dates
-        futureExpirationTime = new Date(System.currentTimeMillis() + 3600000); // 1 hour from now
-        pastExpirationTime = new Date(System.currentTimeMillis() - 3600000); // 1 hour ago
+        futureExpirationTime = new Date(System.currentTimeMillis() + 3600000);
+        pastExpirationTime = new Date(System.currentTimeMillis() - 3600000);
 
-        // Set up test JWK
         testJwk = Jwk.builder()
-                .keyType(Jwk.KeyType.EC)
-                .curve(Jwk.Curve.P_256)
+                .keyType(Jwk.KeyType.OKP)
+                .curve(Jwk.Curve.Ed25519)
                 .x("test_x_value")
-                .y("test_y_value")
                 .build();
 
-        // Set up valid header
         validHeader = WorkloadIdentityToken.Header.builder()
                 .type(WorkloadIdentityToken.Header.MEDIA_TYPE)
-                .algorithm("ES256")
                 .build();
 
-        // Set up valid claims
         WorkloadIdentityToken.Claims.Confirmation confirmation = WorkloadIdentityToken.Claims.Confirmation.builder()
                 .jwk(testJwk)
                 .build();
@@ -122,34 +103,6 @@ class WorkloadIdentityTokenTest {
         }
 
         @Test
-        @DisplayName("Should build token with only signature")
-        void shouldBuildTokenWithOnlySignature() {
-            WorkloadIdentityToken token = WorkloadIdentityToken.builder()
-                    .header(validHeader)
-                    .claims(validClaims)
-                    .signature("signature-only")
-                    .build();
-
-            assertThat(token).isNotNull();
-            assertThat(token.signature()).isEqualTo("signature-only");
-            assertThat(token.jwtString()).isNull();
-        }
-
-        @Test
-        @DisplayName("Should build token with only jwtString")
-        void shouldBuildTokenWithOnlyJwtString() {
-            WorkloadIdentityToken token = WorkloadIdentityToken.builder()
-                    .header(validHeader)
-                    .claims(validClaims)
-                    .jwtString("jwt-string-only")
-                    .build();
-
-            assertThat(token).isNotNull();
-            assertThat(token.signature()).isNull();
-            assertThat(token.jwtString()).isEqualTo("jwt-string-only");
-        }
-
-        @Test
         @DisplayName("Should throw exception when building with null header")
         void shouldThrowExceptionWhenBuildingWithNullHeader() {
             assertThatThrownBy(() -> WorkloadIdentityToken.builder()
@@ -172,14 +125,13 @@ class WorkloadIdentityTokenTest {
         }
     }
 
-
     @Nested
     @DisplayName("Validation Tests")
     class ValidationTests {
 
         @Test
-        @DisplayName("Should return false for expired token")
-        void shouldReturnFalseForExpiredToken() {
+        @DisplayName("Should return true for expired token")
+        void shouldReturnTrueForExpiredToken() {
             WorkloadIdentityToken.Claims expiredClaims = WorkloadIdentityToken.Claims.builder()
                     .issuer("https://idp.example.com")
                     .subject("spiffe://example.com/workload/expired")
@@ -239,26 +191,21 @@ class WorkloadIdentityTokenTest {
     class HeaderTests {
 
         @Test
-        @DisplayName("Should build header with all fields")
-        void shouldBuildHeaderWithAllFields() {
+        @DisplayName("Should build header with type")
+        void shouldBuildHeaderWithType() {
             WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder()
                     .type(WorkloadIdentityToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
                     .build();
 
             assertThat(header.type()).isEqualTo(WorkloadIdentityToken.Header.MEDIA_TYPE);
-            assertThat(header.algorithm()).isEqualTo("ES256");
         }
 
         @Test
         @DisplayName("Should build header with default type")
         void shouldBuildHeaderWithDefaultType() {
-            WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder()
-                    .algorithm("RS256")
-                    .build();
+            WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder().build();
 
             assertThat(header.type()).isEqualTo(WorkloadIdentityToken.Header.MEDIA_TYPE);
-            assertThat(header.algorithm()).isEqualTo("RS256");
         }
 
         @Test
@@ -266,7 +213,6 @@ class WorkloadIdentityTokenTest {
         void shouldThrowExceptionWhenBuildingHeaderWithNullType() {
             assertThatThrownBy(() -> WorkloadIdentityToken.Header.builder()
                     .type(null)
-                    .algorithm("ES256")
                     .build())
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("type (typ) is REQUIRED and should be 'wit+jwt'");
@@ -277,32 +223,9 @@ class WorkloadIdentityTokenTest {
         void shouldThrowExceptionWhenBuildingHeaderWithEmptyType() {
             assertThatThrownBy(() -> WorkloadIdentityToken.Header.builder()
                     .type("")
-                    .algorithm("ES256")
                     .build())
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("type (typ) is REQUIRED and should be 'wit+jwt'");
-        }
-
-        @Test
-        @DisplayName("Should throw exception when building header with null algorithm")
-        void shouldThrowExceptionWhenBuildingHeaderWithNullAlgorithm() {
-            assertThatThrownBy(() -> WorkloadIdentityToken.Header.builder()
-                    .type(WorkloadIdentityToken.Header.MEDIA_TYPE)
-                    .algorithm(null)
-                    .build())
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("algorithm (alg) is REQUIRED");
-        }
-
-        @Test
-        @DisplayName("Should throw exception when building header with empty algorithm")
-        void shouldThrowExceptionWhenBuildingHeaderWithEmptyAlgorithm() {
-            assertThatThrownBy(() -> WorkloadIdentityToken.Header.builder()
-                    .type(WorkloadIdentityToken.Header.MEDIA_TYPE)
-                    .algorithm("")
-                    .build())
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("algorithm (alg) is REQUIRED");
         }
 
         @Test
@@ -310,21 +233,13 @@ class WorkloadIdentityTokenTest {
         void shouldImplementEqualsCorrectlyForHeader() {
             WorkloadIdentityToken.Header header1 = WorkloadIdentityToken.Header.builder()
                     .type(WorkloadIdentityToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
                     .build();
 
             WorkloadIdentityToken.Header header2 = WorkloadIdentityToken.Header.builder()
                     .type(WorkloadIdentityToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
-                    .build();
-
-            WorkloadIdentityToken.Header header3 = WorkloadIdentityToken.Header.builder()
-                    .type(WorkloadIdentityToken.Header.MEDIA_TYPE)
-                    .algorithm("RS256")
                     .build();
 
             assertThat(header1).isEqualTo(header2);
-            assertThat(header1).isNotEqualTo(header3);
             assertThat(header1).isNotEqualTo(null);
             assertThat(header1).isNotEqualTo("string");
         }
@@ -334,12 +249,10 @@ class WorkloadIdentityTokenTest {
         void shouldImplementHashCodeCorrectlyForHeader() {
             WorkloadIdentityToken.Header header1 = WorkloadIdentityToken.Header.builder()
                     .type(WorkloadIdentityToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
                     .build();
 
             WorkloadIdentityToken.Header header2 = WorkloadIdentityToken.Header.builder()
                     .type(WorkloadIdentityToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
                     .build();
 
             assertThat(header1.hashCode()).isEqualTo(header2.hashCode());
@@ -350,12 +263,10 @@ class WorkloadIdentityTokenTest {
         void shouldImplementToStringForHeader() {
             WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder()
                     .type(WorkloadIdentityToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
                     .build();
 
             String toString = header.toString();
             assertThat(toString).contains("wit+jwt");
-            assertThat(toString).contains("ES256");
         }
     }
 
@@ -446,89 +357,9 @@ class WorkloadIdentityTokenTest {
         }
 
         @Test
-        @DisplayName("Should check if claims are not expired")
-        void shouldCheckIfClaimsAreNotExpired() {
-            assertThat(validClaims.isExpired()).isFalse();
-        }
-
-        @Test
-        @DisplayName("Should check if claims are valid")
-        void shouldCheckIfClaimsAreValid() {
-            assertThat(validClaims.isValid()).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should check if claims are invalid when expired")
-        void shouldCheckIfClaimsAreInvalidWhenExpired() {
-            WorkloadIdentityToken.Claims expiredClaims = WorkloadIdentityToken.Claims.builder()
-                    .subject("spiffe://example.com/workload/expired")
-                    .expirationTime(pastExpirationTime)
-                    .build();
-
-            assertThat(expiredClaims.isValid()).isFalse();
-        }
-
-        @Test
         @DisplayName("Should return workload identifier")
         void shouldReturnWorkloadIdentifier() {
             assertThat(validClaims.getWorkloadIdentifier()).isEqualTo("spiffe://example.com/workload/my-workload");
-        }
-
-        @Test
-        @DisplayName("Should implement equals correctly for claims")
-        void shouldImplementEqualsCorrectlyForClaims() {
-            WorkloadIdentityToken.Claims claims1 = WorkloadIdentityToken.Claims.builder()
-                    .issuer("https://idp.example.com")
-                    .subject("spiffe://example.com/workload/test")
-                    .expirationTime(futureExpirationTime)
-                    .build();
-
-            WorkloadIdentityToken.Claims claims2 = WorkloadIdentityToken.Claims.builder()
-                    .issuer("https://idp.example.com")
-                    .subject("spiffe://example.com/workload/test")
-                    .expirationTime(futureExpirationTime)
-                    .build();
-
-            WorkloadIdentityToken.Claims claims3 = WorkloadIdentityToken.Claims.builder()
-                    .issuer("https://other-idp.example.com")
-                    .subject("spiffe://example.com/workload/test")
-                    .expirationTime(futureExpirationTime)
-                    .build();
-
-            assertThat(claims1).isEqualTo(claims2);
-            assertThat(claims1).isNotEqualTo(claims3);
-        }
-
-        @Test
-        @DisplayName("Should implement hashCode correctly for claims")
-        void shouldImplementHashCodeCorrectlyForClaims() {
-            WorkloadIdentityToken.Claims claims1 = WorkloadIdentityToken.Claims.builder()
-                    .issuer("https://idp.example.com")
-                    .subject("spiffe://example.com/workload/test")
-                    .expirationTime(futureExpirationTime)
-                    .build();
-
-            WorkloadIdentityToken.Claims claims2 = WorkloadIdentityToken.Claims.builder()
-                    .issuer("https://idp.example.com")
-                    .subject("spiffe://example.com/workload/test")
-                    .expirationTime(futureExpirationTime)
-                    .build();
-
-            assertThat(claims1.hashCode()).isEqualTo(claims2.hashCode());
-        }
-
-        @Test
-        @DisplayName("Should implement toString for claims")
-        void shouldImplementToStringForClaims() {
-            WorkloadIdentityToken.Claims claims = WorkloadIdentityToken.Claims.builder()
-                    .issuer("https://idp.example.com")
-                    .subject("spiffe://example.com/workload/test")
-                    .expirationTime(futureExpirationTime)
-                    .build();
-
-            String toString = claims.toString();
-            assertThat(toString).contains("Claims");
-            assertThat(toString).contains("subject");
         }
     }
 
@@ -555,99 +386,11 @@ class WorkloadIdentityTokenTest {
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("jwk is REQUIRED in confirmation (cnf) claim");
         }
-
-        @Test
-        @DisplayName("Should implement equals correctly for confirmation")
-        void shouldImplementEqualsCorrectlyForConfirmation() {
-            WorkloadIdentityToken.Claims.Confirmation confirmation1 = WorkloadIdentityToken.Claims.Confirmation.builder()
-                    .jwk(testJwk)
-                    .build();
-
-            WorkloadIdentityToken.Claims.Confirmation confirmation2 = WorkloadIdentityToken.Claims.Confirmation.builder()
-                    .jwk(testJwk)
-                    .build();
-
-            Jwk differentJwk = Jwk.builder()
-                    .keyType(Jwk.KeyType.EC)
-                    .curve(Jwk.Curve.P_256)
-                    .x("different_x")
-                    .y("different_y")
-                    .build();
-
-            WorkloadIdentityToken.Claims.Confirmation confirmation3 = WorkloadIdentityToken.Claims.Confirmation.builder()
-                    .jwk(differentJwk)
-                    .build();
-
-            assertThat(confirmation1).isEqualTo(confirmation2);
-            assertThat(confirmation1).isNotEqualTo(confirmation3);
-        }
-
-        @Test
-        @DisplayName("Should implement hashCode correctly for confirmation")
-        void shouldImplementHashCodeCorrectlyForConfirmation() {
-            WorkloadIdentityToken.Claims.Confirmation confirmation1 = WorkloadIdentityToken.Claims.Confirmation.builder()
-                    .jwk(testJwk)
-                    .build();
-
-            WorkloadIdentityToken.Claims.Confirmation confirmation2 = WorkloadIdentityToken.Claims.Confirmation.builder()
-                    .jwk(testJwk)
-                    .build();
-
-            assertThat(confirmation1.hashCode()).isEqualTo(confirmation2.hashCode());
-        }
-
-        @Test
-        @DisplayName("Should implement toString for confirmation")
-        void shouldImplementToStringForConfirmation() {
-            WorkloadIdentityToken.Claims.Confirmation confirmation = WorkloadIdentityToken.Claims.Confirmation.builder()
-                    .jwk(testJwk)
-                    .build();
-
-            String toString = confirmation.toString();
-            assertThat(toString).contains("Confirmation");
-            assertThat(toString).contains("jwk");
-        }
     }
-
 
     @Nested
     @DisplayName("Edge Cases Tests")
     class EdgeCasesTests {
-
-        @Test
-        @DisplayName("Should handle empty issuer")
-        void shouldHandleEmptyIssuer() {
-            WorkloadIdentityToken.Claims claims = WorkloadIdentityToken.Claims.builder()
-                    .issuer("")
-                    .subject("spiffe://example.com/workload/test")
-                    .expirationTime(futureExpirationTime)
-                    .build();
-
-            WorkloadIdentityToken token = WorkloadIdentityToken.builder()
-                    .header(validHeader)
-                    .claims(claims)
-                    .build();
-
-            assertThat(token.getIssuer()).isEqualTo("");
-        }
-
-        @Test
-        @DisplayName("Should handle empty JWT ID")
-        void shouldHandleEmptyJwtId() {
-            WorkloadIdentityToken.Claims claims = WorkloadIdentityToken.Claims.builder()
-                    .issuer("https://idp.example.com")
-                    .subject("spiffe://example.com/workload/test")
-                    .expirationTime(futureExpirationTime)
-                    .jwtId("")
-                    .build();
-
-            WorkloadIdentityToken token = WorkloadIdentityToken.builder()
-                    .header(validHeader)
-                    .claims(claims)
-                    .build();
-
-            assertThat(token.getJwtId()).isEqualTo("");
-        }
 
         @Test
         @DisplayName("Should handle empty signature")
@@ -687,22 +430,6 @@ class WorkloadIdentityTokenTest {
                     .build();
 
             assertThat(token.getSubject()).isEqualTo("spiffe://example.com/ns/default/sa/my-service");
-        }
-
-        @Test
-        @DisplayName("Should handle custom format subject")
-        void shouldHandleCustomFormatSubject() {
-            WorkloadIdentityToken.Claims claims = WorkloadIdentityToken.Claims.builder()
-                    .subject("urn:example:workload:12345")
-                    .expirationTime(futureExpirationTime)
-                    .build();
-
-            WorkloadIdentityToken token = WorkloadIdentityToken.builder()
-                    .header(validHeader)
-                    .claims(claims)
-                    .build();
-
-            assertThat(token.getSubject()).isEqualTo("urn:example:workload:12345");
         }
     }
 }

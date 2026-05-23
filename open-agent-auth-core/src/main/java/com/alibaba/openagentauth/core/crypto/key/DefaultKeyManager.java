@@ -15,7 +15,6 @@
  */
 package com.alibaba.openagentauth.core.crypto.key;
 
-import com.alibaba.openagentauth.core.crypto.key.model.KeyAlgorithm;
 import com.alibaba.openagentauth.core.crypto.key.model.KeyDefinition;
 import com.alibaba.openagentauth.core.crypto.key.model.KeyInfo;
 import com.alibaba.openagentauth.core.crypto.key.resolve.JwksConsumerKeyResolver;
@@ -27,17 +26,12 @@ import com.alibaba.openagentauth.core.exception.crypto.KeyResolutionException;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.jwk.OctetKeyPair;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,23 +43,9 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * Default implementation of KeyManager.
- * <p>
- * This implementation provides a thread-safe key management solution with support for
- * key generation, storage, retrieval, and rotation. It uses a pluggable KeyStore
- * implementation for persistent storage.
- * </p>
- * <p>
- * <b>Thread Safety:</b></p>
- * This implementation is thread-safe and uses read-write locks for optimal
- * concurrent access performance.
- * </p>
- * <p>
- * <b>Key Rotation:</b></p>
- * When a key is rotated, the old key is retained for a grace period to allow
- * for smooth transition. The old key is marked as inactive but can still be used
- * for verification.
- * </p>
+ * Default thread-safe {@link KeyManager} backed by a pluggable {@link KeyStore}.
+ * All generated keys are Ed25519 ({@code alg=EdDSA}); other algorithms are rejected
+ * at the parser level.
  *
  * @see KeyManager
  * @see KeyStore
@@ -73,69 +53,22 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class DefaultKeyManager implements KeyManager {
 
-    /**
-     * The logger for this class.
-     */
     private static final Logger logger = LoggerFactory.getLogger(DefaultKeyManager.class);
-    
-    /**
-     * The underlying key store for persistent storage.
-     */
+
     private final KeyStore keyStore;
-
-    /**
-     * Ordered list of key resolvers for the resolve chain.
-     */
     private final List<KeyResolver> keyResolvers;
-
-    /**
-     * Mapping from key ID to its key definition.
-     */
     private final Map<String, KeyDefinition> keyDefinitions;
-    
-    /**
-     * Read-write lock for thread-safe key operations.
-     */
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    
-    /**
-     * Creates a new DefaultKeyManager with the specified key store.
-     * <p>
-     * This constructor maintains backward compatibility. No key resolvers or
-     * key definitions are configured, so {@link #resolveKey(String)} falls back
-     * to {@link #getSigningJWK(String)}.
-     * </p>
-     *
-     * @param keyStore the key store implementation
-     * @throws IllegalArgumentException if keyStore is null
-     */
+
     public DefaultKeyManager(KeyStore keyStore) {
         this(keyStore, List.of(), Map.of());
     }
 
-    /**
-     * Creates a new DefaultKeyManager with the specified key store, external key resolvers,
-     * and key definitions.
-     * <p>
-     * A {@link LocalKeyResolver} is automatically prepended to the resolver chain with
-     * the highest priority (order = 0), so local keys are always checked first. The
-     * external resolvers (e.g., {@link JwksConsumerKeyResolver}) are appended after it.
-     * </p>
-     * <p>
-     * The final resolver chain is sorted by {@link KeyResolver#getOrder()} value (ascending).
-     * </p>
-     *
-     * @param keyStore the key store implementation
-     * @param externalResolvers the list of external key resolvers (may be empty or null)
-     * @param keyDefinitions the mapping from key name to key definition (may be empty or null)
-     * @throws IllegalArgumentException if keyStore is null
-     */
     public DefaultKeyManager(KeyStore keyStore, List<KeyResolver> externalResolvers,
                              Map<String, KeyDefinition> keyDefinitions) {
         ValidationUtils.validateNotNull(keyStore, "KeyStore");
         this.keyStore = keyStore;
 
-        // Build the full resolver chain: LocalKeyResolver (self) + external resolvers
         List<KeyResolver> allResolvers = new ArrayList<>();
         allResolvers.add(new LocalKeyResolver(this));
 
@@ -156,209 +89,87 @@ public class DefaultKeyManager implements KeyManager {
                 this.keyDefinitions.size());
     }
 
-    /**
-     * Generates a new key pair with the specified algorithm and key ID.
-     *
-     * @param algorithm the key algorithm
-     * @param keyId the key ID
-     * @return the generated key pair
-     * @throws KeyManagementException if key generation fails
-     */
     @Override
-    public KeyPair generateKeyPair(KeyAlgorithm algorithm, String keyId) throws KeyManagementException {
+    public void generateKeyPair(String keyId) throws KeyManagementException {
 
-        // Validate arguments
-        ValidationUtils.validateNotNull(algorithm, "Algorithm");
         if (ValidationUtils.isNullOrEmpty(keyId)) {
             throw new IllegalArgumentException("Key ID cannot be null or empty");
         }
-        
+
         lock.writeLock().lock();
         try {
-            // Check if key already exists
             if (keyStore.exists(keyId)) {
                 throw new KeyManagementException("Key with ID '" + keyId + "' already exists");
             }
-            
-            // Generate JWK based on algorithm
-            Object jwk;
-            KeyPair keyPair;
+
+            OctetKeyPair jwk;
             try {
-                jwk = getJWK(keyId, algorithm);
-                if (jwk instanceof RSAKey) {
-                    keyPair = ((RSAKey) jwk).toKeyPair();
-                } else if (jwk instanceof ECKey) {
-                    keyPair = ((ECKey) jwk).toKeyPair();
-                } else {
-                    throw new KeyManagementException("Unsupported JWK type: " + jwk.getClass().getName());
-                }
+                jwk = generateEd25519Jwk(keyId);
             } catch (JOSEException e) {
                 throw new KeyManagementException("Failed to generate key pair: " + e.getMessage(), e);
             }
-            
-            // Create key metadata
+
             Instant now = Instant.now();
             KeyInfo keyInfo = KeyInfo.builder()
                     .keyId(keyId)
-                    .algorithm(algorithm)
                     .createdAt(now)
                     .activatedAt(now)
                     .active(true)
                     .build();
-            
-            // Store JWK (preserves kid) and key pair (for backward compatibility)
+
             keyStore.storeJWK(keyId, jwk, keyInfo);
-            
-            logger.info("Generated new key pair: keyId={}, algorithm={}", keyId, algorithm);
-            return keyPair;
-            
+
+            logger.info("Generated new Ed25519 key pair: keyId={}", keyId);
+
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    /**
-     * Retrieves the signing key for the specified key ID.
-     *
-     * @param keyId the key ID
-     * @return the signing key
-     * @throws KeyManagementException if key retrieval fails
-     */
-    @Override
-    public PrivateKey getSigningKey(String keyId) throws KeyManagementException {
-
-        // Validate arguments
-        if (ValidationUtils.isNullOrEmpty(keyId)) {
-            throw new IllegalArgumentException("Key ID cannot be null or empty");
-        }
-        
-        lock.readLock().lock();
-        try {
-            Optional<KeyPair> keyPairOpt = keyStore.retrieve(keyId);
-            if (keyPairOpt.isEmpty()) {
-                throw new KeyManagementException("Key not found: " + keyId);
-            }
-            
-            Optional<KeyInfo> keyInfoOpt = keyStore.retrieveInfo(keyId);
-            if (keyInfoOpt.isEmpty()) {
-                throw new KeyManagementException("Key info not found: " + keyId);
-            }
-            
-            KeyInfo keyInfo = keyInfoOpt.orElseThrow();
-            if (!keyInfo.isActive()) {
-                throw new KeyManagementException("Key is not active for signing: " + keyId);
-            }
-            
-            return keyPairOpt.orElseThrow().getPrivate();
-            
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    /**
-     * Retrieves the verification key for the specified key ID.
-     *
-     * @param keyId the key ID
-     * @return the verification key
-     * @throws KeyManagementException if key retrieval fails
-     */
-    @Override
-    public PublicKey getVerificationKey(String keyId) throws KeyManagementException {
-        if (ValidationUtils.isNullOrEmpty(keyId)) {
-            throw new IllegalArgumentException("Key ID cannot be null or empty");
-        }
-        
-        lock.readLock().lock();
-        try {
-            Optional<KeyPair> keyPairOpt = keyStore.retrieve(keyId);
-            if (keyPairOpt.isEmpty()) {
-                throw new KeyManagementException("Key not found: " + keyId);
-            }
-            
-            return keyPairOpt.orElseThrow().getPublic();
-            
-        } finally {
-            lock.readLock().unlock();
-        }
-    }
-
-    /**
-     * Rotates the key with the specified key ID.
-     *
-     * @param keyId the key ID
-     * @throws KeyManagementException if key rotation fails
-     */
     @Override
     public void rotateKey(String keyId) throws KeyManagementException {
 
-        // Validate arguments
         if (ValidationUtils.isNullOrEmpty(keyId)) {
             throw new IllegalArgumentException("Key ID cannot be null or empty");
         }
-        
+
         lock.writeLock().lock();
         try {
-            // Retrieve existing key info
             Optional<KeyInfo> keyInfoOpt = keyStore.retrieveInfo(keyId);
             if (keyInfoOpt.isEmpty()) {
                 throw new KeyManagementException("Key not found for rotation: " + keyId);
             }
-            
-            KeyInfo oldKeyInfo = keyInfoOpt.orElseThrow();
-            KeyAlgorithm algorithm = oldKeyInfo.getAlgorithm();
-            
-            // Generate new key pair with the same algorithm
-            KeyPair newKeyPair;
+
+            OctetKeyPair newJwk;
             try {
-                newKeyPair = getKeyPair(keyId, algorithm);
+                newJwk = generateEd25519Jwk(keyId);
             } catch (JOSEException e) {
                 throw new KeyManagementException("Failed to generate new key pair: " + e.getMessage(), e);
             }
-            
-            // Create new key metadata
+
             Instant now = Instant.now();
             KeyInfo newKeyInfo = KeyInfo.builder()
                     .keyId(keyId)
-                    .algorithm(algorithm)
                     .createdAt(now)
                     .activatedAt(now)
                     .rotatedAt(now)
                     .active(true)
                     .previousKeyId(keyId)
                     .build();
-            
-            // Store new key pair and metadata
-            keyStore.store(keyId, newKeyPair, newKeyInfo);
-            
-            logger.info("Rotated key: keyId={}, algorithm={}", keyId, algorithm);
-            
+
+            keyStore.storeJWK(keyId, newJwk, newKeyInfo);
+
+            logger.info("Rotated key: keyId={}", keyId);
+
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    private KeyPair getKeyPair(String keyId, KeyAlgorithm algorithm) throws JOSEException {
-        KeyPair newKeyPair;
-        if (algorithm.isRsa()) {
-            var generator = new RSAKeyGenerator(algorithm.getKeySize()).keyID(keyId);
-            RSAKey jwk = generator.generate();
-            newKeyPair = jwk.toKeyPair();
-        } else if (algorithm.isEc()) {
-            var generator = new ECKeyGenerator(Curve.P_256).keyID(keyId);
-            ECKey jwk = generator.generate();
-            newKeyPair = jwk.toKeyPair();
-        } else {
-            throw new KeyManagementException("Unsupported algorithm: " + algorithm);
-        }
-        return newKeyPair;
+    private OctetKeyPair generateEd25519Jwk(String keyId) throws JOSEException {
+        return new OctetKeyPairGenerator(Curve.Ed25519).keyID(keyId).generate();
     }
 
-    /**
-     * Retrieves the list of active keys.
-     *
-     * @return the list of active keys
-     */
     @Override
     public List<KeyInfo> getActiveKeys() {
         lock.readLock().lock();
@@ -376,18 +187,12 @@ public class DefaultKeyManager implements KeyManager {
         }
     }
 
-    /**
-     * Checks if a key with the specified key ID exists.
-     *
-     * @param keyId the key ID
-     * @return true if the key exists, false otherwise
-     */
     @Override
     public boolean hasKey(String keyId) {
         if (ValidationUtils.isNullOrEmpty(keyId)) {
             return false;
         }
-        
+
         lock.readLock().lock();
         try {
             return keyStore.exists(keyId);
@@ -396,95 +201,62 @@ public class DefaultKeyManager implements KeyManager {
         }
     }
 
-    /**
-     * Deletes the key with the specified key ID.
-     *
-     * @param keyId the key ID
-     * @throws KeyManagementException if key deletion fails
-     */
     @Override
     public void deleteKey(String keyId) throws KeyManagementException {
         if (ValidationUtils.isNullOrEmpty(keyId)) {
             throw new IllegalArgumentException("Key ID cannot be null or empty");
         }
-        
+
         lock.writeLock().lock();
         try {
             if (!keyStore.exists(keyId)) {
                 throw new KeyManagementException("Key not found for deletion: " + keyId);
             }
-            
+
             keyStore.delete(keyId);
             logger.info("Deleted key: keyId={}", keyId);
-            
+
         } finally {
             lock.writeLock().unlock();
         }
     }
-    
-    /**
-     * Gets the signing JWK for the specified key ID.
-     *
-     * @param keyId the key ID
-     * @return the signing JWK
-     * @throws KeyManagementException if key retrieval fails
-     */
+
     @Override
     public Object getSigningJWK(String keyId) throws KeyManagementException {
-        // Validate arguments
         if (ValidationUtils.isNullOrEmpty(keyId)) {
             throw new IllegalArgumentException("Key ID cannot be null or empty");
         }
-        
+
         lock.readLock().lock();
         try {
             Optional<Object> jwkOpt = keyStore.retrieveJWK(keyId);
             if (jwkOpt.isEmpty()) {
                 throw new KeyManagementException("JWK not found: " + keyId);
             }
-            
+
             Optional<KeyInfo> keyInfoOpt = keyStore.retrieveInfo(keyId);
             if (keyInfoOpt.isEmpty()) {
                 throw new KeyManagementException("Key info not found: " + keyId);
             }
-            
+
             KeyInfo keyInfo = keyInfoOpt.orElseThrow();
             if (!keyInfo.isActive()) {
                 throw new KeyManagementException("Key is not active for signing: " + keyId);
             }
-            
+
             return jwkOpt.orElseThrow();
-            
+
         } finally {
             lock.readLock().unlock();
         }
     }
-    
-    /**
-     * Resolves a JWK by its key ID using the registered {@code KeyResolver} chain.
-     * <p>
-     * The resolution process:
-     * <ol>
-     *   <li>Look up the {@link KeyDefinition} for the given key ID</li>
-     *   <li>Iterate through registered {@link KeyResolver}s (sorted by order)</li>
-     *   <li>Use the first resolver that {@linkplain KeyResolver#supports(KeyDefinition) supports}
-     *       the key definition</li>
-     *   <li>If no resolver matches or no key definition exists, fall back to
-     *       {@link #getSigningJWK(String)}</li>
-     * </ol>
-     * </p>
-     *
-     * @param keyId the key identifier to resolve
-     * @return the resolved JWK
-     * @throws KeyManagementException if the key cannot be resolved
-     */
+
     @Override
     public Object resolveKey(String keyId) throws KeyManagementException {
         if (ValidationUtils.isNullOrEmpty(keyId)) {
             throw new IllegalArgumentException("Key ID cannot be null or empty");
         }
 
-        // Find key definition by key ID (match by keyId field, not map key)
         KeyDefinition keyDefinition = findKeyDefinitionByKeyId(keyId);
 
         if (keyDefinition == null || keyResolvers.isEmpty()) {
@@ -511,19 +283,6 @@ public class DefaultKeyManager implements KeyManager {
         return getSigningJWK(keyId);
     }
 
-    /**
-     * Resolves a verification JWK for the specified key ID.
-     * <p>
-     * Each invocation resolves the key fresh from the underlying source,
-     * supporting dynamic key rotation without application restarts.
-     * For remote keys, the resolution is delegated to the {@link JwksConsumerKeyResolver}
-     * which handles caching and refresh internally.
-     * </p>
-     *
-     * @param keyId the key identifier to resolve
-     * @return the resolved JWK for verification
-     * @throws KeyManagementException if the key cannot be resolved
-     */
     @Override
     public JWK resolveVerificationKey(String keyId) throws KeyManagementException {
         if (ValidationUtils.isNullOrEmpty(keyId)) {
@@ -540,26 +299,13 @@ public class DefaultKeyManager implements KeyManager {
                 "Resolved key is not a JWK: " + (resolved != null ? resolved.getClass().getName() : "null"));
     }
 
-    /**
-     * Finds a {@link KeyDefinition} by matching the key ID field.
-     * <p>
-     * The key definitions map is keyed by the configuration key name (e.g., "wit-verification"),
-     * but the actual key ID is stored in the {@link KeyDefinition#getKeyId()} field
-     * (e.g., "wit-signing-key"). This method searches by the key ID field.
-     * </p>
-     *
-     * @param keyId the key ID to search for
-     * @return the matching key definition, or {@code null} if not found
-     */
     private KeyDefinition findKeyDefinitionByKeyId(String keyId) {
 
-        // First try direct lookup by map key
         KeyDefinition definition = keyDefinitions.get(keyId);
         if (definition != null) {
             return definition;
         }
 
-        // Search by keyId field in all definitions
         for (KeyDefinition candidate : keyDefinitions.values()) {
             if (keyId.equals(candidate.getKeyId())) {
                 return candidate;
@@ -567,25 +313,5 @@ public class DefaultKeyManager implements KeyManager {
         }
 
         return null;
-    }
-
-    /**
-     * Generates a JWK based on the algorithm.
-     *
-     * @param keyId the key ID
-     * @param algorithm the key algorithm
-     * @return the generated JWK
-     * @throws JOSEException if JWK generation fails
-     */
-    private Object getJWK(String keyId, KeyAlgorithm algorithm) throws JOSEException {
-        if (algorithm.isRsa()) {
-            var generator = new RSAKeyGenerator(algorithm.getKeySize()).keyID(keyId);
-            return generator.generate();
-        } else if (algorithm.isEc()) {
-            var generator = new ECKeyGenerator(Curve.P_256).keyID(keyId);
-            return generator.generate();
-        } else {
-            throw new KeyManagementException("Unsupported algorithm: " + algorithm);
-        }
     }
 }

@@ -37,13 +37,11 @@ class KeyDefinitionTest {
         void shouldBuildKeyDefinitionWithAllFields() {
             KeyDefinition definition = KeyDefinition.builder()
                     .keyId("test-key-001")
-                    .algorithm(KeyAlgorithm.ES256)
                     .provider("local")
                     .jwksConsumer("agent-idp")
                     .build();
 
             assertThat(definition.getKeyId()).isEqualTo("test-key-001");
-            assertThat(definition.getAlgorithm()).isEqualTo(KeyAlgorithm.ES256);
             assertThat(definition.getProvider()).isEqualTo("local");
             assertThat(definition.getJwksConsumer()).isEqualTo("agent-idp");
         }
@@ -56,7 +54,6 @@ class KeyDefinitionTest {
                     .build();
 
             assertThat(definition.getKeyId()).isEqualTo("minimal-key");
-            assertThat(definition.getAlgorithm()).isNull();
             assertThat(definition.getProvider()).isNull();
             assertThat(definition.getJwksConsumer()).isNull();
         }
@@ -136,14 +133,12 @@ class KeyDefinitionTest {
         void shouldBeEqualWhenAllPropertiesAreTheSame() {
             KeyDefinition definition1 = KeyDefinition.builder()
                     .keyId("key-1")
-                    .algorithm(KeyAlgorithm.RS256)
                     .provider("local")
                     .jwksConsumer("consumer-1")
                     .build();
 
             KeyDefinition definition2 = KeyDefinition.builder()
                     .keyId("key-1")
-                    .algorithm(KeyAlgorithm.RS256)
                     .provider("local")
                     .jwksConsumer("consumer-1")
                     .build();
@@ -157,28 +152,10 @@ class KeyDefinitionTest {
         void shouldNotBeEqualWhenKeyIdDiffers() {
             KeyDefinition definition1 = KeyDefinition.builder()
                     .keyId("key-1")
-                    .algorithm(KeyAlgorithm.RS256)
                     .build();
 
             KeyDefinition definition2 = KeyDefinition.builder()
                     .keyId("key-2")
-                    .algorithm(KeyAlgorithm.RS256)
-                    .build();
-
-            assertThat(definition1).isNotEqualTo(definition2);
-        }
-
-        @Test
-        @DisplayName("Should not be equal when algorithm differs")
-        void shouldNotBeEqualWhenAlgorithmDiffers() {
-            KeyDefinition definition1 = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .algorithm(KeyAlgorithm.RS256)
-                    .build();
-
-            KeyDefinition definition2 = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .algorithm(KeyAlgorithm.ES256)
                     .build();
 
             assertThat(definition1).isNotEqualTo(definition2);
@@ -246,7 +223,6 @@ class KeyDefinitionTest {
         void shouldContainAllFieldsInToStringOutput() {
             KeyDefinition definition = KeyDefinition.builder()
                     .keyId("test-key")
-                    .algorithm(KeyAlgorithm.ES256)
                     .provider("local")
                     .jwksConsumer("agent-idp")
                     .build();
@@ -254,7 +230,6 @@ class KeyDefinitionTest {
             String result = definition.toString();
 
             assertThat(result).contains("test-key");
-            assertThat(result).contains("ES256");
             assertThat(result).contains("local");
             assertThat(result).contains("agent-idp");
         }

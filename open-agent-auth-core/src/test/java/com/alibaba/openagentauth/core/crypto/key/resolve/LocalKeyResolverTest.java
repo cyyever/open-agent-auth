@@ -17,12 +17,10 @@ package com.alibaba.openagentauth.core.crypto.key.resolve;
 
 import com.alibaba.openagentauth.core.crypto.key.DefaultKeyManager;
 import com.alibaba.openagentauth.core.crypto.key.KeyManager;
-import com.alibaba.openagentauth.core.crypto.key.model.KeyAlgorithm;
 import com.alibaba.openagentauth.core.crypto.key.model.KeyDefinition;
 import com.alibaba.openagentauth.core.crypto.key.store.InMemoryKeyStore;
-import com.alibaba.openagentauth.core.exception.crypto.KeyResolutionException;
-import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.OctetKeyPair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -76,7 +74,6 @@ class LocalKeyResolverTest {
         void shouldReturnTrueForLocalKeyDefinition() {
             KeyDefinition localKeyDefinition = KeyDefinition.builder()
                     .keyId("local-key")
-                    .algorithm(KeyAlgorithm.ES256)
                     .provider("local")
                     .build();
 
@@ -88,7 +85,6 @@ class LocalKeyResolverTest {
         void shouldReturnFalseForRemoteKeyDefinition() {
             KeyDefinition remoteKeyDefinition = KeyDefinition.builder()
                     .keyId("remote-key")
-                    .algorithm(KeyAlgorithm.ES256)
                     .jwksConsumer("agent-idp")
                     .build();
 
@@ -107,50 +103,36 @@ class LocalKeyResolverTest {
     class ResolveTests {
 
         @Test
-        @DisplayName("Should resolve local key with ES256 algorithm successfully")
-        void shouldResolveLocalKeyWithES256Successfully() throws Exception {
-            String keyId = "es256-test-key";
-            keyManager.generateKeyPair(KeyAlgorithm.ES256, keyId);
+        @DisplayName("Should resolve local Ed25519 key successfully")
+        void shouldResolveLocalEd25519KeySuccessfully() throws Exception {
+            String keyId = "ed25519-test-key";
+            keyManager.generateKeyPair(keyId);
 
             KeyDefinition keyDefinition = KeyDefinition.builder()
                     .keyId(keyId)
-                    .algorithm(KeyAlgorithm.ES256)
                     .provider("local")
                     .build();
 
             JWK resolvedKey = localKeyResolver.resolve(keyDefinition);
 
             assertThat(resolvedKey).isNotNull();
-            assertThat(resolvedKey).isInstanceOf(ECKey.class);
+            assertThat(resolvedKey).isInstanceOf(OctetKeyPair.class);
             assertThat(resolvedKey.getKeyID()).isEqualTo(keyId);
         }
 
         @Test
-        @DisplayName("Should auto-generate key when key does not exist but algorithm is provided")
-        void shouldAutoGenerateKeyWhenNotExistButAlgorithmProvided() throws Exception {
+        @DisplayName("Should auto-generate key when key does not exist")
+        void shouldAutoGenerateKeyWhenNotExist() throws Exception {
             KeyDefinition keyDefinition = KeyDefinition.builder()
                     .keyId("auto-generated-key")
-                    .algorithm(KeyAlgorithm.ES256)
                     .provider("local")
                     .build();
 
             JWK resolvedKey = localKeyResolver.resolve(keyDefinition);
 
             assertThat(resolvedKey).isNotNull();
-            assertThat(resolvedKey).isInstanceOf(ECKey.class);
+            assertThat(resolvedKey).isInstanceOf(OctetKeyPair.class);
             assertThat(resolvedKey.getKeyID()).isEqualTo("auto-generated-key");
-        }
-
-        @Test
-        @DisplayName("Should throw KeyResolutionException when key does not exist and no algorithm")
-        void shouldThrowExceptionWhenKeyDoesNotExistAndNoAlgorithm() {
-            KeyDefinition keyDefinition = KeyDefinition.builder()
-                    .keyId("non-existent-key")
-                    .build();
-
-            assertThatThrownBy(() -> localKeyResolver.resolve(keyDefinition))
-                    .isInstanceOf(KeyResolutionException.class)
-                    .hasMessageContaining("non-existent-key");
         }
     }
 

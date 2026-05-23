@@ -22,82 +22,36 @@ import java.util.Objects;
  * If {@code jwksConsumer} is set, the key is resolved from a remote JWKS endpoint;
  * otherwise, it is resolved from a local key store via the configured {@code provider}.
  *
- * @see KeyAlgorithm
- * @see com.alibaba.openagentauth.core.crypto.key.resolve.KeyResolver
  * @since 1.0
  */
 public final class KeyDefinition {
 
     private final String keyId;
-    private final KeyAlgorithm algorithm;
     private final String provider;
     private final String jwksConsumer;
 
-    private KeyDefinition(String keyId, KeyAlgorithm algorithm, String provider, String jwksConsumer) {
+    private KeyDefinition(String keyId, String provider, String jwksConsumer) {
         this.keyId = keyId;
-        this.algorithm = algorithm;
         this.provider = provider;
         this.jwksConsumer = jwksConsumer;
     }
 
-    /**
-     * Gets the unique key identifier (kid) used in JWT and JWKS.
-     *
-     * @return the key ID
-     */
     public String getKeyId() {
         return keyId;
     }
 
-    /**
-     * Gets the cryptographic algorithm for this key.
-     *
-     * @return the key algorithm
-     */
-    public KeyAlgorithm getAlgorithm() {
-        return algorithm;
-    }
-
-    /**
-     * Gets the key provider name (e.g., "local", "file").
-     * <p>
-     * When set, the key is resolved from a local key store managed by the provider.
-     * </p>
-     *
-     * @return the provider name, or {@code null} if the key is resolved via JWKS consumer
-     */
     public String getProvider() {
         return provider;
     }
 
-    /**
-     * Gets the JWKS consumer name for remote key resolution.
-     * <p>
-     * When set, the key is resolved from a remote JWKS endpoint identified by
-     * this consumer name. The consumer name maps to a configured JWKS consumer
-     * in the infrastructure properties.
-     * </p>
-     *
-     * @return the JWKS consumer name, or {@code null} if the key is resolved locally
-     */
     public String getJwksConsumer() {
         return jwksConsumer;
     }
 
-    /**
-     * Checks whether this key definition requires remote JWKS resolution.
-     *
-     * @return {@code true} if the key should be resolved from a remote JWKS endpoint
-     */
     public boolean isRemoteKey() {
         return jwksConsumer != null && !jwksConsumer.isBlank();
     }
 
-    /**
-     * Checks whether this key definition uses local key store resolution.
-     *
-     * @return {@code true} if the key should be resolved from a local key store
-     */
     public boolean isLocalKey() {
         return !isRemoteKey();
     }
@@ -108,103 +62,57 @@ public final class KeyDefinition {
         if (o == null || getClass() != o.getClass()) return false;
         KeyDefinition that = (KeyDefinition) o;
         return Objects.equals(keyId, that.keyId) &&
-                algorithm == that.algorithm &&
                 Objects.equals(provider, that.provider) &&
                 Objects.equals(jwksConsumer, that.jwksConsumer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(keyId, algorithm, provider, jwksConsumer);
+        return Objects.hash(keyId, provider, jwksConsumer);
     }
 
     @Override
     public String toString() {
         return "KeyDefinition{" +
                 "keyId='" + keyId + '\'' +
-                ", algorithm=" + algorithm +
                 ", provider='" + provider + '\'' +
                 ", jwksConsumer='" + jwksConsumer + '\'' +
                 '}';
     }
 
-    /**
-     * Creates a new builder for {@code KeyDefinition}.
-     *
-     * @return a new builder instance
-     */
     public static Builder builder() {
         return new Builder();
     }
 
-    /**
-     * Builder for constructing {@link KeyDefinition} instances.
-     */
     public static final class Builder {
 
         private String keyId;
-        private KeyAlgorithm algorithm;
         private String provider;
         private String jwksConsumer;
 
         private Builder() {
         }
 
-        /**
-         * Sets the key identifier.
-         *
-         * @param keyId the key ID
-         * @return this builder
-         */
         public Builder keyId(String keyId) {
             this.keyId = keyId;
             return this;
         }
 
-        /**
-         * Sets the cryptographic algorithm.
-         *
-         * @param algorithm the key algorithm
-         * @return this builder
-         */
-        public Builder algorithm(KeyAlgorithm algorithm) {
-            this.algorithm = algorithm;
-            return this;
-        }
-
-        /**
-         * Sets the key provider name.
-         *
-         * @param provider the provider name
-         * @return this builder
-         */
         public Builder provider(String provider) {
             this.provider = provider;
             return this;
         }
 
-        /**
-         * Sets the JWKS consumer name for remote key resolution.
-         *
-         * @param jwksConsumer the JWKS consumer name
-         * @return this builder
-         */
         public Builder jwksConsumer(String jwksConsumer) {
             this.jwksConsumer = jwksConsumer;
             return this;
         }
 
-        /**
-         * Builds the {@code KeyDefinition} instance.
-         *
-         * @return the constructed key definition
-         * @throws IllegalArgumentException if keyId is null or empty
-         */
         public KeyDefinition build() {
             if (keyId == null || keyId.isBlank()) {
                 throw new IllegalArgumentException("KeyDefinition keyId cannot be null or empty");
             }
-            return new KeyDefinition(keyId, algorithm, provider, jwksConsumer);
+            return new KeyDefinition(keyId, provider, jwksConsumer);
         }
     }
 }

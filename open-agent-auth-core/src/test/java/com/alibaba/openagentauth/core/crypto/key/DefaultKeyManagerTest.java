@@ -15,22 +15,17 @@
  */
 package com.alibaba.openagentauth.core.crypto.key;
 
-import com.alibaba.openagentauth.core.crypto.key.model.KeyAlgorithm;
 import com.alibaba.openagentauth.core.crypto.key.model.KeyDefinition;
 import com.alibaba.openagentauth.core.crypto.key.model.KeyInfo;
 import com.alibaba.openagentauth.core.crypto.key.store.InMemoryKeyStore;
 import com.alibaba.openagentauth.core.exception.crypto.KeyManagementException;
-import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.OctetKeyPair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,24 +36,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
 
 /**
  * Unit tests for DefaultKeyManager.
- * <p>
- * This test class verifies the functionality of the DefaultKeyManager implementation,
- * including key generation, retrieval, rotation, deletion, and thread safety.
- * </p>
  */
 @DisplayName("DefaultKeyManager Tests")
 class DefaultKeyManagerTest {
 
     private KeyManager keyManager;
 
-    /**
-     * Sets up the test environment before each test.
-     */
     @BeforeEach
     void setUp() {
         keyManager = new DefaultKeyManager(new InMemoryKeyStore());
@@ -82,83 +68,19 @@ class DefaultKeyManagerTest {
     class KeyGenerationTests {
 
         @Test
-        @DisplayName("Should generate RSA key pair with RS256 algorithm")
-        void shouldGenerateRsaKeyPairWithRS256Algorithm() throws KeyManagementException {
-            KeyPair keyPair = keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-001");
+        @DisplayName("Should generate Ed25519 key pair")
+        void shouldGenerateEd25519KeyPair() throws KeyManagementException {
+            keyManager.generateKeyPair("test-key-001");
 
-            assertThat(keyPair).isNotNull();
-            assertThat(keyPair.getPrivate()).isNotNull();
-            assertThat(keyPair.getPublic()).isNotNull();
             assertThat(keyManager.hasKey("test-key-001")).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should generate RSA key pair with RS384 algorithm")
-        void shouldGenerateRsaKeyPairWithRS384Algorithm() throws KeyManagementException {
-            KeyPair keyPair = keyManager.generateKeyPair(KeyAlgorithm.RS384, "test-key-002");
-
-            assertThat(keyPair).isNotNull();
-            assertThat(keyPair.getPrivate()).isNotNull();
-            assertThat(keyPair.getPublic()).isNotNull();
-            assertThat(keyManager.hasKey("test-key-002")).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should generate RSA key pair with RS512 algorithm")
-        void shouldGenerateRsaKeyPairWithRS512Algorithm() throws KeyManagementException {
-            KeyPair keyPair = keyManager.generateKeyPair(KeyAlgorithm.RS512, "test-key-003");
-
-            assertThat(keyPair).isNotNull();
-            assertThat(keyPair.getPrivate()).isNotNull();
-            assertThat(keyPair.getPublic()).isNotNull();
-            assertThat(keyManager.hasKey("test-key-003")).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should generate ECDSA key pair with ES256 algorithm")
-        void shouldGenerateEcdsaKeyPairWithES256Algorithm() throws KeyManagementException {
-            KeyPair keyPair = keyManager.generateKeyPair(KeyAlgorithm.ES256, "test-key-004");
-
-            assertThat(keyPair).isNotNull();
-            assertThat(keyPair.getPrivate()).isNotNull();
-            assertThat(keyPair.getPublic()).isNotNull();
-            assertThat(keyManager.hasKey("test-key-004")).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should generate ECDSA key pair with ES384 algorithm")
-        void shouldGenerateEcdsaKeyPairWithES384Algorithm() throws KeyManagementException {
-            KeyPair keyPair = keyManager.generateKeyPair(KeyAlgorithm.ES384, "test-key-005");
-
-            assertThat(keyPair).isNotNull();
-            assertThat(keyPair.getPrivate()).isNotNull();
-            assertThat(keyPair.getPublic()).isNotNull();
-            assertThat(keyManager.hasKey("test-key-005")).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should generate ECDSA key pair with ES512 algorithm")
-        void shouldGenerateEcdsaKeyPairWithES512Algorithm() throws KeyManagementException {
-            KeyPair keyPair = keyManager.generateKeyPair(KeyAlgorithm.ES512, "test-key-006");
-
-            assertThat(keyPair).isNotNull();
-            assertThat(keyPair.getPrivate()).isNotNull();
-            assertThat(keyPair.getPublic()).isNotNull();
-            assertThat(keyManager.hasKey("test-key-006")).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should throw exception when algorithm is null")
-        void shouldThrowExceptionWhenAlgorithmIsNull() {
-            assertThatThrownBy(() -> keyManager.generateKeyPair(null, "test-key-007"))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Algorithm cannot be null");
+            Object jwk = keyManager.getSigningJWK("test-key-001");
+            assertThat(jwk).isInstanceOf(OctetKeyPair.class);
         }
 
         @Test
         @DisplayName("Should throw exception when keyId is null")
         void shouldThrowExceptionWhenKeyIdIsNull() {
-            assertThatThrownBy(() -> keyManager.generateKeyPair(KeyAlgorithm.RS256, null))
+            assertThatThrownBy(() -> keyManager.generateKeyPair(null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Key ID cannot be null or empty");
         }
@@ -166,7 +88,7 @@ class DefaultKeyManagerTest {
         @Test
         @DisplayName("Should throw exception when keyId is empty")
         void shouldThrowExceptionWhenKeyIdIsEmpty() {
-            assertThatThrownBy(() -> keyManager.generateKeyPair(KeyAlgorithm.RS256, ""))
+            assertThatThrownBy(() -> keyManager.generateKeyPair(""))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Key ID cannot be null or empty");
         }
@@ -174,7 +96,7 @@ class DefaultKeyManagerTest {
         @Test
         @DisplayName("Should throw exception when keyId is whitespace")
         void shouldThrowExceptionWhenKeyIdIsWhitespace() {
-            assertThatThrownBy(() -> keyManager.generateKeyPair(KeyAlgorithm.RS256, "   "))
+            assertThatThrownBy(() -> keyManager.generateKeyPair("   "))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Key ID cannot be null or empty");
         }
@@ -182,9 +104,9 @@ class DefaultKeyManagerTest {
         @Test
         @DisplayName("Should throw exception when keyId already exists")
         void shouldThrowExceptionWhenKeyIdAlreadyExists() throws KeyManagementException {
-            keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-008");
+            keyManager.generateKeyPair("test-key-008");
 
-            assertThatThrownBy(() -> keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-008"))
+            assertThatThrownBy(() -> keyManager.generateKeyPair("test-key-008"))
                     .isInstanceOf(KeyManagementException.class)
                     .hasMessageContaining("already exists");
         }
@@ -195,83 +117,16 @@ class DefaultKeyManagerTest {
     class KeyRetrievalTests {
 
         @Test
-        @DisplayName("Should retrieve signing key successfully")
-        void shouldRetrieveSigningKeySuccessfully() throws KeyManagementException {
-            KeyPair keyPair = keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-009");
-            PrivateKey signingKey = keyManager.getSigningKey("test-key-009");
-
-            assertThat(signingKey).isNotNull();
-            assertThat(signingKey).isEqualTo(keyPair.getPrivate());
-        }
-
-        @Test
-        @DisplayName("Should retrieve verification key successfully")
-        void shouldRetrieveVerificationKeySuccessfully() throws KeyManagementException {
-            KeyPair keyPair = keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-010");
-            PublicKey verificationKey = keyManager.getVerificationKey("test-key-010");
-
-            assertThat(verificationKey).isNotNull();
-            assertThat(verificationKey).isEqualTo(keyPair.getPublic());
-        }
-
-        @Test
-        @DisplayName("Should throw exception when signing key not found")
-        void shouldThrowExceptionWhenSigningKeyNotFound() {
-            assertThatThrownBy(() -> keyManager.getSigningKey("non-existent-key"))
-                    .isInstanceOf(KeyManagementException.class)
-                    .hasMessageContaining("Key not found");
-        }
-
-        @Test
-        @DisplayName("Should throw exception when verification key not found")
-        void shouldThrowExceptionWhenVerificationKeyNotFound() {
-            assertThatThrownBy(() -> keyManager.getVerificationKey("non-existent-key"))
-                    .isInstanceOf(KeyManagementException.class)
-                    .hasMessageContaining("Key not found");
-        }
-
-        @Test
-        @DisplayName("Should throw exception when keyId is null for signing key")
-        void shouldThrowExceptionWhenKeyIdIsNullForSigningKey() {
-            assertThatThrownBy(() -> keyManager.getSigningKey(null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Key ID cannot be null or empty");
-        }
-
-        @Test
-        @DisplayName("Should throw exception when keyId is null for verification key")
-        void shouldThrowExceptionWhenKeyIdIsNullForVerificationKey() {
-            assertThatThrownBy(() -> keyManager.getVerificationKey(null))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("Key ID cannot be null or empty");
-        }
-
-        @Test
-        @DisplayName("Should retrieve RSA signing JWK successfully")
-        void shouldRetrieveRsaSigningJwkSuccessfully() throws KeyManagementException, com.nimbusds.jose.JOSEException {
-            keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-jwk-rsa-key");
-            Object jwk = keyManager.getSigningJWK("test-jwk-rsa-key");
+        @DisplayName("Should retrieve Ed25519 signing JWK successfully")
+        void shouldRetrieveEd25519SigningJwkSuccessfully() throws KeyManagementException {
+            keyManager.generateKeyPair("test-jwk-okp-key");
+            Object jwk = keyManager.getSigningJWK("test-jwk-okp-key");
 
             assertThat(jwk).isNotNull();
-            assertThat(jwk).isInstanceOf(RSAKey.class);
-            RSAKey rsaKey = (RSAKey) jwk;
-            assertThat(rsaKey.getKeyID()).isEqualTo("test-jwk-rsa-key");
-            assertThat(rsaKey.toPrivateKey()).isNotNull();
-            assertThat(rsaKey.toPublicKey()).isNotNull();
-        }
-
-        @Test
-        @DisplayName("Should retrieve EC signing JWK successfully")
-        void shouldRetrieveEcSigningJwkSuccessfully() throws KeyManagementException, com.nimbusds.jose.JOSEException {
-            keyManager.generateKeyPair(KeyAlgorithm.ES256, "test-jwk-ec-key");
-            Object jwk = keyManager.getSigningJWK("test-jwk-ec-key");
-
-            assertThat(jwk).isNotNull();
-            assertThat(jwk).isInstanceOf(ECKey.class);
-            ECKey ecKey = (ECKey) jwk;
-            assertThat(ecKey.getKeyID()).isEqualTo("test-jwk-ec-key");
-            assertThat(ecKey.toPrivateKey()).isNotNull();
-            assertThat(ecKey.toPublicKey()).isNotNull();
+            assertThat(jwk).isInstanceOf(OctetKeyPair.class);
+            OctetKeyPair okp = (OctetKeyPair) jwk;
+            assertThat(okp.getKeyID()).isEqualTo("test-jwk-okp-key");
+            assertThat(okp.getX()).isNotNull();
         }
 
         @Test
@@ -314,14 +169,15 @@ class DefaultKeyManagerTest {
         @Test
         @DisplayName("Should rotate key successfully")
         void shouldRotateKeySuccessfully() throws KeyManagementException {
-            KeyPair oldKeyPair = keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-011");
-            
+            keyManager.generateKeyPair("test-key-011");
+            OctetKeyPair oldJwk = (OctetKeyPair) keyManager.getSigningJWK("test-key-011");
+
             keyManager.rotateKey("test-key-011");
 
-            PrivateKey newSigningKey = keyManager.getSigningKey("test-key-011");
-            
-            assertThat(newSigningKey).isNotNull();
-            assertThat(newSigningKey).isNotEqualTo(oldKeyPair.getPrivate());
+            OctetKeyPair newJwk = (OctetKeyPair) keyManager.getSigningJWK("test-key-011");
+
+            assertThat(newJwk).isNotNull();
+            assertThat(newJwk.getX()).isNotEqualTo(oldJwk.getX());
         }
 
         @Test
@@ -356,7 +212,7 @@ class DefaultKeyManagerTest {
         @Test
         @DisplayName("Should delete key successfully")
         void shouldDeleteKeySuccessfully() throws KeyManagementException {
-            keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-012");
+            keyManager.generateKeyPair("test-key-012");
             assertThat(keyManager.hasKey("test-key-012")).isTrue();
 
             keyManager.deleteKey("test-key-012");
@@ -395,7 +251,7 @@ class DefaultKeyManagerTest {
         @Test
         @DisplayName("Should return true when key exists")
         void shouldReturnTrueWhenKeyExists() throws KeyManagementException {
-            keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-013");
+            keyManager.generateKeyPair("test-key-013");
 
             assertThat(keyManager.hasKey("test-key-013")).isTrue();
         }
@@ -432,9 +288,9 @@ class DefaultKeyManagerTest {
         @Test
         @DisplayName("Should return list of active keys")
         void shouldReturnListOfActiveKeys() throws KeyManagementException {
-            keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-014");
-            keyManager.generateKeyPair(KeyAlgorithm.ES256, "test-key-015");
-            keyManager.generateKeyPair(KeyAlgorithm.RS384, "test-key-016");
+            keyManager.generateKeyPair("test-key-014");
+            keyManager.generateKeyPair("test-key-015");
+            keyManager.generateKeyPair("test-key-016");
 
             List<KeyInfo> activeKeys = keyManager.getActiveKeys();
 
@@ -469,7 +325,7 @@ class DefaultKeyManagerTest {
                 final int index = i;
                 executorService.submit(() -> {
                     try {
-                        keyManager.generateKeyPair(KeyAlgorithm.RS256, "concurrent-key-" + index);
+                        keyManager.generateKeyPair("concurrent-key-" + index);
                         successCount.incrementAndGet();
                     } catch (KeyManagementException e) {
                         // Expected for duplicate key IDs
@@ -481,7 +337,7 @@ class DefaultKeyManagerTest {
 
             assertThat(latch.await(30, TimeUnit.SECONDS)).isTrue();
             assertThat(successCount.get()).isGreaterThanOrEqualTo(threadCount - 5);
-            
+
             executorService.shutdown();
             executorService.awaitTermination(10, TimeUnit.SECONDS);
         }
@@ -489,8 +345,8 @@ class DefaultKeyManagerTest {
         @Test
         @DisplayName("Should handle concurrent key retrieval")
         void shouldHandleConcurrentKeyRetrieval() throws KeyManagementException, InterruptedException {
-            keyManager.generateKeyPair(KeyAlgorithm.RS256, "concurrent-retrieve-key");
-            
+            keyManager.generateKeyPair("concurrent-retrieve-key");
+
             int threadCount = 20;
             ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
             CountDownLatch latch = new CountDownLatch(threadCount);
@@ -499,7 +355,7 @@ class DefaultKeyManagerTest {
             for (int i = 0; i < threadCount; i++) {
                 executorService.submit(() -> {
                     try {
-                        keyManager.getSigningKey("concurrent-retrieve-key");
+                        keyManager.getSigningJWK("concurrent-retrieve-key");
                         successCount.incrementAndGet();
                     } catch (KeyManagementException e) {
                         // Should not happen
@@ -511,7 +367,7 @@ class DefaultKeyManagerTest {
 
             assertThat(latch.await(30, TimeUnit.SECONDS)).isTrue();
             assertThat(successCount.get()).isEqualTo(threadCount);
-            
+
             executorService.shutdown();
             executorService.awaitTermination(10, TimeUnit.SECONDS);
         }
@@ -524,40 +380,28 @@ class DefaultKeyManagerTest {
         @Test
         @DisplayName("Should complete full key lifecycle")
         void shouldCompleteFullKeyLifecycle() throws KeyManagementException {
-            // Generate key
-            KeyPair keyPair = keyManager.generateKeyPair(KeyAlgorithm.RS256, "lifecycle-key");
-            assertThat(keyPair).isNotNull();
+            keyManager.generateKeyPair("lifecycle-key");
             assertThat(keyManager.hasKey("lifecycle-key")).isTrue();
 
-            // Retrieve signing key
-            PrivateKey signingKey = keyManager.getSigningKey("lifecycle-key");
-            assertThat(signingKey).isEqualTo(keyPair.getPrivate());
+            Object jwk = keyManager.getSigningJWK("lifecycle-key");
+            assertThat(jwk).isInstanceOf(OctetKeyPair.class);
 
-            // Retrieve verification key
-            PublicKey verificationKey = keyManager.getVerificationKey("lifecycle-key");
-            assertThat(verificationKey).isEqualTo(keyPair.getPublic());
-
-            // Get active keys
             List<KeyInfo> activeKeys = keyManager.getActiveKeys();
             assertThat(activeKeys).hasSize(1);
 
-            // Delete key
             keyManager.deleteKey("lifecycle-key");
             assertThat(keyManager.hasKey("lifecycle-key")).isFalse();
         }
 
         @Test
-        @DisplayName("Should handle multiple keys with different algorithms")
-        void shouldHandleMultipleKeysWithDifferentAlgorithms() throws KeyManagementException {
-            keyManager.generateKeyPair(KeyAlgorithm.RS256, "multi-key-1");
-            keyManager.generateKeyPair(KeyAlgorithm.RS384, "multi-key-2");
-            keyManager.generateKeyPair(KeyAlgorithm.RS512, "multi-key-3");
-            keyManager.generateKeyPair(KeyAlgorithm.ES256, "multi-key-4");
-            keyManager.generateKeyPair(KeyAlgorithm.ES384, "multi-key-5");
-            keyManager.generateKeyPair(KeyAlgorithm.ES512, "multi-key-6");
+        @DisplayName("Should handle multiple keys")
+        void shouldHandleMultipleKeys() throws KeyManagementException {
+            keyManager.generateKeyPair("multi-key-1");
+            keyManager.generateKeyPair("multi-key-2");
+            keyManager.generateKeyPair("multi-key-3");
 
             List<KeyInfo> activeKeys = keyManager.getActiveKeys();
-            assertThat(activeKeys).hasSize(6);
+            assertThat(activeKeys).hasSize(3);
 
             for (KeyInfo keyInfo : activeKeys) {
                 assertThat(keyInfo.isActive()).isTrue();
@@ -573,12 +417,12 @@ class DefaultKeyManagerTest {
 
         @Test
         @DisplayName("Should fallback to getSigningJWK when no resolver chain exists")
-        void shouldFallbackToGetSigningJWKWhenNoResolverChainExists() throws KeyManagementException, com.nimbusds.jose.JOSEException {
+        void shouldFallbackToGetSigningJWKWhenNoResolverChainExists() throws KeyManagementException {
             KeyManager singleParamManager = new DefaultKeyManager(new InMemoryKeyStore());
-            singleParamManager.generateKeyPair(KeyAlgorithm.RS256, "fallback-test-key");
-            
+            singleParamManager.generateKeyPair("fallback-test-key");
+
             Object resolvedKey = singleParamManager.resolveKey("fallback-test-key");
-            
+
             assertThat(resolvedKey).isNotNull();
             assertThat(resolvedKey).isInstanceOf(JWK.class);
             JWK jwk = (JWK) resolvedKey;
@@ -587,25 +431,24 @@ class DefaultKeyManagerTest {
 
         @Test
         @DisplayName("Should resolve local key through resolver chain")
-        void shouldResolveLocalKeyThroughResolverChain() throws KeyManagementException, com.nimbusds.jose.JOSEException {
+        void shouldResolveLocalKeyThroughResolverChain() throws KeyManagementException {
             Map<String, KeyDefinition> keyDefinitions = new HashMap<>();
             KeyDefinition keyDefinition = KeyDefinition.builder()
                     .keyId("local-resolver-key")
-                    .algorithm(KeyAlgorithm.RS256)
                     .provider("local")
                     .build();
             keyDefinitions.put("local-verification", keyDefinition);
-            
+
             KeyManager threeParamManager = new DefaultKeyManager(
                 new InMemoryKeyStore(),
                 List.of(),
                 keyDefinitions
             );
-            
-            threeParamManager.generateKeyPair(KeyAlgorithm.RS256, "local-resolver-key");
-            
+
+            threeParamManager.generateKeyPair("local-resolver-key");
+
             Object resolvedKey = threeParamManager.resolveKey("local-resolver-key");
-            
+
             assertThat(resolvedKey).isNotNull();
             assertThat(resolvedKey).isInstanceOf(JWK.class);
             JWK jwk = (JWK) resolvedKey;
@@ -614,25 +457,24 @@ class DefaultKeyManagerTest {
 
         @Test
         @DisplayName("Should find KeyDefinition by keyId field")
-        void shouldFindKeyDefinitionByKeyIdField() throws KeyManagementException, com.nimbusds.jose.JOSEException {
+        void shouldFindKeyDefinitionByKeyIdField() throws KeyManagementException {
             Map<String, KeyDefinition> keyDefinitions = new HashMap<>();
             KeyDefinition keyDefinition = KeyDefinition.builder()
                     .keyId("wit-signing-key")
-                    .algorithm(KeyAlgorithm.RS256)
                     .provider("local")
                     .build();
             keyDefinitions.put("wit-verification", keyDefinition);
-            
+
             KeyManager manager = new DefaultKeyManager(
                 new InMemoryKeyStore(),
                 List.of(),
                 keyDefinitions
             );
-            
-            manager.generateKeyPair(KeyAlgorithm.RS256, "wit-signing-key");
-            
+
+            manager.generateKeyPair("wit-signing-key");
+
             Object resolvedKey = manager.resolveKey("wit-signing-key");
-            
+
             assertThat(resolvedKey).isNotNull();
             assertThat(resolvedKey).isInstanceOf(JWK.class);
             JWK jwk = (JWK) resolvedKey;
@@ -643,7 +485,7 @@ class DefaultKeyManagerTest {
         @DisplayName("Should throw IllegalArgumentException when keyId is null")
         void shouldThrowIllegalArgumentExceptionWhenKeyIdIsNull() {
             KeyManager manager = new DefaultKeyManager(new InMemoryKeyStore());
-            
+
             assertThatThrownBy(() -> manager.resolveKey(null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Key ID cannot be null or empty");
@@ -653,7 +495,7 @@ class DefaultKeyManagerTest {
         @DisplayName("Should throw IllegalArgumentException when keyId is empty")
         void shouldThrowIllegalArgumentExceptionWhenKeyIdIsEmpty() {
             KeyManager manager = new DefaultKeyManager(new InMemoryKeyStore());
-            
+
             assertThatThrownBy(() -> manager.resolveKey(""))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("Key ID cannot be null or empty");

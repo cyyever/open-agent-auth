@@ -21,15 +21,12 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.Ed25519Signer;
 import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,13 +52,11 @@ class SignatureVerificationUtilsTest {
 
     private static final String VERIFICATION_KEY_ID = "test-key";
 
-    private RSAKey rsaKey;
-    private ECKey ecKey;
+    private OctetKeyPair edKey;
 
     @BeforeEach
     void setUp() throws JOSEException {
-        rsaKey = new RSAKeyGenerator(2048).keyID("rsa-key").generate();
-        ecKey = new ECKeyGenerator(Curve.P_256).keyID("ec-key").generate();
+        edKey = new OctetKeyPairGenerator(Curve.Ed25519).keyID("ed-key").generate();
     }
 
     @Nested
@@ -69,25 +64,12 @@ class SignatureVerificationUtilsTest {
     class VerifySignatureTests {
 
         @Test
-        @DisplayName("Should verify valid RSA signature")
-        void shouldVerifyValidRsaSignature() throws Exception {
-            SignedJWT signedJwt = createSignedJwt(JWSAlgorithm.RS256, new RSASSASigner(rsaKey), rsaKey.getKeyID());
+        @DisplayName("Should verify valid Ed25519 signature")
+        void shouldVerifyValidEd25519Signature() throws Exception {
+            SignedJWT signedJwt = createSignedJwt(new Ed25519Signer(edKey), edKey.getKeyID());
 
             KeyManager keyManager = mock(KeyManager.class);
-            when(keyManager.resolveVerificationKey(anyString())).thenReturn(rsaKey.toPublicJWK());
-
-            boolean result = SignatureVerificationUtils.verifySignature(signedJwt, keyManager, VERIFICATION_KEY_ID);
-
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should verify valid EC signature")
-        void shouldVerifyValidEcSignature() throws Exception {
-            SignedJWT signedJwt = createSignedJwt(JWSAlgorithm.ES256, new ECDSASigner(ecKey), ecKey.getKeyID());
-
-            KeyManager keyManager = mock(KeyManager.class);
-            when(keyManager.resolveVerificationKey(anyString())).thenReturn(ecKey.toPublicJWK());
+            when(keyManager.resolveVerificationKey(anyString())).thenReturn(edKey.toPublicJWK());
 
             boolean result = SignatureVerificationUtils.verifySignature(signedJwt, keyManager, VERIFICATION_KEY_ID);
 
@@ -97,10 +79,9 @@ class SignatureVerificationUtilsTest {
         @Test
         @DisplayName("Should return false for invalid signature")
         void shouldReturnFalseForInvalidSignature() throws Exception {
-            SignedJWT signedJwt = createSignedJwt(JWSAlgorithm.RS256, new RSASSASigner(rsaKey), rsaKey.getKeyID());
+            SignedJWT signedJwt = createSignedJwt(new Ed25519Signer(edKey), edKey.getKeyID());
 
-            // Use a different RSA key for verification
-            RSAKey differentKey = new RSAKeyGenerator(2048).keyID("different-key").generate();
+            OctetKeyPair differentKey = new OctetKeyPairGenerator(Curve.Ed25519).keyID("different-key").generate();
             KeyManager keyManager = mock(KeyManager.class);
             when(keyManager.resolveVerificationKey(anyString())).thenReturn(differentKey.toPublicJWK());
 
@@ -112,13 +93,31 @@ class SignatureVerificationUtilsTest {
         @Test
         @DisplayName("Should return false when KeyManager throws exception")
         void shouldReturnFalseWhenKeyManagerThrowsException() throws Exception {
-            SignedJWT signedJwt = createSignedJwt(JWSAlgorithm.RS256, new RSASSASigner(rsaKey), rsaKey.getKeyID());
+            SignedJWT signedJwt = createSignedJwt(new Ed25519Signer(edKey), edKey.getKeyID());
 
             KeyManager keyManager = mock(KeyManager.class);
             when(keyManager.resolveVerificationKey(anyString()))
                     .thenThrow(new KeyManagementException("Key not found"));
 
             boolean result = SignatureVerificationUtils.verifySignature(signedJwt, keyManager, VERIFICATION_KEY_ID);
+
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("Should reject non-EdDSA algorithm")
+        void shouldRejectNonEdDsaAlgorithm() throws Exception {
+            // Build a JWT carrying alg=RS256 and let SignatureVerificationUtils short-circuit.
+            String header = com.nimbusds.jose.util.Base64URL.encode(
+                    "{\"alg\":\"RS256\",\"typ\":\"JWT\"}").toString();
+            String payload = com.nimbusds.jose.util.Base64URL.encode(
+                    "{\"sub\":\"test\"}").toString();
+            String fakeJwt = header + "." + payload + ".AAAA";
+            SignedJWT parsed = SignedJWT.parse(fakeJwt);
+
+            KeyManager keyManager = mock(KeyManager.class);
+
+            boolean result = SignatureVerificationUtils.verifySignature(parsed, keyManager, VERIFICATION_KEY_ID);
 
             assertThat(result).isFalse();
         }
@@ -129,21 +128,12 @@ class SignatureVerificationUtilsTest {
     class CreateVerifierTests {
 
         @Test
-        @DisplayName("Should create RSA verifier from RSA key")
-        void shouldCreateRsaVerifier() throws JOSEException {
-            JWSVerifier verifier = SignatureVerificationUtils.createVerifier(rsaKey.toPublicJWK());
+        @DisplayName("Should create Ed25519 verifier from OctetKeyPair")
+        void shouldCreateEd25519Verifier() throws JOSEException {
+            JWSVerifier verifier = SignatureVerificationUtils.createVerifier(edKey.toPublicJWK());
 
             assertThat(verifier).isNotNull();
-            assertThat(verifier.supportedJWSAlgorithms()).contains(JWSAlgorithm.RS256);
-        }
-
-        @Test
-        @DisplayName("Should create EC verifier from EC key")
-        void shouldCreateEcVerifier() throws JOSEException {
-            JWSVerifier verifier = SignatureVerificationUtils.createVerifier(ecKey.toPublicJWK());
-
-            assertThat(verifier).isNotNull();
-            assertThat(verifier.supportedJWSAlgorithms()).contains(JWSAlgorithm.ES256);
+            assertThat(verifier.supportedJWSAlgorithms()).contains(JWSAlgorithm.EdDSA);
         }
 
         @Test
@@ -157,35 +147,7 @@ class SignatureVerificationUtilsTest {
         }
     }
 
-    @Nested
-    @DisplayName("isSupportedAlgorithm Tests")
-    class IsSupportedAlgorithmTests {
-
-        @Test
-        @DisplayName("Should return true for RSA algorithms")
-        void shouldReturnTrueForRsaAlgorithms() {
-            assertThat(SignatureVerificationUtils.isSupportedAlgorithm(JWSAlgorithm.RS256)).isTrue();
-            assertThat(SignatureVerificationUtils.isSupportedAlgorithm(JWSAlgorithm.RS384)).isTrue();
-            assertThat(SignatureVerificationUtils.isSupportedAlgorithm(JWSAlgorithm.RS512)).isTrue();
-            assertThat(SignatureVerificationUtils.isSupportedAlgorithm(JWSAlgorithm.PS256)).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should return true for EC algorithms")
-        void shouldReturnTrueForEcAlgorithms() {
-            assertThat(SignatureVerificationUtils.isSupportedAlgorithm(JWSAlgorithm.ES256)).isTrue();
-            assertThat(SignatureVerificationUtils.isSupportedAlgorithm(JWSAlgorithm.ES384)).isTrue();
-            assertThat(SignatureVerificationUtils.isSupportedAlgorithm(JWSAlgorithm.ES512)).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should return false for unsupported algorithms")
-        void shouldReturnFalseForUnsupportedAlgorithms() {
-            assertThat(SignatureVerificationUtils.isSupportedAlgorithm(new JWSAlgorithm("none"))).isFalse();
-        }
-    }
-
-    private SignedJWT createSignedJwt(JWSAlgorithm algorithm, com.nimbusds.jose.JWSSigner signer, String keyId)
+    private SignedJWT createSignedJwt(com.nimbusds.jose.JWSSigner signer, String keyId)
             throws JOSEException {
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .issuer("https://example.com")
@@ -194,7 +156,7 @@ class SignatureVerificationUtilsTest {
                 .build();
 
         SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(algorithm).keyID(keyId).build(),
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA).keyID(keyId).build(),
                 claimsSet
         );
         signedJwt.sign(signer);

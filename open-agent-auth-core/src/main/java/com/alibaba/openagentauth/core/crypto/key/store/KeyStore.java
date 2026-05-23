@@ -19,7 +19,6 @@ import com.alibaba.openagentauth.core.crypto.key.model.KeyInfo;
 import com.alibaba.openagentauth.core.crypto.key.KeyManager;
 import com.alibaba.openagentauth.core.exception.crypto.KeyManagementException;
 
-import java.security.KeyPair;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,47 +47,20 @@ import java.util.Optional;
 public interface KeyStore {
     
     /**
-     * Stores a key pair with the specified key ID and metadata.
-     *
-     * @param keyId the unique identifier for this key pair
-     * @param keyPair the key pair to store
-     * @param keyInfo the metadata information for this key
-     * @throws KeyManagementException if storage fails
-     */
-    void store(String keyId, KeyPair keyPair, KeyInfo keyInfo) throws KeyManagementException;
-    
-    /**
-     * Stores a JWK with the specified key ID and metadata.
-     * <p>
-     * This method stores the complete JWK object (RSAKey or ECKey) which contains
-     * both the key material and metadata including the key ID (kid). This is
-     * preferred over storing just the KeyPair as it preserves the kid information.
-     * </p>
+     * Stores a JWK with the specified key ID and metadata. The JWK must be an
+     * Ed25519 {@code OctetKeyPair}.
      *
      * @param keyId the unique identifier for this JWK
-     * @param jwk the JWK to store (RSAKey or ECKey)
+     * @param jwk the JWK to store
      * @param keyInfo the metadata information for this key
      * @throws KeyManagementException if storage fails
      */
     void storeJWK(String keyId, Object jwk, KeyInfo keyInfo) throws KeyManagementException;
-    
+
     /**
      * Retrieves the JWK for the specified key ID.
-     *
-     * @param keyId the key identifier
-     * @return an Optional containing the JWK (RSAKey or ECKey), or empty if not found
-     * @throws KeyManagementException if retrieval fails
      */
     Optional<Object> retrieveJWK(String keyId) throws KeyManagementException;
-    
-    /**
-     * Retrieves the key pair for the specified key ID.
-     *
-     * @param keyId the key identifier
-     * @return an Optional containing the key pair, or empty if not found
-     * @throws KeyManagementException if retrieval fails
-     */
-    Optional<KeyPair> retrieve(String keyId) throws KeyManagementException;
     
     /**
      * Retrieves the key info for the specified key ID.

@@ -27,8 +27,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Validator for Workload Proof Token (WPT) verification.
- * Delegates to {@link WptValidator} for signature, expiration, claims, algorithm
- * consistency, and wth checks.
+ * Delegates to {@link WptValidator} for signature, expiration, claims, and wth checks.
  */
 public class WorkloadProofValidator implements LayerValidator {
 

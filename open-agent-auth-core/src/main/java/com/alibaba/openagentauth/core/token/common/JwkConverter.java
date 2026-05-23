@@ -22,61 +22,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
-
-/**
  * Utility class for converting between JWK maps and Jwk model objects.
- * Provides safe type conversion and serialization for JWK claims.
  */
 public class JwkConverter {
 
-    /**
-     * Converts a Map to a Jwk object.
-     *
-     * @param jwkMap the JWK as a map
-     * @return the Jwk object
-     * @throws IllegalArgumentException if the map contains invalid values
-     */
     public static Jwk convertMapToJwk(Map<String, Object> jwkMap) {
 
-        // Create Jwk builder
         Jwk.Builder builder = Jwk.builder();
 
-        // Extract key type (required)
         String ktyValue = getClaimAsString(jwkMap, "kty");
         ValidationUtils.validateNotNull(ktyValue, "Missing required 'kty' (key type) parameter in JWK");
         builder.keyType(Jwk.KeyType.fromValue(ktyValue));
 
-        // Extract algorithm (optional)
-        String alg = getClaimAsString(jwkMap, "alg");
-        if (alg != null) {
-            builder.algorithm(alg);
-        }
-
-        // Extract key use (optional)
         String use = getClaimAsString(jwkMap, "use");
         if (use != null) {
             builder.use(Jwk.KeyUse.fromValue(use));
         }
 
-        // Extract curve (for EC keys)
         String crv = getClaimAsString(jwkMap, "crv");
         if (crv != null) {
             builder.curve(Jwk.Curve.fromValue(crv));
         }
 
-        // Extract x coordinate (for EC keys)
         String x = getClaimAsString(jwkMap, "x");
         if (x != null) {
             builder.x(x);
         }
 
-        // Extract y coordinate (for EC keys)
-        String y = getClaimAsString(jwkMap, "y");
-        if (y != null) {
-            builder.y(y);
-        }
-
-        // Extract key ID (optional)
         String kid = getClaimAsString(jwkMap, "kid");
         if (kid != null) {
             builder.keyId(kid);
@@ -85,14 +57,6 @@ public class JwkConverter {
         return builder.build();
     }
 
-    /**
-     * Safely extracts a String claim from a map.
-     *
-     * @param map the map containing the claim
-     * @param key the claim key
-     * @return the String value, or null if the key is not present
-     * @throws IllegalArgumentException if the value is not a String
-     */
     public static String getClaimAsString(Map<String, Object> map, String key) {
         Object value = map.get(key);
         if (value == null) {
@@ -105,48 +69,20 @@ public class JwkConverter {
                 .formatted(key, value.getClass().getSimpleName()));
     }
 
-    /**
-     * Converts a Jwk object to a Map for proper JWT serialization.
-     * <p>
-     * This method ensures that all JWK fields are properly serialized, including
-     * the kty (key type) field which is required by RFC 7517.
-     * </p>
-     *
-     * @param jwk the Jwk object to convert
-     * @return a Map representation of the JWK
-     */
     public static Map<String, Object> convertJwkToMap(Jwk jwk) {
 
-        // Create a new map
         Map<String, Object> jwkMap = new HashMap<>();
 
-        // Required field: kty (key type)
-        if (jwk.keyType() != null) {
-            jwkMap.put("kty", jwk.keyType().getValue());
-        }
+        jwkMap.put("kty", jwk.keyType().getValue());
+        jwkMap.put("alg", "EdDSA");
+        jwkMap.put("crv", jwk.curve().getValue());
+        jwkMap.put("x", jwk.x());
 
-        // Optional fields
-        if (jwk.algorithm() != null) {
-            jwkMap.put("alg", jwk.algorithm());
-        }
         if (jwk.use() != null) {
             jwkMap.put("use", jwk.use().getValue());
         }
         if (jwk.keyId() != null) {
             jwkMap.put("kid", jwk.keyId());
-        }
-
-        // EC key specific fields
-        if (jwk.keyType() == Jwk.KeyType.EC) {
-            if (jwk.curve() != null) {
-                jwkMap.put("crv", jwk.curve().getValue());
-            }
-            if (jwk.x() != null) {
-                jwkMap.put("x", jwk.x());
-            }
-            if (jwk.y() != null) {
-                jwkMap.put("y", jwk.y());
-            }
         }
 
         return jwkMap;

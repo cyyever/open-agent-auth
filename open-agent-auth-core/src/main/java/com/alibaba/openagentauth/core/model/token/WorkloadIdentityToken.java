@@ -75,9 +75,7 @@ public record WorkloadIdentityToken(
 
     /** JOSE Header for Workload Identity Token (WIT). */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record Header(
-            @JsonProperty("typ") String type,
-            @JsonProperty("alg") String algorithm) {
+    public record Header(@JsonProperty("typ") String type) {
 
         public static final String MEDIA_TYPE = "wit+jwt";
 
@@ -85,22 +83,17 @@ public record WorkloadIdentityToken(
             if (ValidationUtils.isNullOrEmpty(type)) {
                 throw new IllegalStateException("type (typ) is REQUIRED and should be 'wit+jwt'");
             }
-            if (ValidationUtils.isNullOrEmpty(algorithm)) {
-                throw new IllegalStateException("algorithm (alg) is REQUIRED");
-            }
         }
 
         public static HeaderBuilder builder() { return new HeaderBuilder(); }
 
         public static class HeaderBuilder {
             private String type = MEDIA_TYPE;
-            private String algorithm;
 
-            public HeaderBuilder type(String type)           { this.type = type;           return this; }
-            public HeaderBuilder algorithm(String algorithm) { this.algorithm = algorithm; return this; }
+            public HeaderBuilder type(String type) { this.type = type; return this; }
 
             public Header build() {
-                return new Header(type, algorithm);
+                return new Header(type);
             }
         }
     }

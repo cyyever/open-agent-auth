@@ -18,6 +18,7 @@ package com.alibaba.openagentauth.core.protocol.wimse.wpt;
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
 import com.nimbusds.jose.JOSEObjectType;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
@@ -85,7 +86,12 @@ public class WptParser {
             String jwtString
     ) throws ParseException {
 
-        // Build header — reject if typ is missing or not wpt+jwt
+        JWSAlgorithm alg = signedJwt.getHeader().getAlgorithm();
+        if (!JWSAlgorithm.EdDSA.equals(alg)) {
+            throw new ParseException(
+                    "WPT alg header must be 'EdDSA', got: " + alg, 0);
+        }
+
         JOSEObjectType typ = signedJwt.getHeader().getType();
         if (typ == null || !EXPECTED_TYP.equals(typ.getType())) {
             throw new ParseException(
@@ -93,7 +99,6 @@ public class WptParser {
         }
         WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
                 .type(typ.getType())
-                .algorithm(signedJwt.getHeader().getAlgorithm().getName())
                 .build();
 
         // Build claims

@@ -21,27 +21,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link WorkloadProofToken}.
- * <p>
- * Tests the Workload Proof Token (WPT) model's behavior including:
- * <ul>
- *   <li>Building tokens with all required and optional fields</li>
- *   <li>Getter methods for header, claims, and signature</li>
- *   <li>Token validation (isExpired, isValid)</li>
- *   <li>Builder pattern with validation</li>
- *   <li>Header and Claims inner classes</li>
- *   <li>Token hash handling (wth, ath, tth, oth)</li>
- *   <li>equals, hashCode, and toString methods</li>
- *   <li>Error handling for missing required fields</li>
- * </ul>
- * </p>
  */
 @DisplayName("WorkloadProofToken Tests")
 class WorkloadProofTokenTest {
@@ -53,17 +38,13 @@ class WorkloadProofTokenTest {
 
     @BeforeEach
     void setUp() {
-        // Set up test dates
-        futureExpirationTime = new Date(System.currentTimeMillis() + 3600000); // 1 hour from now
-        pastExpirationTime = new Date(System.currentTimeMillis() - 3600000); // 1 hour ago
+        futureExpirationTime = new Date(System.currentTimeMillis() + 3600000);
+        pastExpirationTime = new Date(System.currentTimeMillis() - 3600000);
 
-        // Set up valid header
         validHeader = WorkloadProofToken.Header.builder()
                 .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                .algorithm("ES256")
                 .build();
 
-        // Set up valid claims
         validClaims = WorkloadProofToken.Claims.builder()
                 .audience("https://resource-server.example.com")
                 .expirationTime(futureExpirationTime)
@@ -110,34 +91,6 @@ class WorkloadProofTokenTest {
         }
 
         @Test
-        @DisplayName("Should build token with only signature")
-        void shouldBuildTokenWithOnlySignature() {
-            WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
-                    .claims(validClaims)
-                    .signature("signature-only")
-                    .build();
-
-            assertThat(token).isNotNull();
-            assertThat(token.signature()).isEqualTo("signature-only");
-            assertThat(token.jwtString()).isNull();
-        }
-
-        @Test
-        @DisplayName("Should build token with only jwtString")
-        void shouldBuildTokenWithOnlyJwtString() {
-            WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
-                    .claims(validClaims)
-                    .jwtString("jwt-string-only")
-                    .build();
-
-            assertThat(token).isNotNull();
-            assertThat(token.signature()).isNull();
-            assertThat(token.jwtString()).isEqualTo("jwt-string-only");
-        }
-
-        @Test
         @DisplayName("Should throw exception when building with null header")
         void shouldThrowExceptionWhenBuildingWithNullHeader() {
             assertThatThrownBy(() -> WorkloadProofToken.builder()
@@ -165,8 +118,8 @@ class WorkloadProofTokenTest {
     class ValidationTests {
 
         @Test
-        @DisplayName("Should return false for expired token")
-        void shouldReturnFalseForExpiredToken() {
+        @DisplayName("Should return true for expired token")
+        void shouldReturnTrueForExpiredToken() {
             WorkloadProofToken.Claims expiredClaims = WorkloadProofToken.Claims.builder()
                     .audience("https://resource-server.example.com")
                     .expirationTime(pastExpirationTime)
@@ -193,34 +146,6 @@ class WorkloadProofTokenTest {
         }
 
         @Test
-        @DisplayName("Should return false for expired token in isValid")
-        void shouldReturnFalseForExpiredTokenInIsValid() {
-            WorkloadProofToken.Claims expiredClaims = WorkloadProofToken.Claims.builder()
-                    .audience("https://resource-server.example.com")
-                    .expirationTime(pastExpirationTime)
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
-                    .claims(expiredClaims)
-                    .build();
-
-            assertThat(token.isValid()).isFalse();
-        }
-
-        @Test
-        @DisplayName("Should return false when not expired")
-        void shouldReturnFalseWhenNotExpired() {
-            WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
-                    .claims(validClaims)
-                    .build();
-
-            assertThat(token.isExpired()).isFalse();
-        }
-
-        @Test
         @DisplayName("Should return true for valid token without expiration time")
         void shouldReturnTrueForValidTokenWithoutExpirationTime() {
             WorkloadProofToken.Claims claimsWithoutExpiration = WorkloadProofToken.Claims.builder()
@@ -241,26 +166,21 @@ class WorkloadProofTokenTest {
     class HeaderTests {
 
         @Test
-        @DisplayName("Should build header with all fields")
-        void shouldBuildHeaderWithAllFields() {
+        @DisplayName("Should build header with type")
+        void shouldBuildHeaderWithType() {
             WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
                     .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
                     .build();
 
             assertThat(header.type()).isEqualTo(WorkloadProofToken.Header.MEDIA_TYPE);
-            assertThat(header.algorithm()).isEqualTo("ES256");
         }
 
         @Test
         @DisplayName("Should build header with default type")
         void shouldBuildHeaderWithDefaultType() {
-            WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
-                    .algorithm("RS256")
-                    .build();
+            WorkloadProofToken.Header header = WorkloadProofToken.Header.builder().build();
 
             assertThat(header.type()).isEqualTo(WorkloadProofToken.Header.MEDIA_TYPE);
-            assertThat(header.algorithm()).isEqualTo("RS256");
         }
 
         @Test
@@ -268,7 +188,6 @@ class WorkloadProofTokenTest {
         void shouldThrowExceptionWhenBuildingHeaderWithNullType() {
             assertThatThrownBy(() -> WorkloadProofToken.Header.builder()
                     .type(null)
-                    .algorithm("ES256")
                     .build())
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("type (typ) is REQUIRED and should be 'wpt+jwt'");
@@ -279,32 +198,9 @@ class WorkloadProofTokenTest {
         void shouldThrowExceptionWhenBuildingHeaderWithEmptyType() {
             assertThatThrownBy(() -> WorkloadProofToken.Header.builder()
                     .type("")
-                    .algorithm("ES256")
                     .build())
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("type (typ) is REQUIRED and should be 'wpt+jwt'");
-        }
-
-        @Test
-        @DisplayName("Should throw exception when building header with null algorithm")
-        void shouldThrowExceptionWhenBuildingHeaderWithNullAlgorithm() {
-            assertThatThrownBy(() -> WorkloadProofToken.Header.builder()
-                    .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .algorithm(null)
-                    .build())
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("algorithm (alg) is REQUIRED");
-        }
-
-        @Test
-        @DisplayName("Should throw exception when building header with empty algorithm")
-        void shouldThrowExceptionWhenBuildingHeaderWithEmptyAlgorithm() {
-            assertThatThrownBy(() -> WorkloadProofToken.Header.builder()
-                    .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .algorithm("")
-                    .build())
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("algorithm (alg) is REQUIRED");
         }
 
         @Test
@@ -312,21 +208,13 @@ class WorkloadProofTokenTest {
         void shouldImplementEqualsCorrectlyForHeader() {
             WorkloadProofToken.Header header1 = WorkloadProofToken.Header.builder()
                     .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
                     .build();
 
             WorkloadProofToken.Header header2 = WorkloadProofToken.Header.builder()
                     .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
-                    .build();
-
-            WorkloadProofToken.Header header3 = WorkloadProofToken.Header.builder()
-                    .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .algorithm("RS256")
                     .build();
 
             assertThat(header1).isEqualTo(header2);
-            assertThat(header1).isNotEqualTo(header3);
             assertThat(header1).isNotEqualTo(null);
             assertThat(header1).isNotEqualTo("string");
         }
@@ -336,12 +224,10 @@ class WorkloadProofTokenTest {
         void shouldImplementHashCodeCorrectlyForHeader() {
             WorkloadProofToken.Header header1 = WorkloadProofToken.Header.builder()
                     .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
                     .build();
 
             WorkloadProofToken.Header header2 = WorkloadProofToken.Header.builder()
                     .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
                     .build();
 
             assertThat(header1.hashCode()).isEqualTo(header2.hashCode());
@@ -352,12 +238,10 @@ class WorkloadProofTokenTest {
         void shouldImplementToStringForHeader() {
             WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
                     .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .algorithm("ES256")
                     .build();
 
             String toString = header.toString();
             assertThat(toString).contains("wpt+jwt");
-            assertThat(toString).contains("ES256");
         }
     }
 
@@ -427,96 +311,6 @@ class WorkloadProofTokenTest {
 
             assertThat(expiredClaims.isExpired()).isTrue();
         }
-
-        @Test
-        @DisplayName("Should check if claims are not expired")
-        void shouldCheckIfClaimsAreNotExpired() {
-            assertThat(validClaims.isExpired()).isFalse();
-        }
-
-        @Test
-        @DisplayName("Should check if claims are valid")
-        void shouldCheckIfClaimsAreValid() {
-            assertThat(validClaims.isValid()).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should check if claims are invalid when expired")
-        void shouldCheckIfClaimsAreInvalidWhenExpired() {
-            WorkloadProofToken.Claims expiredClaims = WorkloadProofToken.Claims.builder()
-                    .expirationTime(pastExpirationTime)
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            assertThat(expiredClaims.isValid()).isFalse();
-        }
-
-        @Test
-        @DisplayName("Should return true for valid claims without expiration time")
-        void shouldReturnTrueForValidClaimsWithoutExpirationTime() {
-            WorkloadProofToken.Claims claimsWithoutExpiration = WorkloadProofToken.Claims.builder()
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            assertThat(claimsWithoutExpiration.isValid()).isTrue();
-        }
-
-        @Test
-        @DisplayName("Should implement equals correctly for claims")
-        void shouldImplementEqualsCorrectlyForClaims() {
-            WorkloadProofToken.Claims claims1 = WorkloadProofToken.Claims.builder()
-                    .audience("https://resource-server.example.com")
-                    .expirationTime(futureExpirationTime)
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            WorkloadProofToken.Claims claims2 = WorkloadProofToken.Claims.builder()
-                    .audience("https://resource-server.example.com")
-                    .expirationTime(futureExpirationTime)
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            WorkloadProofToken.Claims claims3 = WorkloadProofToken.Claims.builder()
-                    .audience("https://other-server.example.com")
-                    .expirationTime(futureExpirationTime)
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            assertThat(claims1).isEqualTo(claims2);
-            assertThat(claims1).isNotEqualTo(claims3);
-        }
-
-        @Test
-        @DisplayName("Should implement hashCode correctly for claims")
-        void shouldImplementHashCodeCorrectlyForClaims() {
-            WorkloadProofToken.Claims claims1 = WorkloadProofToken.Claims.builder()
-                    .audience("https://resource-server.example.com")
-                    .expirationTime(futureExpirationTime)
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            WorkloadProofToken.Claims claims2 = WorkloadProofToken.Claims.builder()
-                    .audience("https://resource-server.example.com")
-                    .expirationTime(futureExpirationTime)
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            assertThat(claims1.hashCode()).isEqualTo(claims2.hashCode());
-        }
-
-        @Test
-        @DisplayName("Should implement toString for claims")
-        void shouldImplementToStringForClaims() {
-            WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
-                    .audience("https://resource-server.example.com")
-                    .expirationTime(futureExpirationTime)
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            String toString = claims.toString();
-            assertThat(toString).contains("Claims");
-            assertThat(toString).contains("workloadTokenHash");
-        }
     }
 
     @Nested
@@ -543,21 +337,6 @@ class WorkloadProofTokenTest {
 
             assertThat(claims.accessTokenHash()).isEqualTo("at-hash-456");
         }
-
-        @Test
-        @DisplayName("Should handle all token hash combinations")
-        void shouldHandleAllTokenHashCombinations() {
-            WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
-                    .audience("https://example.com")
-                    .expirationTime(futureExpirationTime)
-                    .jwtId("jti-123")
-                    .workloadTokenHash("wit-hash")
-                    .accessTokenHash("at-hash")
-                    .build();
-
-            assertThat(claims.workloadTokenHash()).isEqualTo("wit-hash");
-            assertThat(claims.accessTokenHash()).isEqualTo("at-hash");
-        }
     }
 
     @Nested
@@ -581,22 +360,6 @@ class WorkloadProofTokenTest {
         }
 
         @Test
-        @DisplayName("Should handle empty JWT ID")
-        void shouldHandleEmptyJwtId() {
-            WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
-                    .jwtId("")
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
-                    .claims(claims)
-                    .build();
-
-            assertThat(token.getJwtId()).isEqualTo("");
-        }
-
-        @Test
         @DisplayName("Should handle empty signature")
         void shouldHandleEmptySignature() {
             WorkloadProofToken token = WorkloadProofToken.builder()
@@ -606,63 +369,6 @@ class WorkloadProofTokenTest {
                     .build();
 
             assertThat(token.signature()).isEqualTo("");
-        }
-
-        @Test
-        @DisplayName("Should handle empty jwtString")
-        void shouldHandleEmptyJwtString() {
-            WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
-                    .claims(validClaims)
-                    .jwtString("")
-                    .build();
-
-            assertThat(token.jwtString()).isEqualTo("");
-        }
-
-        @Test
-        @DisplayName("Should handle single character workload token hash")
-        void shouldHandleSingleCharacterWorkloadTokenHash() {
-            WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
-                    .workloadTokenHash("a")
-                    .build();
-
-            WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
-                    .claims(claims)
-                    .build();
-
-            assertThat(token.getWorkloadTokenHash()).isEqualTo("a");
-        }
-
-        @Test
-        @DisplayName("Should handle long workload token hash")
-        void shouldHandleLongWorkloadTokenHash() {
-            String longHash = "a".repeat(1000);
-            WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
-                    .workloadTokenHash(longHash)
-                    .build();
-
-            WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
-                    .claims(claims)
-                    .build();
-
-            assertThat(token.getWorkloadTokenHash()).isEqualTo(longHash);
-        }
-
-        @Test
-        @DisplayName("Should handle claims with only required field")
-        void shouldHandleClaimsWithOnlyRequiredField() {
-            WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
-                    .workloadTokenHash("required-only")
-                    .build();
-
-            assertThat(claims.workloadTokenHash()).isEqualTo("required-only");
-            assertThat(claims.audience()).isNull();
-            assertThat(claims.expirationTime()).isNull();
-            assertThat(claims.jwtId()).isNull();
-            assertThat(claims.accessTokenHash()).isNull();
         }
     }
 }

@@ -23,6 +23,12 @@
             <groupId>com.nimbusds</groupId>
             <artifactId>nimbus-jose-jwt</artifactId>
         </dependency>
+        <!-- Ed25519 (EdDSA) crypto: Nimbus delegates Ed25519 to Google Tink -->
+        <dependency>
+            <groupId>com.google.crypto.tink</groupId>
+            <artifactId>tink</artifactId>
+            <version>1.16.0</version>
+        </dependency>
 
         <!-- JSON -->
         <dependency>

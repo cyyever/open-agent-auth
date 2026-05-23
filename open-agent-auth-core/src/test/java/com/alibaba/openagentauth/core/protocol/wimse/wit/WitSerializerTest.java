@@ -18,11 +18,10 @@ package com.alibaba.openagentauth.core.protocol.wimse.wit;
 import com.alibaba.openagentauth.core.model.jwk.Jwk;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.crypto.Ed25519Signer;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.OctetKeyPair;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -33,22 +32,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link WitSerializer}.
- * Tests verify that WorkloadIdentityToken objects can be correctly serialized
- * to JWT string representations.
  */
 @DisplayName("WIT Serializer Tests")
 class WitSerializerTest {
 
-    private RSAKey signingKey;
+    private OctetKeyPair signingKey;
     private WorkloadIdentityToken testWit;
 
     @BeforeEach
     void setUp() throws JOSEException {
-        // Generate RSA key pair for signing
-        RSAKeyGenerator rsaKeyGenerator = new RSAKeyGenerator(2048);
-        signingKey = rsaKeyGenerator.keyID("test-key-id").generate();
+        signingKey = new OctetKeyPairGenerator(Curve.Ed25519)
+                .keyID("test-key-id")
+                .generate();
 
-        // Create test WIT
         testWit = createTestWit();
     }
 
@@ -59,13 +55,10 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should serialize WIT with required claims")
         void shouldSerializeWitWithRequiredClaims() throws JOSEException {
-            // Arrange
             String keyId = "test-key-id";
 
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
 
-            // Assert
             assertThat(jwtString).isNotNull();
             assertThat(jwtString).isNotEmpty();
             assertThat(jwtString).matches("^[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+$");
@@ -74,10 +67,8 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should serialize WIT without key ID")
         void shouldSerializeWitWithoutKeyId() throws JOSEException {
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), null);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), null);
 
-            // Assert
             assertThat(jwtString).isNotNull();
             assertThat(jwtString).isNotEmpty();
         }
@@ -85,10 +76,8 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should serialize WIT with empty key ID")
         void shouldSerializeWitWithEmptyKeyId() throws JOSEException {
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), "");
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), "");
 
-            // Assert
             assertThat(jwtString).isNotNull();
             assertThat(jwtString).isNotEmpty();
         }
@@ -96,30 +85,24 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should produce valid JWT structure")
         void shouldProduceValidJwtStructure() throws JOSEException {
-            // Arrange
             String keyId = "test-key-id";
 
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
 
-            // Assert
             String[] parts = jwtString.split("\\.");
             assertThat(parts).hasSize(3);
-            assertThat(parts[0]).isNotEmpty(); // header
-            assertThat(parts[1]).isNotEmpty(); // payload
-            assertThat(parts[2]).isNotEmpty(); // signature
+            assertThat(parts[0]).isNotEmpty();
+            assertThat(parts[1]).isNotEmpty();
+            assertThat(parts[2]).isNotEmpty();
         }
 
         @Test
         @DisplayName("Should include key ID in header when provided")
         void shouldIncludeKeyIdInHeaderWhenProvided() throws JOSEException {
-            // Arrange
             String keyId = "test-key-id";
 
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
 
-            // Assert
             String header = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[0]));
             assertThat(header).contains("\"kid\":\"test-key-id\"");
         }
@@ -127,13 +110,10 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should serialize WIT with confirmation claim")
         void shouldSerializeWitWithConfirmationClaim() throws JOSEException {
-            // Arrange
             String keyId = "test-key-id";
 
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
 
-            // Assert
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"cnf\"");
             assertThat(payload).contains("\"jwk\"");
@@ -147,8 +127,7 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should throw exception when WIT is null")
         void shouldThrowExceptionWhenWitIsNull() {
-            // Act & Assert
-            assertThatThrownBy(() -> WitSerializer.serialize(null, new RSASSASigner(signingKey), "key-id"))
+            assertThatThrownBy(() -> WitSerializer.serialize(null, new Ed25519Signer(signingKey), "key-id"))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("WorkloadIdentityToken");
         }
@@ -156,7 +135,6 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should throw exception when signer is null")
         void shouldThrowExceptionWhenSignerIsNull() {
-            // Act & Assert
             assertThatThrownBy(() -> WitSerializer.serialize(testWit, null, "key-id"))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("JWSSigner");
@@ -170,13 +148,10 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should include issuer claim")
         void shouldIncludeIssuerClaim() throws JOSEException {
-            // Arrange
             String keyId = "test-key-id";
 
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
 
-            // Assert
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"iss\":\"https://issuer.example.com\"");
         }
@@ -184,13 +159,10 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should include subject claim")
         void shouldIncludeSubjectClaim() throws JOSEException {
-            // Arrange
             String keyId = "test-key-id";
 
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
 
-            // Assert
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"sub\":\"workload-001\"");
         }
@@ -198,13 +170,10 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should include expiration claim")
         void shouldIncludeExpirationClaim() throws JOSEException {
-            // Arrange
             String keyId = "test-key-id";
 
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
 
-            // Assert
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"exp\"");
         }
@@ -212,13 +181,10 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should include JWT ID claim")
         void shouldIncludeJwtIdClaim() throws JOSEException {
-            // Arrange
             String keyId = "test-key-id";
 
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
 
-            // Assert
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"jti\"");
         }
@@ -229,65 +195,49 @@ class WitSerializerTest {
     class JwtHeaderTests {
 
         @Test
-        @DisplayName("Should include algorithm in header")
+        @DisplayName("Should include EdDSA algorithm in header")
         void shouldIncludeAlgorithmInHeader() throws JOSEException {
-            // Arrange
             String keyId = "test-key-id";
 
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
 
-            // Assert
             String header = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[0]));
-            assertThat(header).contains("\"alg\":\"RS256\"");
+            assertThat(header).contains("\"alg\":\"EdDSA\"");
         }
 
         @Test
         @DisplayName("Should include type in header")
         void shouldIncludeTypeInHeader() throws JOSEException {
-            // Arrange
             String keyId = "test-key-id";
 
-            // Act
-            String jwtString = WitSerializer.serialize(testWit, new RSASSASigner(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
 
-            // Assert
             String header = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[0]));
             assertThat(header).contains("\"typ\":\"wit+jwt\"");
         }
     }
 
-    // Helper methods
-
     private WorkloadIdentityToken createTestWit() throws JOSEException {
-        // Create confirmation with EC JWK
-        com.nimbusds.jose.jwk.ECKey ecKey = new ECKeyGenerator(
-                com.nimbusds.jose.jwk.Curve.P_256)
+        OctetKeyPair edKey = new OctetKeyPairGenerator(Curve.Ed25519)
                 .keyID("wpt-key")
-                .algorithm(JWSAlgorithm.ES256)
                 .generate();
-        
+
         Jwk jwk = Jwk.builder()
-                .keyType(Jwk.KeyType.EC)
-                .algorithm("ES256")
+                .keyType(Jwk.KeyType.OKP)
                 .keyId("wpt-key")
-                .curve(Jwk.Curve.P_256)
-                .x(ecKey.getX().toString())
-                .y(ecKey.getY().toString())
+                .curve(Jwk.Curve.Ed25519)
+                .x(edKey.getX().toString())
                 .build();
-        
-        WorkloadIdentityToken.Claims.Confirmation confirmation = 
+
+        WorkloadIdentityToken.Claims.Confirmation confirmation =
             WorkloadIdentityToken.Claims.Confirmation.builder()
                 .jwk(jwk)
                 .build();
 
-        // Create token header
         WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder()
                 .type("wit+jwt")
-                .algorithm("RS256")
                 .build();
 
-        // Create claims
         WorkloadIdentityToken.Claims claims = WorkloadIdentityToken.Claims.builder()
                 .issuer("https://issuer.example.com")
                 .subject("workload-001")
@@ -296,7 +246,6 @@ class WitSerializerTest {
                 .confirmation(confirmation)
                 .build();
 
-        // Create WIT
         return WorkloadIdentityToken.builder()
                 .header(header)
                 .claims(claims)

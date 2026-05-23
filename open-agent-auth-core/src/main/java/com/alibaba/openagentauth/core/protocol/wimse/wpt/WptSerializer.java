@@ -84,9 +84,7 @@ public class WptSerializer {
      */
     private static JWSObject buildJWSObject(WorkloadProofToken wpt) throws JOSEException {
         try {
-            // Build JWSHeader from WPT header
-            JWSHeader header = new JWSHeader.Builder(
-                    new JWSAlgorithm(wpt.header().algorithm()))
+            JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
                     .type(new JOSEObjectType(wpt.header().type()))
                     .build();
 

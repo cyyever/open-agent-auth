@@ -15,7 +15,6 @@
  */
 package com.alibaba.openagentauth.core.crypto.key.resolve;
 
-import com.alibaba.openagentauth.core.crypto.key.model.KeyAlgorithm;
 import com.alibaba.openagentauth.core.crypto.key.model.KeyDefinition;
 import com.alibaba.openagentauth.core.exception.crypto.KeyResolutionException;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,7 +88,6 @@ class JwksConsumerKeyResolverTest {
         void shouldReturnFalseForLocalKey() {
             KeyDefinition localKeyDefinition = KeyDefinition.builder()
                     .keyId("local-key")
-                    .algorithm(KeyAlgorithm.ES256)
                     .provider("local")
                     .build();
 
@@ -101,7 +99,6 @@ class JwksConsumerKeyResolverTest {
         void shouldReturnFalseForRemoteKeyWithUnknownConsumer() {
             KeyDefinition remoteKeyDefinition = KeyDefinition.builder()
                     .keyId("remote-key")
-                    .algorithm(KeyAlgorithm.RS256)
                     .jwksConsumer("unknown-idp")
                     .build();
 
@@ -113,7 +110,6 @@ class JwksConsumerKeyResolverTest {
         void shouldReturnTrueForRemoteKeyWithKnownConsumer() {
             KeyDefinition remoteKeyDefinition = KeyDefinition.builder()
                     .keyId("remote-key")
-                    .algorithm(KeyAlgorithm.RS256)
                     .jwksConsumer("agent-idp")
                     .build();
 
@@ -125,7 +121,6 @@ class JwksConsumerKeyResolverTest {
         void shouldReturnFalseForRemoteKeyWithBlankConsumer() {
             KeyDefinition blankConsumerKeyDefinition = KeyDefinition.builder()
                     .keyId("remote-key")
-                    .algorithm(KeyAlgorithm.RS256)
                     .jwksConsumer("  ")
                     .build();
 
@@ -179,7 +174,6 @@ class JwksConsumerKeyResolverTest {
         void shouldThrowExceptionWhenConsumerNotInEndpoints() {
             KeyDefinition keyDefinition = KeyDefinition.builder()
                     .keyId("test-key")
-                    .algorithm(KeyAlgorithm.RS256)
                     .jwksConsumer("unknown-consumer")
                     .build();
 
@@ -198,7 +192,6 @@ class JwksConsumerKeyResolverTest {
 
             KeyDefinition keyDefinition = KeyDefinition.builder()
                     .keyId("test-key")
-                    .algorithm(KeyAlgorithm.RS256)
                     .jwksConsumer("empty-idp")
                     .build();
 
@@ -217,7 +210,6 @@ class JwksConsumerKeyResolverTest {
 
             KeyDefinition keyDefinition = KeyDefinition.builder()
                     .keyId("test-key")
-                    .algorithm(KeyAlgorithm.RS256)
                     .jwksConsumer("blank-idp")
                     .build();
 
