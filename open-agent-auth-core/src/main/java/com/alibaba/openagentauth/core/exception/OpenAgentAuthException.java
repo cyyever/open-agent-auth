@@ -15,7 +15,6 @@
  */
 package com.alibaba.openagentauth.core.exception;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -89,7 +88,7 @@ public abstract class OpenAgentAuthException extends RuntimeException {
                                      List<Object> errorParams, Map<String, Object> context) {
         super(formattedMessage);
         this.errorCode = errorCode;
-        this.errorParams = errorParams != null ? Collections.unmodifiableList(errorParams) : null;
+        this.errorParams = errorParams != null ? List.copyOf(errorParams) : null;
         this.context = context;
         this.formattedMessage = formattedMessage;
     }
@@ -109,7 +108,7 @@ public abstract class OpenAgentAuthException extends RuntimeException {
                                      Throwable cause) {
         super(formattedMessage, cause);
         this.errorCode = errorCode;
-        this.errorParams = errorParams != null ? Collections.unmodifiableList(errorParams) : null;
+        this.errorParams = errorParams != null ? List.copyOf(errorParams) : null;
         this.context = context;
         this.formattedMessage = formattedMessage;
     }

@@ -16,7 +16,6 @@
 package com.alibaba.openagentauth.core.validation.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,9 +57,7 @@ public class LayerValidationResult {
      */
     private LayerValidationResult(Builder builder) {
         this.success = builder.success;
-        this.errors = builder.errors != null
-                ? Collections.unmodifiableList(new ArrayList<>(builder.errors))
-                : List.of();
+        this.errors = builder.errors != null ? List.copyOf(builder.errors) : List.of();
         this.metadata = builder.metadata;
     }
 

@@ -317,8 +317,7 @@ class DefaultKeyManagerTest {
             KeyPair oldKeyPair = keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-011");
             
             keyManager.rotateKey("test-key-011");
-            
-            KeyPair newKeyPair = keyManager.generateKeyPair(KeyAlgorithm.RS256, "test-key-011-rotated");
+
             PrivateKey newSigningKey = keyManager.getSigningKey("test-key-011");
             
             assertThat(newSigningKey).isNotNull();
