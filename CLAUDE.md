@@ -17,10 +17,10 @@ The trim phase is mostly done. The remaining work is the **M1 retrofit
 
 Do not relax any of these without a spec change:
 
-- **Java 21 LTS** baseline. Originally 17+ → 26 mid-trim, then back to
-  21 LTS in 2026-05 for downstream-customer compatibility + JaCoCo /
-  tooling support. (Spec at `cyyever/authentication_plan` needs the same
-  edit — single source of truth.)
+- **Java 21 LTS** baseline. Spec previously said Java 17+; bumped to
+  21 LTS+ in 2026-05 (spec commit `c9b3a42`) for downstream-customer
+  compatibility + JaCoCo / tooling support. This repo briefly ran 26
+  mid-trim — that was never spec-mandated.
 - Algorithm whitelist: **`alg=EdDSA` only** (Ed25519 + SHA-512). Reject
   `alg=none`, key-confusion, anything else → MALFORMED.
 - JOSE header whitelist: `{alg, typ}` only (DPoP also allows `jwk`).
