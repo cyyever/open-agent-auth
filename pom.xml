@@ -20,8 +20,8 @@
     </modules>
 
     <properties>
-        <maven.compiler.source>26</maven.compiler.source>
-        <maven.compiler.target>26</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- JWT -->
@@ -121,7 +121,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.15.0</version>
                     <configuration>
-                        <release>26</release>
+                        <release>21</release>
                         <parameters>true</parameters>
                     </configuration>
                 </plugin>
@@ -149,7 +149,7 @@
                 <artifactId>modernizer-maven-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
-                    <javaVersion>26</javaVersion>
+                    <javaVersion>21</javaVersion>
                 </configuration>
                 <executions>
                     <execution>
@@ -175,7 +175,7 @@
         <!--
             Opt-in Error Prone (https://errorprone.info/) for compile-time bug pattern
             detection. Not in the default build because Error Prone tracks JDK releases
-            with a lag; on a new JDK (currently 26) it may need the latest release plus
+            with a lag; on a new JDK (currently 21) it may need the latest release plus
             extra javac internal exports. Run with: mvn -P errorprone compile
         -->
         <!--

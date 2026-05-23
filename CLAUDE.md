@@ -17,7 +17,10 @@ The trim phase is mostly done. The remaining work is the **M1 retrofit
 
 Do not relax any of these without a spec change:
 
-- **Java 26** baseline (was 17+; bumped after the trim).
+- **Java 21 LTS** baseline. Originally 17+ → 26 mid-trim, then back to
+  21 LTS in 2026-05 for downstream-customer compatibility + JaCoCo /
+  tooling support. (Spec at `cyyever/authentication_plan` needs the same
+  edit — single source of truth.)
 - Algorithm whitelist: **`alg=EdDSA` only** (Ed25519 + SHA-512). Reject
   `alg=none`, key-confusion, anything else → MALFORMED.
 - JOSE header whitelist: `{alg, typ}` only (DPoP also allows `jwk`).
@@ -43,20 +46,20 @@ dropped per the trim. Consumers wire `WitValidator` + `WptValidator` +
 ## Build
 
 ```bash
-# Linux dev host
-JAVA_HOME=/usr/lib/jvm/java-26-openjdk mvn -B test
-# macOS (Temurin via `brew install --cask temurin`)
-JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-26.jdk/Contents/Home mvn -B test
+# Linux dev host (system javac already points at Java 21)
+mvn -B test
+# macOS (Temurin via `brew install --cask temurin@21`)
+JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home mvn -B test
 ```
 
-The default `/usr/bin/javac` still points at Java 21 on the Linux dev
-host, and macOS has no system `javac` at all; explicit `JAVA_HOME` is
-required until the system default is bumped.
+Any JDK ≥ 21 works; CI runs on Temurin 21. macOS has no system `javac`,
+so an explicit `JAVA_HOME` is needed there.
 
 The pom only declares: nimbus-jose-jwt, Jackson (databind/annotations/
 jsr310), SLF4J, jakarta.servlet/validation (provided/test), JUnit 5,
-Mockito, AssertJ. No Spring, no JaCoCo (dropped — JaCoCo 0.8.12 doesn't
-support class-file major 70).
+Mockito, AssertJ. No Spring. JaCoCo (0.8.13) was re-added after the
+Java 21 LTS downgrade — runs as a separate CI job to keep main test
+runs fast.
 
 ## Coding conventions (project-specific)
 

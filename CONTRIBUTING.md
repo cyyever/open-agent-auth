@@ -7,7 +7,7 @@ for context.
 
 ## Prerequisites
 
-- Java 26
+- Java 21 LTS (or later)
 - Maven 3.6+
 - Git
 
