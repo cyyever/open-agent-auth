@@ -1,5 +1,10 @@
 # Open Agent Auth — AAP fork baseline
 
+[![CI](https://github.com/cyyever/open-agent-auth/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cyyever/open-agent-auth/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/cyyever/open-agent-auth/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/cyyever/open-agent-auth/actions/workflows/codeql.yml)
+[![Coverage](https://raw.githubusercontent.com/cyyever/open-agent-auth/badges/jacoco.svg)](https://github.com/cyyever/open-agent-auth/actions/workflows/ci.yml)
+[![Branches](https://raw.githubusercontent.com/cyyever/open-agent-auth/badges/branches.svg)](https://github.com/cyyever/open-agent-auth/actions/workflows/ci.yml)
+
 This repository is the upstream baseline being trimmed into an
 **Agent Auth Protocol (AAP)** fork.
 
