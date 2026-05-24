@@ -18,28 +18,24 @@ package com.alibaba.openagentauth.core.model.jwk;
 import com.alibaba.openagentauth.core.util.ValidationUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * JSON Web Key (JWK) as defined in RFC 7517.
+ * Minimal Ed25519 JSON Web Key as used in AAP CT cnf.jwk and DPoP header.jwk.
+ * <p>
+ * Per spec §3 only Ed25519 ({@code kty=OKP}, {@code crv=Ed25519}) is permitted,
+ * so those fields are wire-only constants emitted by {@link
+ * com.alibaba.openagentauth.core.token.common.JwkConverter} and not carried on
+ * the record itself.
  *
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc8037">RFC 8037</a>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record Jwk(
-        @JsonProperty("kty") KeyType keyType,
-        @JsonProperty("use") KeyUse use,
-        @JsonProperty("crv") Curve curve,
         @JsonProperty("x") String x,
         @JsonProperty("kid") String keyId) {
 
     public Jwk {
-        if (keyType == null) {
-            throw new IllegalStateException("kty (key type) is REQUIRED");
-        }
-        if (curve == null) {
-            throw new IllegalStateException("crv (curve) is REQUIRED");
-        }
         if (ValidationUtils.isNullOrEmpty(x)) {
             throw new IllegalStateException("x coordinate is REQUIRED");
         }
@@ -49,75 +45,15 @@ public record Jwk(
         return new Builder();
     }
 
-    public enum KeyType {
-        OKP("OKP");
-
-        private final String value;
-
-        KeyType(String value) { this.value = value; }
-
-        @JsonValue
-        public String getValue() { return value; }
-
-        public static KeyType fromValue(String value) {
-            for (KeyType type : values()) {
-                if (type.value.equals(value)) return type;
-            }
-            throw new IllegalArgumentException("Unknown KeyType: " + value);
-        }
-    }
-
-    public enum KeyUse {
-        SIGNATURE("sig"), ENCRYPTION("enc");
-
-        private final String value;
-
-        KeyUse(String value) { this.value = value; }
-
-        @JsonValue
-        public String getValue() { return value; }
-
-        public static KeyUse fromValue(String value) {
-            for (KeyUse keyUse : values()) {
-                if (keyUse.value.equals(value)) return keyUse;
-            }
-            throw new IllegalArgumentException("Unknown KeyUse: " + value);
-        }
-    }
-
-    public enum Curve {
-        Ed25519("Ed25519");
-
-        private final String value;
-
-        Curve(String value) { this.value = value; }
-
-        @JsonValue
-        public String getValue() { return value; }
-
-        public static Curve fromValue(String value) {
-            for (Curve curve : values()) {
-                if (curve.value.equals(value)) return curve;
-            }
-            throw new IllegalArgumentException("Unknown Curve: " + value);
-        }
-    }
-
     public static class Builder {
-        private KeyType keyType;
-        private KeyUse use;
-        private Curve curve;
         private String x;
         private String keyId;
 
-        public Builder keyType(KeyType keyType)  { this.keyType  = keyType;  return this; }
-        public Builder use(KeyUse use)            { this.use      = use;      return this; }
-        public Builder curve(Curve curve)         { this.curve    = curve;    return this; }
-        public Builder x(String x)                { this.x        = x;        return this; }
-        public Builder keyId(String keyId)        { this.keyId    = keyId;    return this; }
+        public Builder x(String x)         { this.x     = x;     return this; }
+        public Builder keyId(String keyId) { this.keyId = keyId; return this; }
 
         public Jwk build() {
-            return new Jwk(keyType, use, curve, x, keyId);
+            return new Jwk(x, keyId);
         }
     }
 }

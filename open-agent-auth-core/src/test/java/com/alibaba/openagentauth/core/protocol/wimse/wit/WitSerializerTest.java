@@ -182,9 +182,7 @@ class WitSerializerTest {
                 .generate();
 
         Jwk jwk = Jwk.builder()
-                .keyType(Jwk.KeyType.OKP)
                 .keyId("wpt-key")
-                .curve(Jwk.Curve.Ed25519)
                 .x(edKey.getX().toString())
                 .build();
 

@@ -57,8 +57,6 @@ class WptGeneratorTest {
 
     private WorkloadIdentityToken createTestWit(OctetKeyPair publicKey) {
         Jwk jwk = Jwk.builder()
-                .keyType(Jwk.KeyType.OKP)
-                .curve(Jwk.Curve.Ed25519)
                 .x(publicKey.getX().toString())
                 .build();
 

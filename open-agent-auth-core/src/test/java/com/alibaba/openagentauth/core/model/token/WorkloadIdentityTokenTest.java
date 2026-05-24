@@ -44,8 +44,6 @@ class WorkloadIdentityTokenTest {
         pastExpirationTime = new Date(System.currentTimeMillis() - 3600000);
 
         testJwk = Jwk.builder()
-                .keyType(Jwk.KeyType.OKP)
-                .curve(Jwk.Curve.Ed25519)
                 .x("test_x_value")
                 .build();
 

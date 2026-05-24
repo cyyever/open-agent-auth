@@ -95,7 +95,7 @@ class WitParserTest {
 
             assertThat(wit.getConfirmation()).isNotNull();
             assertThat(wit.getConfirmation().jwk()).isNotNull();
-            assertThat(wit.getConfirmation().jwk().keyType()).isEqualTo(Jwk.KeyType.OKP);
+            assertThat(wit.getConfirmation().jwk().x()).isNotBlank();
         }
 
         @Test

@@ -273,8 +273,7 @@ class WitGeneratorTest {
 
             assertThat(wit.getConfirmation()).isNotNull();
             assertThat(wit.getConfirmation().jwk()).isNotNull();
-            assertThat(wit.getConfirmation().jwk().keyType()).isEqualTo(Jwk.KeyType.OKP);
-            assertThat(wit.getConfirmation().jwk().curve()).isEqualTo(Jwk.Curve.Ed25519);
+            assertThat(wit.getConfirmation().jwk().x()).isNotBlank();
         }
     }
 }
