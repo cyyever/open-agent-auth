@@ -254,6 +254,28 @@ class WptParserTest {
                     .isInstanceOf(ParseException.class)
                     .hasMessageContaining("alg header must be 'EdDSA'");
         }
+
+        @Test
+        @DisplayName("Should reject WPT with disallowed JOSE header parameter (kid)")
+        void shouldRejectWptWithKidHeader() throws Exception {
+            JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                    .audience("resource-server")
+                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                    .jwtID(java.util.UUID.randomUUID().toString())
+                    .claim("wth", computeHash(sampleWit))
+                    .build();
+            SignedJWT signedJwt = new SignedJWT(
+                    new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                            .keyID(signingKey.getKeyID())
+                            .type(new JOSEObjectType("wpt+jwt"))
+                            .build(),
+                    claims);
+            signedJwt.sign(new com.nimbusds.jose.crypto.Ed25519Signer(signingKey));
+
+            assertThatThrownBy(() -> wptParser.parse(signedJwt.serialize()))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("disallowed parameter: kid");
+        }
     }
 
     @Nested
@@ -296,7 +318,6 @@ class WptParserTest {
 
         SignedJWT signedJwt = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wpt+jwt"))
                         .build(),
                 claimsSet
@@ -319,7 +340,6 @@ class WptParserTest {
 
         SignedJWT signedJwt = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wpt+jwt"))
                         .build(),
                 claimsSet

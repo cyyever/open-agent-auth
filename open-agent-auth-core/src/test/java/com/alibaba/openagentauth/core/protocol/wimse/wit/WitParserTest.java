@@ -188,6 +188,26 @@ class WitParserTest {
                     .isInstanceOf(ParseException.class)
                     .hasMessageContaining("alg header must be 'EdDSA'");
         }
+
+        @Test
+        @DisplayName("Should reject WIT with disallowed JOSE header parameter (kid)")
+        void shouldRejectWitWithKidHeader() throws Exception {
+            JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                    .subject("agent-001")
+                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                    .build();
+            SignedJWT signedJwt = new SignedJWT(
+                    new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                            .keyID(signingKey.getKeyID())
+                            .type(new JOSEObjectType("wit+jwt"))
+                            .build(),
+                    claims);
+            signedJwt.sign(new com.nimbusds.jose.crypto.Ed25519Signer(signingKey));
+
+            assertThatThrownBy(() -> witParser.parse(signedJwt))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("disallowed parameter: kid");
+        }
     }
 
     private SignedJWT createSignedJwtWithAllClaims() throws Exception {
@@ -276,7 +296,6 @@ class WitParserTest {
     private SignedJWT signJwt(JWTClaimsSet claimsSet) throws Exception {
         SignedJWT signedJwt = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet

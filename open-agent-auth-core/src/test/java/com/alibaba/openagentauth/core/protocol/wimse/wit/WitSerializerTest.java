@@ -30,9 +30,6 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * Unit tests for {@link WitSerializer}.
- */
 @DisplayName("WIT Serializer Tests")
 class WitSerializerTest {
 
@@ -55,9 +52,7 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should serialize WIT with required claims")
         void shouldSerializeWitWithRequiredClaims() throws JOSEException {
-            String keyId = "test-key-id";
-
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey));
 
             assertThat(jwtString).isNotNull();
             assertThat(jwtString).isNotEmpty();
@@ -65,29 +60,9 @@ class WitSerializerTest {
         }
 
         @Test
-        @DisplayName("Should serialize WIT without key ID")
-        void shouldSerializeWitWithoutKeyId() throws JOSEException {
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), null);
-
-            assertThat(jwtString).isNotNull();
-            assertThat(jwtString).isNotEmpty();
-        }
-
-        @Test
-        @DisplayName("Should serialize WIT with empty key ID")
-        void shouldSerializeWitWithEmptyKeyId() throws JOSEException {
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), "");
-
-            assertThat(jwtString).isNotNull();
-            assertThat(jwtString).isNotEmpty();
-        }
-
-        @Test
         @DisplayName("Should produce valid JWT structure")
         void shouldProduceValidJwtStructure() throws JOSEException {
-            String keyId = "test-key-id";
-
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey));
 
             String[] parts = jwtString.split("\\.");
             assertThat(parts).hasSize(3);
@@ -97,22 +72,18 @@ class WitSerializerTest {
         }
 
         @Test
-        @DisplayName("Should include key ID in header when provided")
-        void shouldIncludeKeyIdInHeaderWhenProvided() throws JOSEException {
-            String keyId = "test-key-id";
-
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
+        @DisplayName("Should NOT include kid in header (AAP spec: header whitelist is {alg, typ})")
+        void shouldNotIncludeKidInHeader() throws JOSEException {
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey));
 
             String header = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[0]));
-            assertThat(header).contains("\"kid\":\"test-key-id\"");
+            assertThat(header).doesNotContain("\"kid\"");
         }
 
         @Test
         @DisplayName("Should serialize WIT with confirmation claim")
         void shouldSerializeWitWithConfirmationClaim() throws JOSEException {
-            String keyId = "test-key-id";
-
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey));
 
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"cnf\"");
@@ -127,7 +98,7 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should throw exception when WIT is null")
         void shouldThrowExceptionWhenWitIsNull() {
-            assertThatThrownBy(() -> WitSerializer.serialize(null, new Ed25519Signer(signingKey), "key-id"))
+            assertThatThrownBy(() -> WitSerializer.serialize(null, new Ed25519Signer(signingKey)))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("WorkloadIdentityToken");
         }
@@ -135,7 +106,7 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should throw exception when signer is null")
         void shouldThrowExceptionWhenSignerIsNull() {
-            assertThatThrownBy(() -> WitSerializer.serialize(testWit, null, "key-id"))
+            assertThatThrownBy(() -> WitSerializer.serialize(testWit, null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("JWSSigner");
         }
@@ -148,9 +119,7 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should include issuer claim")
         void shouldIncludeIssuerClaim() throws JOSEException {
-            String keyId = "test-key-id";
-
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey));
 
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"iss\":\"https://issuer.example.com\"");
@@ -159,9 +128,7 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should include subject claim")
         void shouldIncludeSubjectClaim() throws JOSEException {
-            String keyId = "test-key-id";
-
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey));
 
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"sub\":\"workload-001\"");
@@ -170,9 +137,7 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should include expiration claim")
         void shouldIncludeExpirationClaim() throws JOSEException {
-            String keyId = "test-key-id";
-
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey));
 
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"exp\"");
@@ -181,9 +146,7 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should include JWT ID claim")
         void shouldIncludeJwtIdClaim() throws JOSEException {
-            String keyId = "test-key-id";
-
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey));
 
             String payload = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[1]));
             assertThat(payload).contains("\"jti\"");
@@ -197,9 +160,7 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should include EdDSA algorithm in header")
         void shouldIncludeAlgorithmInHeader() throws JOSEException {
-            String keyId = "test-key-id";
-
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey));
 
             String header = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[0]));
             assertThat(header).contains("\"alg\":\"EdDSA\"");
@@ -208,9 +169,7 @@ class WitSerializerTest {
         @Test
         @DisplayName("Should include type in header")
         void shouldIncludeTypeInHeader() throws JOSEException {
-            String keyId = "test-key-id";
-
-            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey), keyId);
+            String jwtString = WitSerializer.serialize(testWit, new Ed25519Signer(signingKey));
 
             String header = new String(java.util.Base64.getUrlDecoder().decode(jwtString.split("\\.")[0]));
             assertThat(header).contains("\"typ\":\"wit+jwt\"");

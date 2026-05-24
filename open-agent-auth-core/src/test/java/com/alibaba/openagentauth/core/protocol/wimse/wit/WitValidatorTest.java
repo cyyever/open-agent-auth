@@ -310,7 +310,6 @@ class WitValidatorTest {
 
         SignedJWT signedJwt = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
@@ -333,7 +332,6 @@ class WitValidatorTest {
 
         SignedJWT signedJwt = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
@@ -356,7 +354,6 @@ class WitValidatorTest {
 
         SignedJWT signedJwt = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
@@ -376,7 +373,6 @@ class WitValidatorTest {
 
         SignedJWT signedJwt = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet
@@ -404,7 +400,6 @@ class WitValidatorTest {
 
         SignedJWT signedJwt = new SignedJWT(
                 new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .keyID(signingKey.getKeyID())
                         .type(new JOSEObjectType("wit+jwt"))
                         .build(),
                 claimsSet

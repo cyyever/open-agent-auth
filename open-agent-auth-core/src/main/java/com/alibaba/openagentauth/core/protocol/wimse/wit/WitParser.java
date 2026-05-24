@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Parser for Workload Identity Tokens (WIT). Converts signed JWT strings into
@@ -37,6 +38,9 @@ import java.util.Map;
 public class WitParser {
 
     private static final String EXPECTED_TYP = "wit+jwt";
+
+    /** Per AAP spec §3: only {alg, typ} JOSE header params allowed on CT. */
+    private static final Set<String> ALLOWED_HEADER_PARAMS = Set.of("alg", "typ");
 
     private static final Logger logger = LoggerFactory.getLogger(WitParser.class);
 
@@ -69,6 +73,14 @@ public class WitParser {
         if (typ == null || !EXPECTED_TYP.equals(typ.getType())) {
             throw new ParseException(
                     "WIT typ header must be '" + EXPECTED_TYP + "', got: " + typ, 0);
+        }
+
+        Set<String> headerParams = signedJwt.getHeader().toJSONObject().keySet();
+        for (String name : headerParams) {
+            if (!ALLOWED_HEADER_PARAMS.contains(name)) {
+                throw new ParseException(
+                        "WIT JOSE header contains disallowed parameter: " + name, 0);
+            }
         }
 
         var claims = signedJwt.getJWTClaimsSet();

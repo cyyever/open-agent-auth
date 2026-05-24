@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
+import java.util.Set;
 
 /**
  * Parser for Workload Proof Tokens (WPT). Converts signed JWT strings into
@@ -33,6 +34,9 @@ import java.text.ParseException;
 public class WptParser {
 
     private static final String EXPECTED_TYP = "wpt+jwt";
+
+    /** Per AAP spec §3: DPoP allows {alg, typ, jwk} JOSE header params. */
+    private static final Set<String> ALLOWED_HEADER_PARAMS = Set.of("alg", "typ", "jwk");
 
     private static final Logger logger = LoggerFactory.getLogger(WptParser.class);
 
@@ -97,6 +101,15 @@ public class WptParser {
             throw new ParseException(
                     "WPT typ header must be '" + EXPECTED_TYP + "', got: " + typ, 0);
         }
+
+        Set<String> headerParams = signedJwt.getHeader().toJSONObject().keySet();
+        for (String name : headerParams) {
+            if (!ALLOWED_HEADER_PARAMS.contains(name)) {
+                throw new ParseException(
+                        "WPT JOSE header contains disallowed parameter: " + name, 0);
+            }
+        }
+
         WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
                 .type(typ.getType())
                 .build();

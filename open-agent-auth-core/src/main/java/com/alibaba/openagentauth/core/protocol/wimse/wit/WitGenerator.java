@@ -122,9 +122,8 @@ public class WitGenerator {
     private WorkloadIdentityToken signAndSerializeWit(WorkloadIdentityToken wit) throws JOSEException {
         try {
             JWSSigner signer = new Ed25519Signer(signingKey);
-            String keyId = signingKey.getKeyID();
 
-            String signedJwtString = WitSerializer.serialize(wit, signer, keyId);
+            String signedJwtString = WitSerializer.serialize(wit, signer);
 
             String[] parts = signedJwtString.split("\\.");
             String signature = parts.length > 2 ? parts[2] : "";

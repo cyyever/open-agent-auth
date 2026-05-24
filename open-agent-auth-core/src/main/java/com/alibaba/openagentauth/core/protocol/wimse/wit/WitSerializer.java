@@ -44,27 +44,23 @@ public class WitSerializer {
 
     /**
      * Serializes and signs a WorkloadIdentityToken object to a JWT string.
-     * <p>
-     * This method builds a JWSObject from the structured WorkloadIdentityToken,
-     * signs it using the provided signer, and returns the serialized JWT string.
-     * This approach follows the natural JWT flow of "build → sign → serialize"
-     * and eliminates the need for manual string concatenation.
-     * </p>
+     * Per AAP spec §3 the JWS header carries only {alg, typ}; the
+     * verification key is resolved out-of-band by issuer/subject, so no
+     * {@code kid} is emitted.
      *
      * @param wit the WorkloadIdentityToken object to serialize and sign
      * @param signer the JWSSigner to use for signing
-     * @param keyId the key ID to include in the JWT header
      * @return the signed JWT string representation
      * @throws JOSEException if serialization or signing fails
      */
-    public static String serialize(WorkloadIdentityToken wit, JWSSigner signer, String keyId) throws JOSEException {
+    public static String serialize(WorkloadIdentityToken wit, JWSSigner signer) throws JOSEException {
 
         ValidationUtils.validateNotNull(wit, "WorkloadIdentityToken");
         ValidationUtils.validateNotNull(signer, "JWSSigner");
 
         try {
             // Build JWSObject from the structured WIT
-            JWSObject jwsObject = buildJWSObject(wit, keyId);
+            JWSObject jwsObject = buildJWSObject(wit);
 
             // Sign the JWSObject
             jwsObject.sign(signer);
@@ -78,24 +74,11 @@ public class WitSerializer {
         }
     }
 
-    /**
-     * Builds a JWSObject from the structured WorkloadIdentityToken.
-     *
-     * @param wit the WorkloadIdentityToken object
-     * @param keyId the key ID to include in the JWT header
-     * @return the JWSObject ready for signing
-     * @throws JOSEException if building fails
-     */
-    private static JWSObject buildJWSObject(WorkloadIdentityToken wit, String keyId) throws JOSEException {
+    private static JWSObject buildJWSObject(WorkloadIdentityToken wit) throws JOSEException {
         try {
-            JWSHeader.Builder headerBuilder = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                    .type(new JOSEObjectType(wit.header().type()));
-
-            if (!ValidationUtils.isNullOrEmpty(keyId)) {
-                headerBuilder.keyID(keyId);
-            }
-
-            JWSHeader header = headerBuilder.build();
+            JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                    .type(new JOSEObjectType(wit.header().type()))
+                    .build();
 
             // Build JWTClaimsSet from WIT claims
             JWTClaimsSet.Builder claimsBuilder = new JWTClaimsSet.Builder()
