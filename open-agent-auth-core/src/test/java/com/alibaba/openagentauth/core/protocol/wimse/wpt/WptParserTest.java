@@ -76,7 +76,6 @@ class WptParserTest {
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
             assertThat(wpt).isNotNull();
-            assertThat(wpt.header()).isNotNull();
             assertThat(wpt.claims()).isNotNull();
             assertThat(wpt.jwtString()).isNotNull();
             assertThat(wpt.signature()).isNotNull();
@@ -89,7 +88,6 @@ class WptParserTest {
 
             WorkloadProofToken wpt = wptParser.parse(wptJwt);
 
-            assertThat(wpt.header().type()).isEqualTo("wpt+jwt");
             assertThat(wpt.claims().audience()).isEqualTo("[resource-server]");
             assertThat(wpt.claims().jwtId()).isNotNull();
             assertThat(wpt.claims().workloadTokenHash()).isNotNull();

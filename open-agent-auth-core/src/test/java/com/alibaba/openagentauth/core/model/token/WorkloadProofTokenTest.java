@@ -33,17 +33,12 @@ class WorkloadProofTokenTest {
 
     private Date futureExpirationTime;
     private Date pastExpirationTime;
-    private WorkloadProofToken.Header validHeader;
     private WorkloadProofToken.Claims validClaims;
 
     @BeforeEach
     void setUp() {
         futureExpirationTime = new Date(System.currentTimeMillis() + 3600000);
         pastExpirationTime = new Date(System.currentTimeMillis() - 3600000);
-
-        validHeader = WorkloadProofToken.Header.builder()
-                .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                .build();
 
         validClaims = WorkloadProofToken.Claims.builder()
                 .audience("https://resource-server.example.com")
@@ -62,14 +57,12 @@ class WorkloadProofTokenTest {
         @DisplayName("Should build token with all fields")
         void shouldBuildTokenWithAllFields() {
             WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
                     .claims(validClaims)
                     .signature("test-signature")
                     .jwtString("test.jwt.string")
                     .build();
 
             assertThat(token).isNotNull();
-            assertThat(token.header()).isEqualTo(validHeader);
             assertThat(token.claims()).isEqualTo(validClaims);
             assertThat(token.signature()).isEqualTo("test-signature");
             assertThat(token.jwtString()).isEqualTo("test.jwt.string");
@@ -79,33 +72,19 @@ class WorkloadProofTokenTest {
         @DisplayName("Should build token with minimal required fields")
         void shouldBuildTokenWithMinimalRequiredFields() {
             WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
                     .claims(validClaims)
                     .build();
 
             assertThat(token).isNotNull();
-            assertThat(token.header()).isEqualTo(validHeader);
             assertThat(token.claims()).isEqualTo(validClaims);
             assertThat(token.signature()).isNull();
             assertThat(token.jwtString()).isNull();
         }
 
         @Test
-        @DisplayName("Should throw exception when building with null header")
-        void shouldThrowExceptionWhenBuildingWithNullHeader() {
-            assertThatThrownBy(() -> WorkloadProofToken.builder()
-                    .header(null)
-                    .claims(validClaims)
-                    .build())
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("header is REQUIRED for WPT");
-        }
-
-        @Test
         @DisplayName("Should throw exception when building with null claims")
         void shouldThrowExceptionWhenBuildingWithNullClaims() {
             assertThatThrownBy(() -> WorkloadProofToken.builder()
-                    .header(validHeader)
                     .claims(null)
                     .build())
                     .isInstanceOf(IllegalStateException.class)
@@ -127,7 +106,6 @@ class WorkloadProofTokenTest {
                     .build();
 
             WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
                     .claims(expiredClaims)
                     .build();
 
@@ -138,7 +116,6 @@ class WorkloadProofTokenTest {
         @DisplayName("Should return true for valid token")
         void shouldReturnTrueForValidToken() {
             WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
                     .claims(validClaims)
                     .build();
 
@@ -153,95 +130,10 @@ class WorkloadProofTokenTest {
                     .build();
 
             WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
                     .claims(claimsWithoutExpiration)
                     .build();
 
             assertThat(token.isValid()).isTrue();
-        }
-    }
-
-    @Nested
-    @DisplayName("Header Tests")
-    class HeaderTests {
-
-        @Test
-        @DisplayName("Should build header with type")
-        void shouldBuildHeaderWithType() {
-            WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
-                    .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .build();
-
-            assertThat(header.type()).isEqualTo(WorkloadProofToken.Header.MEDIA_TYPE);
-        }
-
-        @Test
-        @DisplayName("Should build header with default type")
-        void shouldBuildHeaderWithDefaultType() {
-            WorkloadProofToken.Header header = WorkloadProofToken.Header.builder().build();
-
-            assertThat(header.type()).isEqualTo(WorkloadProofToken.Header.MEDIA_TYPE);
-        }
-
-        @Test
-        @DisplayName("Should throw exception when building header with null type")
-        void shouldThrowExceptionWhenBuildingHeaderWithNullType() {
-            assertThatThrownBy(() -> WorkloadProofToken.Header.builder()
-                    .type(null)
-                    .build())
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("type (typ) is REQUIRED and should be 'wpt+jwt'");
-        }
-
-        @Test
-        @DisplayName("Should throw exception when building header with empty type")
-        void shouldThrowExceptionWhenBuildingHeaderWithEmptyType() {
-            assertThatThrownBy(() -> WorkloadProofToken.Header.builder()
-                    .type("")
-                    .build())
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("type (typ) is REQUIRED and should be 'wpt+jwt'");
-        }
-
-        @Test
-        @DisplayName("Should implement equals correctly for header")
-        void shouldImplementEqualsCorrectlyForHeader() {
-            WorkloadProofToken.Header header1 = WorkloadProofToken.Header.builder()
-                    .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .build();
-
-            WorkloadProofToken.Header header2 = WorkloadProofToken.Header.builder()
-                    .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .build();
-
-            assertThat(header1).isEqualTo(header2);
-            assertThat(header1).isNotEqualTo(null);
-            assertThat(header1).isNotEqualTo("string");
-        }
-
-        @Test
-        @DisplayName("Should implement hashCode correctly for header")
-        void shouldImplementHashCodeCorrectlyForHeader() {
-            WorkloadProofToken.Header header1 = WorkloadProofToken.Header.builder()
-                    .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .build();
-
-            WorkloadProofToken.Header header2 = WorkloadProofToken.Header.builder()
-                    .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .build();
-
-            assertThat(header1.hashCode()).isEqualTo(header2.hashCode());
-        }
-
-        @Test
-        @DisplayName("Should implement toString for header")
-        void shouldImplementToStringForHeader() {
-            WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
-                    .type(WorkloadProofToken.Header.MEDIA_TYPE)
-                    .build();
-
-            String toString = header.toString();
-            assertThat(toString).contains("wpt+jwt");
         }
     }
 
@@ -352,7 +244,6 @@ class WorkloadProofTokenTest {
                     .build();
 
             WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
                     .claims(claims)
                     .build();
 
@@ -363,7 +254,6 @@ class WorkloadProofTokenTest {
         @DisplayName("Should handle empty signature")
         void shouldHandleEmptySignature() {
             WorkloadProofToken token = WorkloadProofToken.builder()
-                    .header(validHeader)
                     .claims(validClaims)
                     .signature("")
                     .build();

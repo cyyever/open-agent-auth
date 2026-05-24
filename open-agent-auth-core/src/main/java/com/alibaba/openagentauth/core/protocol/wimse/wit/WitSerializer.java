@@ -77,7 +77,7 @@ public class WitSerializer {
     private static JWSObject buildJWSObject(WorkloadIdentityToken wit) throws JOSEException {
         try {
             JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                    .type(new JOSEObjectType(wit.header().type()))
+                    .type(new JOSEObjectType(WorkloadIdentityToken.MEDIA_TYPE))
                     .build();
 
             // Build JWTClaimsSet from WIT claims

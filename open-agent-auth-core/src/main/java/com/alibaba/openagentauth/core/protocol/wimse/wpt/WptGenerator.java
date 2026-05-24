@@ -38,7 +38,6 @@ public class WptGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(WptGenerator.class);
 
-    private static final String MEDIA_TYPE = "wpt+jwt";
 
     public WptGenerator() {
     }
@@ -89,9 +88,6 @@ public class WptGenerator {
                 .build();
 
         return WorkloadProofToken.builder()
-                .header(WorkloadProofToken.Header.builder()
-                        .type(MEDIA_TYPE)
-                        .build())
                 .claims(claims)
                 .build();
     }
@@ -106,7 +102,6 @@ public class WptGenerator {
             String signature = parts.length > 2 ? parts[2] : "";
 
             return WorkloadProofToken.builder()
-                    .header(wpt.header())
                     .claims(wpt.claims())
                     .signature(signature)
                     .jwtString(signedJwtString)

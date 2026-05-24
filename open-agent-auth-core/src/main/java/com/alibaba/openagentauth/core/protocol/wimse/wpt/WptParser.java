@@ -110,10 +110,6 @@ public class WptParser {
             }
         }
 
-        WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
-                .type(typ.getType())
-                .build();
-
         // Build claims
         WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
                 .audience(getStringClaim(claimsSet, "aud"))
@@ -125,7 +121,6 @@ public class WptParser {
 
         // Build WPT
         return WorkloadProofToken.builder()
-                .header(header)
                 .claims(claims)
                 .signature(signedJwt.getSignature().toString())
                 .jwtString(jwtString)

@@ -26,19 +26,19 @@ import java.util.Date;
 /**
  * Represents a Workload Identity Token (WIT). A WIT is a JWT that identifies a workload
  * and contains a public key in the {@code cnf} claim used to verify the corresponding
- * Workload Proof Token (WPT).
+ * Workload Proof Token (WPT). Per AAP spec §3 the JOSE header is fixed at
+ * {@code {alg=EdDSA, typ=wit+jwt}}, so neither parameter is carried on this record.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record WorkloadIdentityToken(
-        Header header,
         Claims claims,
         @JsonProperty("signature") String signature,
         @JsonProperty("jwtString") String jwtString) {
 
+    /** Required {@code typ} JOSE header value. */
+    public static final String MEDIA_TYPE = "wit+jwt";
+
     public WorkloadIdentityToken {
-        if (header == null) {
-            throw new IllegalStateException("header is REQUIRED for WIT");
-        }
         if (claims == null) {
             throw new IllegalStateException("claims is REQUIRED for WIT");
         }
@@ -58,43 +58,16 @@ public record WorkloadIdentityToken(
     public static Builder builder() { return new Builder(); }
 
     public static class Builder {
-        private Header header;
         private Claims claims;
         private String signature;
         private String jwtString;
 
-        public Builder header(Header header)       { this.header = header;       return this; }
         public Builder claims(Claims claims)       { this.claims = claims;       return this; }
         public Builder signature(String signature) { this.signature = signature; return this; }
         public Builder jwtString(String jwtString) { this.jwtString = jwtString; return this; }
 
         public WorkloadIdentityToken build() {
-            return new WorkloadIdentityToken(header, claims, signature, jwtString);
-        }
-    }
-
-    /** JOSE Header for Workload Identity Token (WIT). */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record Header(@JsonProperty("typ") String type) {
-
-        public static final String MEDIA_TYPE = "wit+jwt";
-
-        public Header {
-            if (ValidationUtils.isNullOrEmpty(type)) {
-                throw new IllegalStateException("type (typ) is REQUIRED and should be 'wit+jwt'");
-            }
-        }
-
-        public static HeaderBuilder builder() { return new HeaderBuilder(); }
-
-        public static class HeaderBuilder {
-            private String type = MEDIA_TYPE;
-
-            public HeaderBuilder type(String type) { this.type = type; return this; }
-
-            public Header build() {
-                return new Header(type);
-            }
+            return new WorkloadIdentityToken(claims, signature, jwtString);
         }
     }
 

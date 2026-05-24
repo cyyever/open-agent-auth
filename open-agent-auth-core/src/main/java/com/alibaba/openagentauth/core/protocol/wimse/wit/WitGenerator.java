@@ -109,12 +109,7 @@ public class WitGenerator {
                 .jwtId(jwtId)
                 .confirmation(confirmation);
 
-        WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder()
-                .type("wit+jwt")
-                .build();
-
         return WorkloadIdentityToken.builder()
-                .header(header)
                 .claims(claimsBuilder.build())
                 .build();
     }
@@ -129,7 +124,6 @@ public class WitGenerator {
             String signature = parts.length > 2 ? parts[2] : "";
 
             return WorkloadIdentityToken.builder()
-                    .header(wit.header())
                     .claims(wit.claims())
                     .signature(signature)
                     .jwtString(signedJwtString)

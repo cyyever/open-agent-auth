@@ -87,7 +87,7 @@ public class WitParser {
 
         WorkloadIdentityToken.Claims.Confirmation confirmation = parseConfirmationClaim(claims);
 
-        WorkloadIdentityToken wit = buildWorkloadIdentityToken(signedJwt, claims, confirmation, typ.getType());
+        WorkloadIdentityToken wit = buildWorkloadIdentityToken(signedJwt, claims, confirmation);
 
         logger.debug("Successfully parsed WIT with subject: {}", wit.getSubject());
         return wit;
@@ -149,8 +149,7 @@ public class WitParser {
     private WorkloadIdentityToken buildWorkloadIdentityToken(
             SignedJWT signedJwt,
             JWTClaimsSet claims,
-            WorkloadIdentityToken.Claims.Confirmation confirmation,
-            String typ
+            WorkloadIdentityToken.Claims.Confirmation confirmation
     ) {
 
         // Build claims
@@ -160,11 +159,6 @@ public class WitParser {
                 .expirationTime(claims.getExpirationTime())
                 .jwtId(claims.getJWTID())
                 .confirmation(confirmation);
-
-        // Build header
-        WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder()
-                .type(typ)
-                .build();
 
         // Serialize the JWT to preserve the original JWT string
         String jwtString;
@@ -177,7 +171,6 @@ public class WitParser {
 
         // Build WIT
         return WorkloadIdentityToken.builder()
-                .header(header)
                 .claims(claimsBuilder.build())
                 .jwtString(jwtString)
                 .build();

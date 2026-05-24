@@ -177,10 +177,6 @@ class WptSerializerTest {
     }
 
     private WorkloadProofToken createTestWpt() {
-        WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
-                .type("wpt+jwt")
-                .build();
-
         WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
                 .expirationTime(new Date(System.currentTimeMillis() + 3600000))
                 .jwtId("test-jti-001")
@@ -188,7 +184,6 @@ class WptSerializerTest {
                 .build();
 
         return WorkloadProofToken.builder()
-                .header(header)
                 .claims(claims)
                 .signature("test-signature")
                 .jwtString("test.wpt.jwt.string")
@@ -196,10 +191,6 @@ class WptSerializerTest {
     }
 
     private WorkloadProofToken createTestWptWithAudience() {
-        WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
-                .type("wpt+jwt")
-                .build();
-
         WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
                 .audience("https://api.example.com")
                 .expirationTime(new Date(System.currentTimeMillis() + 3600000))
@@ -208,7 +199,6 @@ class WptSerializerTest {
                 .build();
 
         return WorkloadProofToken.builder()
-                .header(header)
                 .claims(claims)
                 .signature("test-signature")
                 .jwtString("test.wpt.jwt.string")
@@ -216,10 +206,6 @@ class WptSerializerTest {
     }
 
     private WorkloadProofToken createTestWptWithAccessTokenHash() {
-        WorkloadProofToken.Header header = WorkloadProofToken.Header.builder()
-                .type("wpt+jwt")
-                .build();
-
         WorkloadProofToken.Claims claims = WorkloadProofToken.Claims.builder()
                 .expirationTime(new Date(System.currentTimeMillis() + 3600000))
                 .jwtId("test-jti-001")
@@ -228,7 +214,6 @@ class WptSerializerTest {
                 .build();
 
         return WorkloadProofToken.builder()
-                .header(header)
                 .claims(claims)
                 .signature("test-signature")
                 .jwtString("test.wpt.jwt.string")

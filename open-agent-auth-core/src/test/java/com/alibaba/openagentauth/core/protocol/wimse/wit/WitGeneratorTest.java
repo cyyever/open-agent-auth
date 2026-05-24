@@ -241,17 +241,6 @@ class WitGeneratorTest {
     class ProtocolComplianceTests {
 
         @Test
-        @DisplayName("Should use correct media type 'wit+jwt'")
-        void shouldUseCorrectMediaType() throws JOSEException, ParseException {
-            long expirationSeconds = 3600;
-            String wptPublicKeyJson = wptPublicKey.toJSONString();
-
-            WorkloadIdentityToken wit = witGenerator.generateWit(workloadId, wptPublicKeyJson, expirationSeconds);
-
-            assertThat(wit.header().type()).isEqualTo("wit+jwt");
-        }
-
-        @Test
         @DisplayName("Should include subject as Workload Identifier")
         void shouldIncludeSubjectAsWorkloadIdentifier() throws JOSEException, ParseException {
             long expirationSeconds = 3600;

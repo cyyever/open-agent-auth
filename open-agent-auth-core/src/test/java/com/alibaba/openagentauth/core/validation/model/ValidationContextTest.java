@@ -45,13 +45,11 @@ class ValidationContextTest {
                         .subject("workload-123")
                         .expirationTime(new Date(System.currentTimeMillis() + 3600000))
                         .build())
-                .header(WorkloadIdentityToken.Header.builder().build())
                 .build();
         WorkloadProofToken wpt = WorkloadProofToken.builder()
                 .claims(WorkloadProofToken.Claims.builder()
                         .workloadTokenHash("hash123")
                         .build())
-                .header(WorkloadProofToken.Header.builder().build())
                 .build();
         Date timestamp = new Date();
         Map<String, String> headers = new HashMap<>();

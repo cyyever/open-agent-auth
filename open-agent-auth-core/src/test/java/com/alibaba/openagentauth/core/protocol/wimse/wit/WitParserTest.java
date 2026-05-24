@@ -99,17 +99,6 @@ class WitParserTest {
         }
 
         @Test
-        @DisplayName("Should parse header correctly")
-        void shouldParseHeaderCorrectly() throws Exception {
-            SignedJWT signedJwt = createSignedJwtWithAllClaims();
-
-            WorkloadIdentityToken wit = witParser.parse(signedJwt);
-
-            assertThat(wit.header()).isNotNull();
-            assertThat(wit.header().type()).isEqualTo("wit+jwt");
-        }
-
-        @Test
         @DisplayName("Should parse WIT without optional claims")
         void shouldParseWitWithoutOptionalClaims() throws Exception {
             SignedJWT signedJwt = createSignedJwtWithRequiredClaimsOnly();

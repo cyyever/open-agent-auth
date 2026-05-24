@@ -191,10 +191,6 @@ class WitSerializerTest {
                 .jwk(jwk)
                 .build();
 
-        WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder()
-                .type("wit+jwt")
-                .build();
-
         WorkloadIdentityToken.Claims claims = WorkloadIdentityToken.Claims.builder()
                 .issuer("https://issuer.example.com")
                 .subject("workload-001")
@@ -204,7 +200,6 @@ class WitSerializerTest {
                 .build();
 
         return WorkloadIdentityToken.builder()
-                .header(header)
                 .claims(claims)
                 .signature("test-signature")
                 .jwtString("test.jwt.string")

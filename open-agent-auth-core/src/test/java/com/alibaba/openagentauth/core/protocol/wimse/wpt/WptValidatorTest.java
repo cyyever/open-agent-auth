@@ -90,7 +90,6 @@ class WptValidatorTest {
 
             assertThat(result.getToken()).isNotNull();
             assertThat(result.getToken().claims().workloadTokenHash()).isNotNull();
-            assertThat(result.getToken().header().type()).isEqualTo("wpt+jwt");
         }
     }
 
@@ -257,9 +256,6 @@ class WptValidatorTest {
 
     private WorkloadProofToken createExpiredWpt() {
         return WorkloadProofToken.builder()
-                .header(WorkloadProofToken.Header.builder()
-                        .type("wpt+jwt")
-                        .build())
                 .claims(WorkloadProofToken.Claims.builder()
                         .expirationTime(java.util.Date.from(Instant.now().minusSeconds(300)))
                         .jwtId(java.util.UUID.randomUUID().toString())
@@ -272,9 +268,6 @@ class WptValidatorTest {
 
     private WorkloadProofToken createWptWithoutWth() {
         return WorkloadProofToken.builder()
-                .header(WorkloadProofToken.Header.builder()
-                        .type("wpt+jwt")
-                        .build())
                 .claims(WorkloadProofToken.Claims.builder()
                         .expirationTime(java.util.Date.from(Instant.now().plusSeconds(300)))
                         .jwtId(java.util.UUID.randomUUID().toString())
@@ -292,7 +285,6 @@ class WptValidatorTest {
             String tamperedJwtString = jwtString.substring(0, lastDotIndex + 1) + "tampered" + jwtString.substring(lastDotIndex + 1);
 
             return WorkloadProofToken.builder()
-                    .header(wpt.header())
                     .claims(wpt.claims())
                     .signature(wpt.signature() + "tampered")
                     .jwtString(tamperedJwtString)
@@ -301,7 +293,6 @@ class WptValidatorTest {
 
         String tamperedSignature = wpt.signature() + "tampered";
         return WorkloadProofToken.builder()
-                .header(wpt.header())
                 .claims(wpt.claims())
                 .signature(tamperedSignature)
                 .jwtString(wpt.jwtString())

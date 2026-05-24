@@ -73,12 +73,7 @@ class WptGeneratorTest {
                 .confirmation(confirmation)
                 .build();
 
-        WorkloadIdentityToken.Header header = WorkloadIdentityToken.Header.builder()
-                .type("wit+jwt")
-                .build();
-
         return WorkloadIdentityToken.builder()
-                .header(header)
                 .claims(claims)
                 .signature("test-signature")
                 .jwtString("test.wit.jwt.string")
@@ -98,7 +93,6 @@ class WptGeneratorTest {
 
             assertThat(wpt).isNotNull();
             assertThat(wpt.claims()).isNotNull();
-            assertThat(wpt.header()).isNotNull();
         }
 
         @Test
@@ -141,15 +135,6 @@ class WptGeneratorTest {
             assertThat(wpt1.claims().jwtId()).isNotEqualTo(wpt2.claims().jwtId());
         }
 
-        @Test
-        @DisplayName("Should use correct media type 'wpt+jwt'")
-        void shouldUseCorrectMediaType() throws JOSEException {
-            long expirationSeconds = 300;
-
-            WorkloadProofToken wpt = wptGenerator.generateWpt(testWit, wptPrivateKey, expirationSeconds);
-
-            assertThat(wpt.header().type()).isEqualTo("wpt+jwt");
-        }
     }
 
     @Nested
