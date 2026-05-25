@@ -97,6 +97,26 @@ jobs:
       - name: SpotBugs analysis
         run: mvn -B -ntp -P spotbugs verify
 
+  errorprone:
+    name: Error Prone + NullAway
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Error Prone + NullAway analysis
+        run: mvn -B -ntp -P errorprone clean test-compile
+
   coverage:
     name: Coverage (JaCoCo)
     runs-on: ubuntu-latest
