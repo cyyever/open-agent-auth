@@ -147,14 +147,13 @@ class CtParserTest {
         }
 
         @Test
-        @DisplayName("Should parse CT without cnf claim")
-        void shouldParseWitWithoutCnfClaim() throws Exception {
+        @DisplayName("Should throw exception when cnf claim missing")
+        void shouldThrowExceptionWhenCnfClaimMissing() throws Exception {
             SignedJWT signedJwt = createSignedJwtWithoutCnf();
 
-            CredentialToken ct = ctParser.parse(signedJwt);
-
-            assertThat(ct).isNotNull();
-            assertThat(ct.getConfirmation()).isNull();
+            assertThatThrownBy(() -> ctParser.parse(signedJwt))
+                    .isInstanceOf(ParseException.class)
+                    .hasMessageContaining("missing required claim: cnf");
         }
 
         @Test

@@ -81,14 +81,17 @@ public record DpopToken(
             if (workloadTokenHash == null || workloadTokenHash.isEmpty()) {
                 throw new IllegalStateException("workloadTokenHash (wth) is REQUIRED");
             }
+            if (expirationTime == null) {
+                throw new IllegalStateException("expirationTime (exp) is REQUIRED");
+            }
         }
 
         public boolean isExpired() {
-            return expirationTime != null && expirationTime.getTime() < System.currentTimeMillis();
+            return expirationTime.getTime() < System.currentTimeMillis();
         }
 
         public boolean isValid() {
-            return expirationTime == null || System.currentTimeMillis() <= expirationTime.getTime();
+            return System.currentTimeMillis() <= expirationTime.getTime();
         }
 
         public static ClaimsBuilder builder() { return new ClaimsBuilder(); }

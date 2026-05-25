@@ -95,21 +95,16 @@ public class CtParser {
 
     /**
      * Parses the confirmation (cnf) claim from the JWT claims set.
-     * Contains the public key (JWK) used to verify DPoP Proofs.
-     *
-     * @param claims the JWT claims set
-     * @return the confirmation object, or null if not present
-     * @throws ParseException if the cnf claim is malformed
+     * Contains the public key (JWK) used to verify DPoP Proofs. Per AAP spec
+     * the cnf claim is REQUIRED on every CT — missing cnf surfaces as a
+     * ParseException.
      */
     private CredentialToken.Claims.Confirmation parseConfirmationClaim(JWTClaimsSet claims) throws ParseException {
 
-        // Extract cnf claim
         Map<String, Object> cnfClaim = claims.getJSONObjectClaim("cnf");
 
-        // cnf claim is optional in the parser, but required for DPoP verification
         if (cnfClaim == null) {
-            logger.debug("CT does not contain cnf claim");
-            return null;
+            throw new ParseException("CT missing required claim: cnf", 0);
         }
 
         // Validate cnf.jwk

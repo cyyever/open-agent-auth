@@ -122,19 +122,6 @@ class DpopTokenTest {
             assertThat(token.isValid()).isTrue();
         }
 
-        @Test
-        @DisplayName("Should return true for valid token without expiration time")
-        void shouldReturnTrueForValidTokenWithoutExpirationTime() {
-            DpopToken.Claims claimsWithoutExpiration = DpopToken.Claims.builder()
-                    .workloadTokenHash("abc123")
-                    .build();
-
-            DpopToken token = DpopToken.builder()
-                    .claims(claimsWithoutExpiration)
-                    .build();
-
-            assertThat(token.isValid()).isTrue();
-        }
     }
 
     @Nested
@@ -164,10 +151,11 @@ class DpopTokenTest {
         void shouldBuildClaimsWithMinimalRequiredFields() {
             DpopToken.Claims claims = DpopToken.Claims.builder()
                     .workloadTokenHash("abc123")
+                    .expirationTime(futureExpirationTime)
                     .build();
 
             assertThat(claims.audience()).isNull();
-            assertThat(claims.expirationTime()).isNull();
+            assertThat(claims.expirationTime()).isEqualTo(futureExpirationTime);
             assertThat(claims.jwtId()).isNull();
             assertThat(claims.workloadTokenHash()).isEqualTo("abc123");
             assertThat(claims.accessTokenHash()).isNull();
@@ -178,9 +166,21 @@ class DpopTokenTest {
         void shouldThrowExceptionWhenBuildingClaimsWithNullWorkloadTokenHash() {
             assertThatThrownBy(() -> DpopToken.Claims.builder()
                     .workloadTokenHash(null)
+                    .expirationTime(futureExpirationTime)
                     .build())
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("workloadTokenHash (wth) is REQUIRED");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when building claims with null expiration time")
+        void shouldThrowExceptionWhenBuildingClaimsWithNullExpirationTime() {
+            assertThatThrownBy(() -> DpopToken.Claims.builder()
+                    .workloadTokenHash("abc123")
+                    .expirationTime(null)
+                    .build())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("expirationTime (exp) is REQUIRED");
         }
 
         @Test
@@ -214,6 +214,7 @@ class DpopTokenTest {
         void shouldHandleWorkloadTokenHash() {
             DpopToken.Claims claims = DpopToken.Claims.builder()
                     .workloadTokenHash("ct-hash-123")
+                    .expirationTime(futureExpirationTime)
                     .build();
 
             assertThat(claims.workloadTokenHash()).isEqualTo("ct-hash-123");
@@ -225,6 +226,7 @@ class DpopTokenTest {
             DpopToken.Claims claims = DpopToken.Claims.builder()
                     .workloadTokenHash("ct-hash")
                     .accessTokenHash("at-hash-456")
+                    .expirationTime(futureExpirationTime)
                     .build();
 
             assertThat(claims.accessTokenHash()).isEqualTo("at-hash-456");
@@ -241,6 +243,7 @@ class DpopTokenTest {
             DpopToken.Claims claims = DpopToken.Claims.builder()
                     .audience("")
                     .workloadTokenHash("abc123")
+                    .expirationTime(futureExpirationTime)
                     .build();
 
             DpopToken token = DpopToken.builder()

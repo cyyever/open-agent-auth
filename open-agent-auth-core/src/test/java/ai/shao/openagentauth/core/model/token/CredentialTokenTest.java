@@ -35,6 +35,7 @@ class CredentialTokenTest {
     private Date futureExpirationTime;
     private Date pastExpirationTime;
     private Jwk testJwk;
+    private CredentialToken.Claims.Confirmation testConfirmation;
     private CredentialToken.Claims validClaims;
 
     @BeforeEach
@@ -46,7 +47,7 @@ class CredentialTokenTest {
                 .x("test_x_value")
                 .build();
 
-        CredentialToken.Claims.Confirmation confirmation = CredentialToken.Claims.Confirmation.builder()
+        testConfirmation = CredentialToken.Claims.Confirmation.builder()
                 .jwk(testJwk)
                 .build();
 
@@ -55,7 +56,7 @@ class CredentialTokenTest {
                 .subject("agent-my-workload")
                 .expirationTime(futureExpirationTime)
                 .jwtId("test-jti-123")
-                .confirmation(confirmation)
+                .confirmation(testConfirmation)
                 .build();
     }
 
@@ -113,6 +114,7 @@ class CredentialTokenTest {
                     .issuer("https://idp.example.com")
                     .subject("agent-expired")
                     .expirationTime(pastExpirationTime)
+                    .confirmation(testConfirmation)
                     .build();
 
             CredentialToken token = CredentialToken.builder()
@@ -139,6 +141,7 @@ class CredentialTokenTest {
                     .issuer("https://idp.example.com")
                     .subject("agent-expired")
                     .expirationTime(pastExpirationTime)
+                    .confirmation(testConfirmation)
                     .build();
 
             CredentialToken token = CredentialToken.builder()
@@ -189,27 +192,47 @@ class CredentialTokenTest {
         @Test
         @DisplayName("Should build claims with minimal required fields")
         void shouldBuildClaimsWithMinimalRequiredFields() {
+            CredentialToken.Claims.Confirmation confirmation = CredentialToken.Claims.Confirmation.builder()
+                    .jwk(testJwk)
+                    .build();
             CredentialToken.Claims claims = CredentialToken.Claims.builder()
                     .subject("agent-test")
                     .expirationTime(futureExpirationTime)
+                    .confirmation(confirmation)
                     .build();
 
             assertThat(claims.issuer()).isNull();
             assertThat(claims.subject()).isEqualTo("agent-test");
             assertThat(claims.expirationTime()).isEqualTo(futureExpirationTime);
             assertThat(claims.jwtId()).isNull();
-            assertThat(claims.confirmation()).isNull();
+            assertThat(claims.confirmation()).isEqualTo(confirmation);
         }
 
         @Test
         @DisplayName("Should throw exception when building claims with null subject")
         void shouldThrowExceptionWhenBuildingClaimsWithNullSubject() {
+            CredentialToken.Claims.Confirmation confirmation = CredentialToken.Claims.Confirmation.builder()
+                    .jwk(testJwk)
+                    .build();
             assertThatThrownBy(() -> CredentialToken.Claims.builder()
                     .subject(null)
                     .expirationTime(futureExpirationTime)
+                    .confirmation(confirmation)
                     .build())
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("subject (sub) is REQUIRED");
+        }
+
+        @Test
+        @DisplayName("Should throw exception when building claims with null confirmation")
+        void shouldThrowExceptionWhenBuildingClaimsWithNullConfirmation() {
+            assertThatThrownBy(() -> CredentialToken.Claims.builder()
+                    .subject("agent-test")
+                    .expirationTime(futureExpirationTime)
+                    .confirmation(null)
+                    .build())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("confirmation (cnf) is REQUIRED");
         }
 
         @Test
@@ -240,6 +263,7 @@ class CredentialTokenTest {
             CredentialToken.Claims expiredClaims = CredentialToken.Claims.builder()
                     .subject("agent-expired")
                     .expirationTime(pastExpirationTime)
+                    .confirmation(testConfirmation)
                     .build();
 
             assertThat(expiredClaims.isExpired()).isTrue();
@@ -309,6 +333,7 @@ class CredentialTokenTest {
             CredentialToken.Claims claims = CredentialToken.Claims.builder()
                     .subject("agent-my-service")
                     .expirationTime(futureExpirationTime)
+                    .confirmation(testConfirmation)
                     .build();
 
             CredentialToken token = CredentialToken.builder()

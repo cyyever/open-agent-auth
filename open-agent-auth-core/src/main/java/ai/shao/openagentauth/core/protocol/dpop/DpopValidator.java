@@ -71,42 +71,49 @@ public class DpopValidator {
         }
         logger.debug("Validating DPoP, CT: {}, DPoP: {}", ct, dpop);
 
-        String expirationError = verifyExpiration(dpop);
-        if (expirationError != null) {
-            logger.warn("DPoP has expired: {}", expirationError);
-            return TokenValidationResult.failure(expirationError);
+        Result step;
+
+        step = verifyExpiration(dpop);
+        if (step instanceof Result.Err(String msg)) {
+            logger.warn("DPoP has expired: {}", msg);
+            return TokenValidationResult.failure(msg);
         }
 
-        String requiredClaimsError = verifyRequiredClaims(dpop);
-        if (requiredClaimsError != null) {
-            logger.warn("DPoP missing required claims: {}", requiredClaimsError);
-            return TokenValidationResult.failure(requiredClaimsError);
+        step = verifyRequiredClaims(dpop);
+        if (step instanceof Result.Err(String msg)) {
+            logger.warn("DPoP missing required claims: {}", msg);
+            return TokenValidationResult.failure(msg);
         }
 
-        String wthError = verifyWth(dpop, ct);
-        if (wthError != null) {
-            logger.warn("DPoP wth does not match CT hash: {}", wthError);
-            return TokenValidationResult.failure(wthError);
+        step = verifyWth(dpop, ct);
+        if (step instanceof Result.Err(String msg)) {
+            logger.warn("DPoP wth does not match CT hash: {}", msg);
+            return TokenValidationResult.failure(msg);
         }
 
-        String signatureError = verifySignature(signedJwt, dpop, ct);
-        if (signatureError != null) {
-            logger.warn("DPoP signature verification failed: {}", signatureError);
-            return TokenValidationResult.failure(signatureError);
+        step = verifySignature(signedJwt, dpop, ct);
+        if (step instanceof Result.Err(String msg)) {
+            logger.warn("DPoP signature verification failed: {}", msg);
+            return TokenValidationResult.failure(msg);
         }
 
         logger.debug("Successfully validated DPoP");
         return TokenValidationResult.success(dpop);
     }
 
-    private String verifyExpiration(DpopToken dpop) {
-        if (dpop.claims() == null || dpop.claims().expirationTime() == null) {
-            return "DPoP missing expiration time";
-        }
+    /** Outcome of a single verification step. */
+    private sealed interface Result {
+        record Ok() implements Result {}
+        record Err(String message) implements Result {}
+    }
+
+    private static final Result OK = new Result.Ok();
+
+    private Result verifyExpiration(DpopToken dpop) {
         if (dpop.claims().isExpired()) {
-            return "DPoP expired at: " + dpop.claims().expirationTime();
+            return new Result.Err("DPoP expired at: " + dpop.claims().expirationTime());
         }
-        return null;
+        return OK;
     }
 
     private JWK convertToJWK(Jwk jwk) {
@@ -128,21 +135,16 @@ public class DpopValidator {
         return builder.build();
     }
 
-    private String verifySignature(SignedJWT signedJwt, DpopToken dpop, CredentialToken ct) {
+    private Result verifySignature(SignedJWT signedJwt, DpopToken dpop, CredentialToken ct) {
         try {
             SignedJWT jwt = signedJwt;
             if (jwt == null) {
                 String dpopJwtString = dpop.jwtString();
                 if (ValidationUtils.isNullOrEmpty(dpopJwtString)) {
                     logger.warn("DPoP missing JWT string, cannot verify signature");
-                    return "DPoP missing JWT string";
+                    return new Result.Err("DPoP missing JWT string");
                 }
                 jwt = SignedJWT.parse(dpopJwtString);
-            }
-
-            if (ct.getConfirmation() == null || ct.getConfirmation().jwk() == null) {
-                logger.warn("CT missing cnf.jwk, cannot verify DPoP signature");
-                return "CT missing cnf.jwk";
             }
 
             JWK dpopVerificationKey = convertToJWK(ct.getConfirmation().jwk());
@@ -153,56 +155,46 @@ public class DpopValidator {
 
             if (!isValid) {
                 logger.warn("DPoP signature verification failed");
-                return "DPoP signature verification failed";
-            } else {
-                logger.debug("DPoP signature verified successfully");
-                return null;
+                return new Result.Err("DPoP signature verification failed");
             }
+            logger.debug("DPoP signature verified successfully");
+            return OK;
 
         } catch (JOSEException e) {
             logger.error("Error verifying DPoP signature", e);
-            return "Error verifying DPoP signature: " + e.getMessage();
+            return new Result.Err("Error verifying DPoP signature: " + e.getMessage());
         } catch (ParseException e) {
             logger.error("Error parsing DPoP JWT string during signature verification", e);
-            return "DPoP signature verification failed";
+            return new Result.Err("DPoP signature verification failed");
         }
     }
 
-    private String verifyRequiredClaims(DpopToken dpop) {
-        if (dpop.claims() == null) {
-            return "DPoP missing claims";
+    private Result verifyRequiredClaims(DpopToken dpop) {
+        if (dpop.claims().workloadTokenHash().trim().isEmpty()) {
+            return new Result.Err("DPoP missing required claim: wth");
         }
-        if (dpop.claims().workloadTokenHash() == null ||
-            dpop.claims().workloadTokenHash().trim().isEmpty()) {
-            return "DPoP missing required claim: wth";
-        } else {
-            return null;
-        }
+        return OK;
     }
 
-    private String verifyWth(DpopToken dpop, CredentialToken ct) {
+    private Result verifyWth(DpopToken dpop, CredentialToken ct) {
         try {
             String ctJwtString = ct.jwtString();
             if (ValidationUtils.isNullOrEmpty(ctJwtString)) {
                 logger.warn("CT missing JWT string, cannot verify wth");
-                return "CT missing JWT string";
+                return new Result.Err("CT missing JWT string");
             }
 
             String expectedWth = JwtHashUtil.computeWitHash(ctJwtString);
             String actualWth = dpop.claims().workloadTokenHash();
 
-            if (ValidationUtils.isNullOrEmpty(actualWth)) {
-                return "DPoP missing wth claim";
-            }
-
             if (!expectedWth.equals(actualWth)) {
-                return "DPoP wth '%s' does not match CT hash '%s'".formatted(actualWth, expectedWth);
-            } else {
-                return null;
+                return new Result.Err(
+                        "DPoP wth '%s' does not match CT hash '%s'".formatted(actualWth, expectedWth));
             }
+            return OK;
         } catch (Exception e) {
             logger.error("Error calculating CT hash", e);
-            return "Error calculating CT hash: " + e.getMessage();
+            return new Result.Err("Error calculating CT hash: " + e.getMessage());
         }
     }
 }

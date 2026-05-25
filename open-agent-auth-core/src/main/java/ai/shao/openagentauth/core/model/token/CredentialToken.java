@@ -86,13 +86,16 @@ public record CredentialToken(
             if (expirationTime == null) {
                 throw new IllegalStateException("expirationTime (exp) is REQUIRED");
             }
+            if (confirmation == null) {
+                throw new IllegalStateException("confirmation (cnf) is REQUIRED");
+            }
         }
 
         /** Workload Identifier alias for subject. */
         public String getWorkloadIdentifier() { return subject; }
 
         /** JWK from the confirmation claim. */
-        public Jwk jwk() { return confirmation != null ? confirmation.jwk() : null; }
+        public Jwk jwk() { return confirmation.jwk(); }
 
         public boolean isExpired() {
             return expirationTime.getTime() < System.currentTimeMillis();
