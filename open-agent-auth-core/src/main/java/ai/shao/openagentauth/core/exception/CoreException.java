@@ -15,6 +15,8 @@
  */
 package ai.shao.openagentauth.core.exception;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +56,7 @@ public abstract class CoreException extends OpenAgentAuthException {
      * @param errorParams the error parameters (varargs)
      * @param context the context information
      */
-    protected CoreException(ErrorCode errorCode, List<Object> errorParams, Map<String, Object> context) {
+    protected CoreException(ErrorCode errorCode, @Nullable List<Object> errorParams, @Nullable Map<String, Object> context) {
         super(errorCode.getErrorCode(), errorCode.formatMessage(errorParams != null ? errorParams.toArray() : null),
               errorParams, context);
     }
@@ -89,8 +91,8 @@ public abstract class CoreException extends OpenAgentAuthException {
      * @param context the context information
      * @param cause the cause
      */
-    protected CoreException(ErrorCode errorCode, List<Object> errorParams,
-                          Map<String, Object> context, Throwable cause) {
+    protected CoreException(ErrorCode errorCode, @Nullable List<Object> errorParams,
+                          @Nullable Map<String, Object> context, @Nullable Throwable cause) {
         super(errorCode.getErrorCode(), errorCode.formatMessage(errorParams != null ? errorParams.toArray() : null),
               errorParams, context, cause);
     }

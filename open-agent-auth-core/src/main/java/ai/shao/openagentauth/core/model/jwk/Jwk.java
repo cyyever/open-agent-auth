@@ -18,6 +18,7 @@ package ai.shao.openagentauth.core.model.jwk;
 import ai.shao.openagentauth.core.util.ValidationUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Minimal Ed25519 JSON Web Key as used in AAP CT cnf.jwk and DPoP header.jwk.
@@ -33,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record Jwk(
         @JsonProperty("x") String x,
-        @JsonProperty("kid") String keyId) {
+        @JsonProperty("kid") @Nullable String keyId) {
 
     public Jwk {
         if (ValidationUtils.isNullOrEmpty(x)) {
@@ -46,13 +47,16 @@ public record Jwk(
     }
 
     public static class Builder {
-        private String x;
-        private String keyId;
+        private @Nullable String x;
+        private @Nullable String keyId;
 
-        public Builder x(String x)         { this.x     = x;     return this; }
-        public Builder keyId(String keyId) { this.keyId = keyId; return this; }
+        public Builder x(@Nullable String x)         { this.x     = x;     return this; }
+        public Builder keyId(@Nullable String keyId) { this.keyId = keyId; return this; }
 
         public Jwk build() {
+            if (x == null) {
+                throw new IllegalStateException("x coordinate is REQUIRED");
+            }
             return new Jwk(x, keyId);
         }
     }

@@ -43,6 +43,13 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
+        <!-- JSpecify nullness annotations (@Nullable). Compile-time only; the
+             annotation class is retained at runtime per JSR-308 convention. -->
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

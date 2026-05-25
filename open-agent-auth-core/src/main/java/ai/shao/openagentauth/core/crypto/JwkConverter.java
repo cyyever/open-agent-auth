@@ -16,6 +16,7 @@
 package ai.shao.openagentauth.core.crypto;
 
 import ai.shao.openagentauth.core.model.jwk.Jwk;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +59,7 @@ public final class JwkConverter {
         return builder.build();
     }
 
-    public static String getClaimAsString(Map<String, Object> map, String key) {
+    public static @Nullable String getClaimAsString(Map<String, Object> map, String key) {
         Object value = map.get(key);
         if (value == null) {
             return null;

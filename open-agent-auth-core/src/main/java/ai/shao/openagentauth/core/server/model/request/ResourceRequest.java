@@ -19,6 +19,7 @@ import ai.shao.openagentauth.core.util.ValidationUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 
@@ -32,25 +33,25 @@ public class ResourceRequest {
     private final String dpop;
 
     @JsonProperty("httpMethod")
-    private final String httpMethod;
+    private final @Nullable String httpMethod;
 
     @JsonProperty("httpUri")
-    private final String httpUri;
+    private final @Nullable String httpUri;
 
     @JsonProperty("httpHeaders")
-    private final Map<String, String> httpHeaders;
+    private final @Nullable Map<String, String> httpHeaders;
 
     @JsonProperty("httpBody")
-    private final String httpBody;
+    private final @Nullable String httpBody;
 
     @JsonCreator
     public ResourceRequest(
-            @JsonProperty("ct") String ct,
-            @JsonProperty("dpop") String dpop,
-            @JsonProperty("httpMethod") String httpMethod,
-            @JsonProperty("httpUri") String httpUri,
-            @JsonProperty("httpHeaders") Map<String, String> httpHeaders,
-            @JsonProperty("httpBody") String httpBody
+            @JsonProperty("ct") @Nullable String ct,
+            @JsonProperty("dpop") @Nullable String dpop,
+            @JsonProperty("httpMethod") @Nullable String httpMethod,
+            @JsonProperty("httpUri") @Nullable String httpUri,
+            @JsonProperty("httpHeaders") @Nullable Map<String, String> httpHeaders,
+            @JsonProperty("httpBody") @Nullable String httpBody
     ) {
         if (ValidationUtils.isNullOrEmpty(ct)) {
             throw new IllegalStateException("ct is REQUIRED");
@@ -68,49 +69,49 @@ public class ResourceRequest {
 
     public String getCt() { return ct; }
     public String getDpop() { return dpop; }
-    public String getHttpMethod() { return httpMethod; }
-    public String getHttpUri() { return httpUri; }
-    public Map<String, String> getHttpHeaders() { return httpHeaders; }
-    public String getHttpBody() { return httpBody; }
+    public @Nullable String getHttpMethod() { return httpMethod; }
+    public @Nullable String getHttpUri() { return httpUri; }
+    public @Nullable Map<String, String> getHttpHeaders() { return httpHeaders; }
+    public @Nullable String getHttpBody() { return httpBody; }
 
     public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
-        private String ct;
-        private String dpop;
-        private String httpMethod;
-        private String httpUri;
-        private Map<String, String> httpHeaders;
-        private String httpBody;
+        private @Nullable String ct;
+        private @Nullable String dpop;
+        private @Nullable String httpMethod;
+        private @Nullable String httpUri;
+        private @Nullable Map<String, String> httpHeaders;
+        private @Nullable String httpBody;
 
-        public Builder ct(String ct) {
+        public Builder ct(@Nullable String ct) {
             this.ct = ct;
             return this;
         }
 
-        public Builder dpop(String dpop) {
+        public Builder dpop(@Nullable String dpop) {
             this.dpop = dpop;
             return this;
         }
 
-        public Builder httpMethod(String httpMethod) {
+        public Builder httpMethod(@Nullable String httpMethod) {
             this.httpMethod = httpMethod;
             return this;
         }
 
-        public Builder httpUri(String httpUri) {
+        public Builder httpUri(@Nullable String httpUri) {
             this.httpUri = httpUri;
             return this;
         }
 
-        public Builder httpHeaders(Map<String, String> httpHeaders) {
+        public Builder httpHeaders(@Nullable Map<String, String> httpHeaders) {
             this.httpHeaders = httpHeaders;
             return this;
         }
 
-        public Builder httpBody(String httpBody) {
+        public Builder httpBody(@Nullable String httpBody) {
             this.httpBody = httpBody;
             return this;
         }

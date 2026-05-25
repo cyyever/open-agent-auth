@@ -15,6 +15,8 @@
  */
 package ai.shao.openagentauth.core.crypto.key.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Objects;
 
 /**
@@ -27,10 +29,10 @@ import java.util.Objects;
 public final class KeyDefinition {
 
     private final String keyId;
-    private final String provider;
-    private final String jwksConsumer;
+    private final @Nullable String provider;
+    private final @Nullable String jwksConsumer;
 
-    private KeyDefinition(String keyId, String provider, String jwksConsumer) {
+    private KeyDefinition(String keyId, @Nullable String provider, @Nullable String jwksConsumer) {
         this.keyId = keyId;
         this.provider = provider;
         this.jwksConsumer = jwksConsumer;
@@ -40,11 +42,11 @@ public final class KeyDefinition {
         return keyId;
     }
 
-    public String getProvider() {
+    public @Nullable String getProvider() {
         return provider;
     }
 
-    public String getJwksConsumer() {
+    public @Nullable String getJwksConsumer() {
         return jwksConsumer;
     }
 
@@ -86,24 +88,24 @@ public final class KeyDefinition {
 
     public static final class Builder {
 
-        private String keyId;
-        private String provider;
-        private String jwksConsumer;
+        private @Nullable String keyId;
+        private @Nullable String provider;
+        private @Nullable String jwksConsumer;
 
         private Builder() {
         }
 
-        public Builder keyId(String keyId) {
+        public Builder keyId(@Nullable String keyId) {
             this.keyId = keyId;
             return this;
         }
 
-        public Builder provider(String provider) {
+        public Builder provider(@Nullable String provider) {
             this.provider = provider;
             return this;
         }
 
-        public Builder jwksConsumer(String jwksConsumer) {
+        public Builder jwksConsumer(@Nullable String jwksConsumer) {
             this.jwksConsumer = jwksConsumer;
             return this;
         }

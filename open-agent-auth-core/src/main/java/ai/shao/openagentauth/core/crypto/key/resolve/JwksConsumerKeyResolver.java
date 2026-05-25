@@ -19,6 +19,7 @@ import ai.shao.openagentauth.core.crypto.key.model.KeyDefinition;
 import ai.shao.openagentauth.core.exception.crypto.KeyResolutionException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -209,7 +210,7 @@ public class JwksConsumerKeyResolver implements KeyResolver {
         logger.info("Cleared JWKS cache for consumer: {}", consumerName);
     }
 
-    public String getConsumerEndpoint(String consumerName) {
+    public @Nullable String getConsumerEndpoint(String consumerName) {
         return consumerEndpoints.get(consumerName);
     }
 

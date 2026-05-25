@@ -21,6 +21,7 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,7 +127,7 @@ public class DpopParser {
      * @param claimName the claim name
      * @return the claim value, or null if not present
      */
-    private String getStringClaim(JWTClaimsSet claimsSet, String claimName) throws ParseException {
+    private @Nullable String getStringClaim(JWTClaimsSet claimsSet, String claimName) throws ParseException {
         Object value = claimsSet.getClaim(claimName);
         if (value == null) {
             return null;

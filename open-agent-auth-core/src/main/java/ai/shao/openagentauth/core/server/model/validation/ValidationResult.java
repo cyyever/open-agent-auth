@@ -18,6 +18,7 @@ package ai.shao.openagentauth.core.server.model.validation;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -33,27 +34,27 @@ public class ValidationResult {
     
     @JsonProperty("valid")
     private final boolean valid;
-    
+
     @JsonProperty("layerResults")
-    private final List<LayerResult> layerResults;
-    
+    private final @Nullable List<LayerResult> layerResults;
+
     @JsonProperty("errors")
-    private final List<String> errors;
-    
+    private final @Nullable List<String> errors;
+
     @JsonCreator
     public ValidationResult(
             @JsonProperty("valid") boolean valid,
-            @JsonProperty("layerResults") List<LayerResult> layerResults,
-            @JsonProperty("errors") List<String> errors
+            @JsonProperty("layerResults") @Nullable List<LayerResult> layerResults,
+            @JsonProperty("errors") @Nullable List<String> errors
     ) {
         this.valid = valid;
         this.layerResults = layerResults;
         this.errors = errors;
     }
-    
+
     public boolean isValid() { return valid; }
-    public List<LayerResult> getLayerResults() { return layerResults; }
-    public List<String> getErrors() { return errors; }
+    public @Nullable List<LayerResult> getLayerResults() { return layerResults; }
+    public @Nullable List<String> getErrors() { return errors; }
     
     public static Builder builder() {
         return new Builder();
@@ -61,24 +62,24 @@ public class ValidationResult {
     
     public static class Builder {
         private boolean valid;
-        private List<LayerResult> layerResults;
-        private List<String> errors;
-        
+        private @Nullable List<LayerResult> layerResults;
+        private @Nullable List<String> errors;
+
         public Builder valid(boolean valid) {
             this.valid = valid;
             return this;
         }
-        
-        public Builder layerResults(List<LayerResult> layerResults) {
+
+        public Builder layerResults(@Nullable List<LayerResult> layerResults) {
             this.layerResults = layerResults;
             return this;
         }
-        
-        public Builder errors(List<String> errors) {
+
+        public Builder errors(@Nullable List<String> errors) {
             this.errors = errors;
             return this;
         }
-        
+
         public ValidationResult build() {
             return new ValidationResult(valid, layerResults, errors);
         }
@@ -90,62 +91,62 @@ public class ValidationResult {
         private final int layer;
         
         @JsonProperty("layerName")
-        private final String layerName;
-        
+        private final @Nullable String layerName;
+
         @JsonProperty("valid")
         private final boolean valid;
-        
+
         @JsonProperty("message")
-        private final String message;
-        
+        private final @Nullable String message;
+
         @JsonCreator
         public LayerResult(
                 @JsonProperty("layer") int layer,
-                @JsonProperty("layerName") String layerName,
+                @JsonProperty("layerName") @Nullable String layerName,
                 @JsonProperty("valid") boolean valid,
-                @JsonProperty("message") String message
+                @JsonProperty("message") @Nullable String message
         ) {
             this.layer = layer;
             this.layerName = layerName;
             this.valid = valid;
             this.message = message;
         }
-        
+
         public int getLayer() { return layer; }
-        public String getLayerName() { return layerName; }
+        public @Nullable String getLayerName() { return layerName; }
         public boolean isValid() { return valid; }
-        public String getMessage() { return message; }
-        
+        public @Nullable String getMessage() { return message; }
+
         public static Builder builder() {
             return new Builder();
         }
-        
+
         public static class Builder {
             private int layer;
-            private String layerName;
+            private @Nullable String layerName;
             private boolean valid;
-            private String message;
-            
+            private @Nullable String message;
+
             public Builder layer(int layer) {
                 this.layer = layer;
                 return this;
             }
-            
-            public Builder layerName(String layerName) {
+
+            public Builder layerName(@Nullable String layerName) {
                 this.layerName = layerName;
                 return this;
             }
-            
+
             public Builder valid(boolean valid) {
                 this.valid = valid;
                 return this;
             }
-            
-            public Builder message(String message) {
+
+            public Builder message(@Nullable String message) {
                 this.message = message;
                 return this;
             }
-            
+
             public LayerResult build() {
                 return new LayerResult(layer, layerName, valid, message);
             }
