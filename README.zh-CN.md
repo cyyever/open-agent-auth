@@ -11,7 +11,7 @@
 单 Maven 模块 `open-agent-auth-core`:协议原语(JWS 签验、密钥管理、
 JWKS 提供端、信任根、WIT/WPT — M1 改名为 CT/DPoP)+ server 侧 actor
 (`ResourceServer`、`DefaultResourceServer`、请求/结果模型)位于
-`com.alibaba.openagentauth.core.server.*` 包。纯 Java,无 Spring。
+`ai.shao.openagentauth.core.server.*` 包。纯 Java,无 Spring。
 
 模块需要 **Java 21 LTS**(或更高版本)。直接依赖只有
 [Nimbus JOSE+JWT](https://connect2id.com/products/nimbus-jose-jwt)、
