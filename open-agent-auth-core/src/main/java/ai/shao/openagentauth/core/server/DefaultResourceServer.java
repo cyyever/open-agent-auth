@@ -61,12 +61,6 @@ public class DefaultResourceServer implements ResourceServer {
 
         String ctString = request.getCt();
         String dpopString = request.getDpop();
-        if (ValidationUtils.isNullOrEmpty(ctString)) {
-            throw new ServerValidationException("CT is required");
-        }
-        if (ValidationUtils.isNullOrEmpty(dpopString)) {
-            throw new ServerValidationException("DPoP is required");
-        }
 
         CredentialToken ct;
         TokenValidationResult<CredentialToken> ctResult;
@@ -105,19 +99,22 @@ public class DefaultResourceServer implements ResourceServer {
         List<ValidationResult.LayerResult> layerResults = new ArrayList<>();
         List<String> errors = new ArrayList<>();
 
-        layerResults.add(toLayerResult(1, CT_NAME, ctResult.isValid(), ctResult.getErrorMessage()));
-        if (!ctResult.isValid() && ctResult.getErrorMessage() != null) {
-            errors.add(ctResult.getErrorMessage());
+        layerResults.add(toLayerResult(1, CT_NAME, ctResult));
+        if (ctResult instanceof TokenValidationResult.Failure<CredentialToken>(String msg)) {
+            errors.add(msg);
         }
 
+        boolean valid = ctResult.isValid();
         if (dpopResult != null) {
-            layerResults.add(toLayerResult(2, DPOP_NAME, dpopResult.isValid(), dpopResult.getErrorMessage()));
-            if (!dpopResult.isValid() && dpopResult.getErrorMessage() != null) {
-                errors.add(dpopResult.getErrorMessage());
+            layerResults.add(toLayerResult(2, DPOP_NAME, dpopResult));
+            if (dpopResult instanceof TokenValidationResult.Failure<DpopToken>(String msg)) {
+                errors.add(msg);
             }
+            valid = valid && dpopResult.isValid();
+        } else {
+            valid = false;
         }
 
-        boolean valid = ctResult.isValid() && dpopResult != null && dpopResult.isValid();
         return ValidationResult.builder()
                 .valid(valid)
                 .layerResults(layerResults)
@@ -125,12 +122,16 @@ public class DefaultResourceServer implements ResourceServer {
                 .build();
     }
 
-    private static ValidationResult.LayerResult toLayerResult(int layer, String name, boolean valid, String message) {
+    private static ValidationResult.LayerResult toLayerResult(int layer, String name, TokenValidationResult<?> result) {
+        String message = switch (result) {
+            case TokenValidationResult.Success<?> __ -> "Validation passed";
+            case TokenValidationResult.Failure<?>(String msg) -> msg;
+        };
         return ValidationResult.LayerResult.builder()
                 .layer(layer)
                 .layerName(name)
-                .valid(valid)
-                .message(valid ? "Validation passed" : message != null ? message : "Validation failed")
+                .valid(result.isValid())
+                .message(message)
                 .build();
     }
 }

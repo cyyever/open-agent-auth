@@ -16,87 +16,44 @@
 package ai.shao.openagentauth.core.token.common;
 
 /**
- * Generic result class for token validation.
- * Represents the outcome of validating a token (CT, DPoP, etc.).
+ * Outcome of validating a token (CT, DPoP, etc.). Sealed ADT — every instance
+ * is either {@link Success} carrying the parsed token, or {@link Failure}
+ * carrying an error message. Callers should pattern-match the sealed cases
+ * rather than rely on the legacy getters, which return null on the wrong arm.
  *
  * @param <T> the type of token being validated
  */
-public class TokenValidationResult<T> {
+public sealed interface TokenValidationResult<T> {
 
-    /**
-     * Indicates whether the token is valid.
-     */
-    private final boolean valid;
+    record Success<T>(T token) implements TokenValidationResult<T> {}
 
-    /**
-     * Error message if the token is invalid.
-     */
-    private final String errorMessage;
+    record Failure<T>(String errorMessage) implements TokenValidationResult<T> {}
 
-    /**
-     * Parsed token if the token is valid.
-     */
-    private final T token;
+    static <T> TokenValidationResult<T> success(T token) {
+        return new Success<>(token);
+    }
 
-    /**
-     * Constructor.
-     *
-     * @param valid indicates whether the token is valid
-     * @param errorMessage error message if the token is invalid
-     * @param token parsed token if the token is valid
-     */
-    private TokenValidationResult(boolean valid, String errorMessage, T token) {
-        this.valid = valid;
-        this.errorMessage = errorMessage;
-        this.token = token;
+    static <T> TokenValidationResult<T> failure(String errorMessage) {
+        return new Failure<>(errorMessage);
+    }
+
+    default boolean isValid() {
+        return this instanceof Success<T>;
     }
 
     /**
-     * Returns true if the token is valid, false otherwise.
-     *
-     * @return true if the token is valid, false otherwise
+     * Legacy accessor. Returns the parsed token on {@link Success}, null on
+     * {@link Failure}. Prefer pattern-matching the sealed cases.
      */
-    public boolean isValid() {
-        return valid;
+    default T getToken() {
+        return this instanceof Success<T>(T tok) ? tok : null;
     }
 
     /**
-     * Returns the error message if the token is invalid.
-     *
-     * @return the error message if the token is invalid
+     * Legacy accessor. Returns the error message on {@link Failure}, null on
+     * {@link Success}. Prefer pattern-matching the sealed cases.
      */
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    /**
-     * Returns the parsed token if the token is valid.
-     *
-     * @return the parsed token if the token is valid
-     */
-    public T getToken() {
-        return token;
-    }
-
-    /**
-     * Creates a successful validation result.
-     *
-     * @param token the parsed token
-     * @param <T> the type of token
-     * @return the validation result
-     */
-    public static <T> TokenValidationResult<T> success(T token) {
-        return new TokenValidationResult<>(true, null, token);
-    }
-
-    /**
-     * Creates a failed validation result.
-     *
-     * @param errorMessage the error message
-     * @param <T> the type of token
-     * @return the validation result
-     */
-    public static <T> TokenValidationResult<T> failure(String errorMessage) {
-        return new TokenValidationResult<>(false, errorMessage, null);
+    default String getErrorMessage() {
+        return this instanceof Failure<T>(String msg) ? msg : null;
     }
 }

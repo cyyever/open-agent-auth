@@ -23,31 +23,60 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("ResourceRequest Tests")
 class ResourceRequestTest {
+
+    private static ResourceRequest.Builder validBuilder() {
+        return ResourceRequest.builder().ct("ct-token").dpop("dpop-token");
+    }
+
+    @Nested
+    @DisplayName("Compact ctor invariants")
+    class CompactCtorInvariants {
+
+        @Test
+        @DisplayName("Should throw when ct is null")
+        void shouldThrowWhenCtNull() {
+            assertThatThrownBy(() -> ResourceRequest.builder().dpop("dpop-token").build())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("ct is REQUIRED");
+        }
+
+        @Test
+        @DisplayName("Should throw when ct is empty")
+        void shouldThrowWhenCtEmpty() {
+            assertThatThrownBy(() -> ResourceRequest.builder().ct("").dpop("dpop-token").build())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("ct is REQUIRED");
+        }
+
+        @Test
+        @DisplayName("Should throw when dpop is null")
+        void shouldThrowWhenDpopNull() {
+            assertThatThrownBy(() -> ResourceRequest.builder().ct("ct-token").build())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("dpop is REQUIRED");
+        }
+
+        @Test
+        @DisplayName("Should throw when dpop is empty")
+        void shouldThrowWhenDpopEmpty() {
+            assertThatThrownBy(() -> ResourceRequest.builder().ct("ct-token").dpop("").build())
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("dpop is REQUIRED");
+        }
+    }
 
     @Nested
     @DisplayName("Builder Pattern Tests")
     class BuilderPatternTests {
 
         @Test
-        @DisplayName("Should build request with ct")
-        void shouldBuildRequestWithWit() {
-            ResourceRequest request = ResourceRequest.builder()
-                .ct("ct-token")
-                .build();
-
-            assertThat(request.getCt()).isEqualTo("ct-token");
-        }
-
-        @Test
         @DisplayName("Should build request with ct and dpop")
-        void shouldBuildRequestWithWitAndWpt() {
-            ResourceRequest request = ResourceRequest.builder()
-                .ct("ct-token")
-                .dpop("dpop-token")
-                .build();
+        void shouldBuildRequestWithCtAndDpop() {
+            ResourceRequest request = validBuilder().build();
 
             assertThat(request.getCt()).isEqualTo("ct-token");
             assertThat(request.getDpop()).isEqualTo("dpop-token");
@@ -59,7 +88,7 @@ class ResourceRequestTest {
             Map<String, String> headers = new HashMap<>();
             headers.put("Content-Type", "application/json");
 
-            ResourceRequest request = ResourceRequest.builder()
+            ResourceRequest request = validBuilder()
                 .httpMethod("POST")
                 .httpUri("/api/resource")
                 .httpHeaders(headers)
@@ -73,33 +102,9 @@ class ResourceRequestTest {
         }
 
         @Test
-        @DisplayName("Should build request with all fields")
-        void shouldBuildRequestWithAllFields() {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Content-Type", "application/json");
-
-            ResourceRequest request = ResourceRequest.builder()
-                .ct("ct-token")
-                .dpop("dpop-token")
-                .httpMethod("GET")
-                .httpUri("/api/resource")
-                .httpHeaders(headers)
-                .httpBody("")
-                .build();
-
-            assertThat(request.getCt()).isEqualTo("ct-token");
-            assertThat(request.getDpop()).isEqualTo("dpop-token");
-            assertThat(request.getHttpMethod()).isEqualTo("GET");
-            assertThat(request.getHttpUri()).isEqualTo("/api/resource");
-            assertThat(request.getHttpHeaders()).hasSize(1);
-        }
-
-        @Test
         @DisplayName("Should support method chaining")
         void shouldSupportMethodChaining() {
-            ResourceRequest request = ResourceRequest.builder()
-                .ct("ct-token")
-                .dpop("dpop-token")
+            ResourceRequest request = validBuilder()
                 .httpMethod("POST")
                 .httpUri("/api/resource")
                 .build();
@@ -108,19 +113,17 @@ class ResourceRequestTest {
         }
 
         @Test
-        @DisplayName("Should handle null values")
-        void shouldHandleNullValues() {
-            ResourceRequest request = ResourceRequest.builder()
-                .ct(null)
-                .dpop(null)
+        @DisplayName("Should accept null values for optional HTTP fields")
+        void shouldAcceptNullValuesForOptionalHttpFields() {
+            ResourceRequest request = validBuilder()
                 .httpMethod(null)
                 .httpUri(null)
                 .httpHeaders(null)
                 .httpBody(null)
                 .build();
 
-            assertThat(request.getCt()).isNull();
-            assertThat(request.getDpop()).isNull();
+            assertThat(request.getCt()).isEqualTo("ct-token");
+            assertThat(request.getDpop()).isEqualTo("dpop-token");
             assertThat(request.getHttpMethod()).isNull();
             assertThat(request.getHttpUri()).isNull();
             assertThat(request.getHttpHeaders()).isNull();
@@ -134,42 +137,26 @@ class ResourceRequestTest {
 
         @Test
         @DisplayName("Should return ct")
-        void shouldReturnWit() {
-            ResourceRequest request = ResourceRequest.builder()
-                .ct("ct-token")
-                .build();
-
-            assertThat(request.getCt()).isEqualTo("ct-token");
+        void shouldReturnCt() {
+            assertThat(validBuilder().build().getCt()).isEqualTo("ct-token");
         }
 
         @Test
         @DisplayName("Should return dpop")
-        void shouldReturnWpt() {
-            ResourceRequest request = ResourceRequest.builder()
-                .dpop("dpop-token")
-                .build();
-
-            assertThat(request.getDpop()).isEqualTo("dpop-token");
+        void shouldReturnDpop() {
+            assertThat(validBuilder().build().getDpop()).isEqualTo("dpop-token");
         }
 
         @Test
         @DisplayName("Should return httpMethod")
         void shouldReturnHttpMethod() {
-            ResourceRequest request = ResourceRequest.builder()
-                .httpMethod("POST")
-                .build();
-
-            assertThat(request.getHttpMethod()).isEqualTo("POST");
+            assertThat(validBuilder().httpMethod("POST").build().getHttpMethod()).isEqualTo("POST");
         }
 
         @Test
         @DisplayName("Should return httpUri")
         void shouldReturnHttpUri() {
-            ResourceRequest request = ResourceRequest.builder()
-                .httpUri("/api/resource")
-                .build();
-
-            assertThat(request.getHttpUri()).isEqualTo("/api/resource");
+            assertThat(validBuilder().httpUri("/api/resource").build().getHttpUri()).isEqualTo("/api/resource");
         }
 
         @Test
@@ -178,9 +165,7 @@ class ResourceRequestTest {
             Map<String, String> headers = new HashMap<>();
             headers.put("Content-Type", "application/json");
 
-            ResourceRequest request = ResourceRequest.builder()
-                .httpHeaders(headers)
-                .build();
+            ResourceRequest request = validBuilder().httpHeaders(headers).build();
 
             assertThat(request.getHttpHeaders()).hasSize(1);
             assertThat(request.getHttpHeaders().get("Content-Type")).isEqualTo("application/json");
@@ -189,21 +174,15 @@ class ResourceRequestTest {
         @Test
         @DisplayName("Should return httpBody")
         void shouldReturnHttpBody() {
-            ResourceRequest request = ResourceRequest.builder()
-                .httpBody("{\"key\":\"value\"}")
-                .build();
-
-            assertThat(request.getHttpBody()).isEqualTo("{\"key\":\"value\"}");
+            assertThat(validBuilder().httpBody("{\"key\":\"value\"}").build().getHttpBody())
+                    .isEqualTo("{\"key\":\"value\"}");
         }
 
         @Test
-        @DisplayName("Should return null for missing fields")
-        void shouldReturnNullForMissingFields() {
-            ResourceRequest request = ResourceRequest.builder()
-                .ct("ct-token")
-                .build();
+        @DisplayName("Should return null for unset optional fields")
+        void shouldReturnNullForUnsetOptionalFields() {
+            ResourceRequest request = validBuilder().build();
 
-            assertThat(request.getDpop()).isNull();
             assertThat(request.getHttpMethod()).isNull();
             assertThat(request.getHttpUri()).isNull();
             assertThat(request.getHttpHeaders()).isNull();
@@ -223,9 +202,7 @@ class ResourceRequestTest {
             headers.put("User-Agent", "TestAgent/1.0");
             headers.put("X-Custom-Header", "custom-value");
 
-            ResourceRequest request = ResourceRequest.builder()
-                .httpHeaders(headers)
-                .build();
+            ResourceRequest request = validBuilder().httpHeaders(headers).build();
 
             assertThat(request.getHttpHeaders()).hasSize(3);
             assertThat(request.getHttpHeaders().get("Content-Type")).isEqualTo("application/json");
@@ -234,13 +211,8 @@ class ResourceRequestTest {
         @Test
         @DisplayName("Should create multiple independent instances")
         void shouldCreateMultipleIndependentInstances() {
-            ResourceRequest request1 = ResourceRequest.builder()
-                .ct("ct-1")
-                .build();
-
-            ResourceRequest request2 = ResourceRequest.builder()
-                .ct("ct-2")
-                .build();
+            ResourceRequest request1 = ResourceRequest.builder().ct("ct-1").dpop("dpop-1").build();
+            ResourceRequest request2 = ResourceRequest.builder().ct("ct-2").dpop("dpop-2").build();
 
             assertThat(request1.getCt()).isEqualTo("ct-1");
             assertThat(request2.getCt()).isEqualTo("ct-2");
