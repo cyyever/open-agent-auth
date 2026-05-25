@@ -3,7 +3,7 @@
 This repository is the upstream baseline being trimmed into an
 **Agent Auth Protocol (AAP)** fork.
 
-- Spec: [`cyyever/authentication_plan`](https://github.com/cyyever/authentication_plan) — single source `agent_auth_protocol.tex`
+- Spec: [`cyyever/authentication_plan`](https://github.com/cyyever/authentication_plan) — single source `agent_auth_protocol.tex`. Vendored at `spec/` as a submodule for offline browsing; spec PRs go to the spec repo, not here.
 - Scope: authentication-only, single algorithm **Ed25519 + SHA-512** (`alg=EdDSA`), two wire messages — CT (delegation) and DPoP (per-request), JWS compact serialization, HTTPS only.
 - Not provided: authorization, consent UI, CA / X.509, OAuth 2.0 / OIDC flows, W3C VC.
 
