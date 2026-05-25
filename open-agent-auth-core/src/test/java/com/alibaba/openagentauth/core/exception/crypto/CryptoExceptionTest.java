@@ -25,75 +25,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CryptoExceptionTest {
 
     @Test
-    @DisplayName("Test KeyManagementException with single parameter")
-    void testKeyManagementExceptionWithSingleParameter() {
-        KeyManagementException exception = new KeyManagementException("Key not found");
-
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0302");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Key management operation failed: Key not found");
-        assertThat(exception.getErrorParams()).containsExactly("Key not found");
-    }
-
-    @Test
-    @DisplayName("Test KeyManagementException with message and cause")
-    void testKeyManagementExceptionWithMessageAndCause() {
-        Throwable cause = new RuntimeException("Key generation failed");
-        KeyManagementException exception = new KeyManagementException("Key not found", cause);
-
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0302");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Key management operation failed: Key not found");
-        assertThat(exception.getErrorParams()).containsExactly("Key not found");
-        assertThat(exception.getCause()).isEqualTo(cause);
-    }
-
-    @Test
-    @DisplayName("Test KeyManagementException error code properties")
-    void testKeyManagementExceptionErrorCodeProperties() {
-        KeyManagementException exception = new KeyManagementException("Test message");
-
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0302");
-        assertThat(exception.toString()).contains("KeyManagementException");
-        assertThat(exception.toString()).contains("errorCode='OPEN_AGENT_AUTH_10_0302'");
-    }
-
-    @Test
     @DisplayName("Test CryptoErrorCode error code format")
     void testCryptoErrorCodeFormat() {
-        assertThat(CryptoErrorCode.KEY_MANAGEMENT_FAILED.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0302");
         assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0306");
     }
 
     @Test
     @DisplayName("Test CryptoErrorCode domain code")
     void testCryptoErrorCodeDomainCode() {
-        assertThat(CryptoErrorCode.KEY_MANAGEMENT_FAILED.getDomainCode()).isEqualTo("03");
         assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getDomainCode()).isEqualTo("03");
     }
 
     @Test
     @DisplayName("Test CryptoErrorCode sub code")
     void testCryptoErrorCodeSubCode() {
-        assertThat(CryptoErrorCode.KEY_MANAGEMENT_FAILED.getSubCode()).isEqualTo("02");
         assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getSubCode()).isEqualTo("06");
     }
 
     @Test
     @DisplayName("Test CryptoErrorCode system code")
     void testCryptoErrorCodeSystemCode() {
-        assertThat(CryptoErrorCode.KEY_MANAGEMENT_FAILED.getSystemCode()).isEqualTo("10");
+        assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getSystemCode()).isEqualTo("10");
     }
 
     @Test
     @DisplayName("Test CryptoErrorCode error names")
     void testCryptoErrorCodeErrorNames() {
-        assertThat(CryptoErrorCode.KEY_MANAGEMENT_FAILED.getErrorName()).isEqualTo("KeyManagementFailed");
         assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getErrorName()).isEqualTo("KeyResolutionFailed");
     }
 
     @Test
     @DisplayName("Test CryptoErrorCode HTTP status")
     void testCryptoErrorCodeHttpStatus() {
-        assertThat(CryptoErrorCode.KEY_MANAGEMENT_FAILED.getHttpStatus().value()).isEqualTo(500);
         assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getHttpStatus().value()).isEqualTo(500);
     }
 

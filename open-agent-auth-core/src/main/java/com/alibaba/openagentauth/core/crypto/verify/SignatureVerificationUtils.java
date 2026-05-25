@@ -16,7 +16,7 @@
 package com.alibaba.openagentauth.core.crypto.verify;
 
 import com.alibaba.openagentauth.core.crypto.key.KeyManager;
-import com.alibaba.openagentauth.core.exception.crypto.KeyManagementException;
+import com.alibaba.openagentauth.core.exception.crypto.KeyResolutionException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
@@ -62,7 +62,7 @@ public final class SignatureVerificationUtils {
                         headerKeyId, verificationKeyId);
             }
             return isValid;
-        } catch (KeyManagementException e) {
+        } catch (KeyResolutionException e) {
             logger.error("Failed to resolve verification key for keyId '{}': {}",
                     verificationKeyId, e.getMessage());
             return false;

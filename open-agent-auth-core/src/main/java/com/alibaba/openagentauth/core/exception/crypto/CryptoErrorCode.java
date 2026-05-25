@@ -38,13 +38,6 @@ import com.alibaba.openagentauth.core.exception.HttpStatus;
 public enum CryptoErrorCode implements CoreErrorCode {
 
     /**
-     * Key management operation failed.
-     * Corresponds to {@link KeyManagementException}.
-     * Template: {0}
-     */
-    KEY_MANAGEMENT_FAILED("02", "KeyManagementFailed", "Key management operation failed: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
-
-    /**
      * Key resolution operation failed.
      * Corresponds to {@link KeyResolutionException}.
      * Template: {0}

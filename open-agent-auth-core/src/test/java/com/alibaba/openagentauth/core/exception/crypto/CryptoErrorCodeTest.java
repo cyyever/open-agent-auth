@@ -24,15 +24,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CryptoErrorCodeTest {
 
     @Test
-    @DisplayName("Should verify KEY_MANAGEMENT_FAILED error code properties")
-    void shouldVerifyKeyManagementFailedErrorCodeProperties() {
-        CryptoErrorCode errorCode = CryptoErrorCode.KEY_MANAGEMENT_FAILED;
+    @DisplayName("Should verify KEY_RESOLUTION_FAILED error code properties")
+    void shouldVerifyKeyResolutionFailedErrorCodeProperties() {
+        CryptoErrorCode errorCode = CryptoErrorCode.KEY_RESOLUTION_FAILED;
 
-        assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0302");
+        assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0306");
         assertThat(errorCode.getDomainCode()).isEqualTo("03");
-        assertThat(errorCode.getSubCode()).isEqualTo("02");
-        assertThat(errorCode.getErrorName()).isEqualTo("KeyManagementFailed");
-        assertThat(errorCode.getMessageTemplate()).isEqualTo("Key management operation failed: {0}");
+        assertThat(errorCode.getSubCode()).isEqualTo("06");
+        assertThat(errorCode.getErrorName()).isEqualTo("KeyResolutionFailed");
+        assertThat(errorCode.getMessageTemplate()).isEqualTo("Key resolution failed: {0}");
         assertThat(errorCode.getHttpStatus().value()).isEqualTo(500);
     }
 

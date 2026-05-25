@@ -16,7 +16,7 @@
 package com.alibaba.openagentauth.core.crypto.verify;
 
 import com.alibaba.openagentauth.core.crypto.key.KeyManager;
-import com.alibaba.openagentauth.core.exception.crypto.KeyManagementException;
+import com.alibaba.openagentauth.core.exception.crypto.KeyResolutionException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -97,7 +97,7 @@ class SignatureVerificationUtilsTest {
 
             KeyManager keyManager = mock(KeyManager.class);
             when(keyManager.resolveVerificationKey(anyString()))
-                    .thenThrow(new KeyManagementException("Key not found"));
+                    .thenThrow(new KeyResolutionException("Key not found"));
 
             boolean result = SignatureVerificationUtils.verifySignature(signedJwt, keyManager, VERIFICATION_KEY_ID);
 
