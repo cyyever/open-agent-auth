@@ -15,21 +15,32 @@
  */
 package com.alibaba.openagentauth.core.protocol.wimse.wpt;
 
+import com.alibaba.openagentauth.core.model.jwk.Jwk;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
-import com.alibaba.openagentauth.core.protocol.wimse.wit.WitGenerator;
+import com.alibaba.openagentauth.core.token.common.JwtHashUtil;
 import com.alibaba.openagentauth.core.token.common.TokenValidationResult;
 import com.alibaba.openagentauth.core.trust.model.TrustDomain;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.Ed25519Signer;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,8 +55,6 @@ class WptValidatorTest {
     private OctetKeyPair wptPublicKey;
     private OctetKeyPair wptPrivateKey;
     private TrustDomain trustDomain;
-    private WitGenerator witGenerator;
-    private WptGenerator wptGenerator;
 
     @BeforeEach
     void setUp() throws JOSEException {
@@ -60,8 +69,6 @@ class WptValidatorTest {
 
         trustDomain = new TrustDomain("wimse://example.com");
         wptValidator = new WptValidator();
-        witGenerator = new WitGenerator(witSigningKey, trustDomain);
-        wptGenerator = new WptGenerator();
     }
 
     @Nested
@@ -71,8 +78,8 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should validate valid WPT successfully")
         void shouldValidateValidWptSuccessfully() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
-            WorkloadProofToken wpt = wptGenerator.generateWpt(wit, wptPrivateKey, 300);
+            WorkloadIdentityToken wit = createValidWit("agent-001");
+            WorkloadProofToken wpt = signedWpt(wit, wptPrivateKey, 300);
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(wpt, wit);
 
@@ -83,8 +90,8 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should return parsed WPT on successful validation")
         void shouldReturnParsedWptOnSuccessfulValidation() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
-            WorkloadProofToken wpt = wptGenerator.generateWpt(wit, wptPrivateKey, 300);
+            WorkloadIdentityToken wit = createValidWit("agent-001");
+            WorkloadProofToken wpt = signedWpt(wit, wptPrivateKey, 300);
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(wpt, wit);
 
@@ -100,7 +107,7 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should reject expired WPT")
         void shouldRejectExpiredWpt() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
+            WorkloadIdentityToken wit = createValidWit("agent-001");
             WorkloadProofToken wpt = createExpiredWpt();
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(wpt, wit);
@@ -112,8 +119,8 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should accept non-expired WPT")
         void shouldAcceptNonExpiredWpt() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
-            WorkloadProofToken wpt = wptGenerator.generateWpt(wit, wptPrivateKey, 300);
+            WorkloadIdentityToken wit = createValidWit("agent-001");
+            WorkloadProofToken wpt = signedWpt(wit, wptPrivateKey, 300);
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(wpt, wit);
 
@@ -128,8 +135,8 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should reject WPT with invalid signature")
         void shouldRejectWptWithInvalidSignature() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
-            WorkloadProofToken wpt = wptGenerator.generateWpt(wit, wptPrivateKey, 300);
+            WorkloadIdentityToken wit = createValidWit("agent-001");
+            WorkloadProofToken wpt = signedWpt(wit, wptPrivateKey, 300);
 
             WorkloadProofToken tamperedWpt = tamperWithWptSignature(wpt);
 
@@ -142,8 +149,8 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should accept WPT with valid signature")
         void shouldAcceptWptWithValidSignature() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
-            WorkloadProofToken wpt = wptGenerator.generateWpt(wit, wptPrivateKey, 300);
+            WorkloadIdentityToken wit = createValidWit("agent-001");
+            WorkloadProofToken wpt = signedWpt(wit, wptPrivateKey, 300);
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(wpt, wit);
 
@@ -158,7 +165,7 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should reject WPT missing wth claim")
         void shouldRejectWptMissingWthClaim() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
+            WorkloadIdentityToken wit = createValidWit("agent-001");
             WorkloadProofToken wpt = createWptWithoutWth();
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(wpt, wit);
@@ -170,8 +177,8 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should accept WPT with wth claim")
         void shouldAcceptWptWithWthClaim() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
-            WorkloadProofToken wpt = wptGenerator.generateWpt(wit, wptPrivateKey, 300);
+            WorkloadIdentityToken wit = createValidWit("agent-001");
+            WorkloadProofToken wpt = signedWpt(wit, wptPrivateKey, 300);
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(wpt, wit);
 
@@ -187,10 +194,10 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should reject WPT with mismatched wth")
         void shouldRejectWptWithMismatchedWth() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
-            WorkloadProofToken wpt = wptGenerator.generateWpt(wit, wptPrivateKey, 300);
+            WorkloadIdentityToken wit = createValidWit("agent-001");
+            WorkloadProofToken wpt = signedWpt(wit, wptPrivateKey, 300);
 
-            WorkloadIdentityToken differentWit = createDifferentWit();
+            WorkloadIdentityToken differentWit = createValidWit("agent-002");
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(wpt, differentWit);
 
@@ -201,8 +208,8 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should accept WPT with matching wth")
         void shouldAcceptWptWithMatchingWth() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
-            WorkloadProofToken wpt = wptGenerator.generateWpt(wit, wptPrivateKey, 300);
+            WorkloadIdentityToken wit = createValidWit("agent-001");
+            WorkloadProofToken wpt = signedWpt(wit, wptPrivateKey, 300);
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(wpt, wit);
 
@@ -217,7 +224,7 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should reject null WPT")
         void shouldRejectNullWpt() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
+            WorkloadIdentityToken wit = createValidWit("agent-001");
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(null, wit);
 
@@ -228,8 +235,8 @@ class WptValidatorTest {
         @Test
         @DisplayName("Should reject null WIT")
         void shouldRejectNullWit() throws Exception {
-            WorkloadIdentityToken wit = createValidWit();
-            WorkloadProofToken wpt = wptGenerator.generateWpt(wit, wptPrivateKey, 300);
+            WorkloadIdentityToken wit = createValidWit("agent-001");
+            WorkloadProofToken wpt = signedWpt(wit, wptPrivateKey, 300);
 
             TokenValidationResult<WorkloadProofToken> result = wptValidator.validate(wpt, null);
 
@@ -238,27 +245,87 @@ class WptValidatorTest {
         }
     }
 
-    private WorkloadIdentityToken createValidWit() throws JOSEException {
-        return witGenerator.generateWit(
-                "agent-001",
-                wptPublicKey.toJSONString(),
-                3600
-        );
+    private WorkloadIdentityToken createValidWit(String subject) throws JOSEException {
+        return signedWit(trustDomain.getDomainId(), subject,
+                Date.from(Instant.now().plusSeconds(3600)),
+                wptPublicKey, witSigningKey);
     }
 
-    private WorkloadIdentityToken createDifferentWit() throws JOSEException {
-        return witGenerator.generateWit(
-                "agent-002",
-                wptPublicKey.toJSONString(),
-                3600
-        );
+    private static WorkloadIdentityToken signedWit(String issuer, String subject, Date expiration,
+                                                   OctetKeyPair cnfPublicKey, OctetKeyPair signingKey)
+            throws JOSEException {
+        Map<String, Object> cnf = new HashMap<>();
+        cnf.put("jwk", cnfPublicKey.toJSONObject());
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .issuer(issuer)
+                .subject(subject)
+                .expirationTime(expiration)
+                .jwtID(UUID.randomUUID().toString())
+                .claim("cnf", cnf)
+                .build();
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                .type(new JOSEObjectType("wit+jwt"))
+                .build();
+        SignedJWT jwt = new SignedJWT(header, claims);
+        jwt.sign(new Ed25519Signer(signingKey));
+        String jwtString = jwt.serialize();
+
+        Jwk cnfJwk = Jwk.builder().x(cnfPublicKey.getX().toString()).keyId(cnfPublicKey.getKeyID()).build();
+        WorkloadIdentityToken.Claims.Confirmation confirmation =
+                WorkloadIdentityToken.Claims.Confirmation.builder().jwk(cnfJwk).build();
+        WorkloadIdentityToken.Claims witClaims = WorkloadIdentityToken.Claims.builder()
+                .issuer(issuer)
+                .subject(subject)
+                .expirationTime(expiration)
+                .jwtId(UUID.randomUUID().toString())
+                .confirmation(confirmation)
+                .build();
+        String[] parts = jwtString.split("\\.");
+        String signature = parts.length > 2 ? parts[2] : "";
+        return WorkloadIdentityToken.builder()
+                .claims(witClaims)
+                .signature(signature)
+                .jwtString(jwtString)
+                .build();
+    }
+
+    private static WorkloadProofToken signedWpt(WorkloadIdentityToken wit, OctetKeyPair signingKey,
+                                                long expirationSeconds) throws JOSEException {
+        String wth = JwtHashUtil.computeWitHash(wit.jwtString());
+        Date expiration = Date.from(Instant.now().plusSeconds(expirationSeconds));
+        String jti = UUID.randomUUID().toString();
+
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .expirationTime(expiration)
+                .jwtID(jti)
+                .claim("wth", wth)
+                .build();
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                .type(new JOSEObjectType("wpt+jwt"))
+                .build();
+        SignedJWT jwt = new SignedJWT(header, claims);
+        jwt.sign(new Ed25519Signer(signingKey));
+        String jwtString = jwt.serialize();
+        String[] parts = jwtString.split("\\.");
+        String signature = parts.length > 2 ? parts[2] : "";
+
+        WorkloadProofToken.Claims wptClaims = WorkloadProofToken.Claims.builder()
+                .expirationTime(expiration)
+                .jwtId(jti)
+                .workloadTokenHash(wth)
+                .build();
+        return WorkloadProofToken.builder()
+                .claims(wptClaims)
+                .signature(signature)
+                .jwtString(jwtString)
+                .build();
     }
 
     private WorkloadProofToken createExpiredWpt() {
         return WorkloadProofToken.builder()
                 .claims(WorkloadProofToken.Claims.builder()
-                        .expirationTime(java.util.Date.from(Instant.now().minusSeconds(300)))
-                        .jwtId(java.util.UUID.randomUUID().toString())
+                        .expirationTime(Date.from(Instant.now().minusSeconds(300)))
+                        .jwtId(UUID.randomUUID().toString())
                         .workloadTokenHash("test-wth-hash")
                         .build())
                 .signature("test-signature")
@@ -269,8 +336,8 @@ class WptValidatorTest {
     private WorkloadProofToken createWptWithoutWth() {
         return WorkloadProofToken.builder()
                 .claims(WorkloadProofToken.Claims.builder()
-                        .expirationTime(java.util.Date.from(Instant.now().plusSeconds(300)))
-                        .jwtId(java.util.UUID.randomUUID().toString())
+                        .expirationTime(Date.from(Instant.now().plusSeconds(300)))
+                        .jwtId(UUID.randomUUID().toString())
                         .workloadTokenHash("   ")
                         .build())
                 .signature("test-signature")

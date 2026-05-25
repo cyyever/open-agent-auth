@@ -16,7 +16,6 @@
 package com.alibaba.openagentauth.core.protocol.wimse.wit;
 
 import com.alibaba.openagentauth.core.crypto.key.KeyManager;
-import com.alibaba.openagentauth.core.model.identity.AgentIdentity;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.token.common.TokenValidationResult;
 import com.alibaba.openagentauth.core.trust.model.TrustDomain;
@@ -40,6 +39,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -58,7 +58,6 @@ class WitValidatorTest {
     private OctetKeyPair verificationKey;
     private OctetKeyPair wptPublicKey;
     private TrustDomain trustDomain;
-    private WitGenerator witGenerator;
     private KeyManager keyManager;
 
     @BeforeEach
@@ -79,7 +78,6 @@ class WitValidatorTest {
         when(keyManager.resolveVerificationKey(anyString())).thenReturn(verificationKey);
 
         witValidator = new WitValidator(keyManager, VERIFICATION_KEY_ID, trustDomain);
-        witGenerator = new WitGenerator(signingKey, trustDomain);
     }
 
     @Nested
@@ -163,14 +161,12 @@ class WitValidatorTest {
         @Test
         @DisplayName("Should reject WIT with wrong trust domain")
         void shouldRejectWitWithWrongTrustDomain() throws Exception {
-            TrustDomain wrongTrustDomain = new TrustDomain("wimse://wrong-domain.com");
-            WitGenerator wrongGenerator = new WitGenerator(signingKey, wrongTrustDomain);
-            WorkloadIdentityToken wit = wrongGenerator.generateWit(
-                    createAgentIdentity().id(),
-                    wptPublicKey.toJSONString(),
-                    3600
-            );
-            String witJwt = wit.jwtString();
+            String witJwt = signedWit(
+                    "wimse://wrong-domain.com",
+                    "agent-001",
+                    Date.from(Instant.now().plusSeconds(3600)),
+                    wptPublicKey.toJSONObject(),
+                    signingKey);
 
             TokenValidationResult<WorkloadIdentityToken> result = witValidator.validate(witJwt);
 
@@ -286,127 +282,67 @@ class WitValidatorTest {
     }
 
     private String createValidWit() throws JOSEException {
-        WorkloadIdentityToken wit = witGenerator.generateWit(
-                createAgentIdentity().id(),
-                wptPublicKey.toJSONString(),
-                3600
-        );
-        return wit.jwtString();
+        return signedWit(
+                trustDomain.getDomainId(),
+                "agent-001",
+                Date.from(Instant.now().plusSeconds(3600)),
+                wptPublicKey.toJSONObject(),
+                signingKey);
     }
 
     private String createExpiredWit() throws JOSEException {
-        Instant expirationTime = Instant.now().minusSeconds(3600);
-
-        Map<String, Object> cnfClaim = new HashMap<>();
-        cnfClaim.put("jwk", wptPublicKey.toJSONObject());
-
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .issuer(trustDomain.getDomainId())
-                .subject("agent-001")
-                .expirationTime(Date.from(expirationTime))
-                .jwtID(java.util.UUID.randomUUID().toString())
-                .claim("cnf", cnfClaim)
-                .build();
-
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .type(new JOSEObjectType("wit+jwt"))
-                        .build(),
-                claimsSet
-        );
-
-        signedJwt.sign(new Ed25519Signer(signingKey));
-        return signedJwt.serialize();
+        return signedWit(
+                trustDomain.getDomainId(),
+                "agent-001",
+                Date.from(Instant.now().minusSeconds(3600)),
+                wptPublicKey.toJSONObject(),
+                signingKey);
     }
 
     private String createWitWithoutExpiration() throws JOSEException {
-        Map<String, Object> cnfClaim = new HashMap<>();
-        cnfClaim.put("jwk", wptPublicKey.toJSONObject());
-
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+        Map<String, Object> cnf = new HashMap<>();
+        cnf.put("jwk", wptPublicKey.toJSONObject());
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .issuer(trustDomain.getDomainId())
                 .subject("agent-001")
-                .jwtID(java.util.UUID.randomUUID().toString())
-                .claim("cnf", cnfClaim)
+                .jwtID(UUID.randomUUID().toString())
+                .claim("cnf", cnf)
                 .build();
-
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .type(new JOSEObjectType("wit+jwt"))
-                        .build(),
-                claimsSet
-        );
-
-        signedJwt.sign(new Ed25519Signer(signingKey));
-        return signedJwt.serialize();
+        return sign(claims, signingKey);
     }
 
     private String createWitWithoutSubject() throws JOSEException {
-        Map<String, Object> cnfClaim = new HashMap<>();
-        cnfClaim.put("jwk", wptPublicKey.toJSONObject());
-
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+        Map<String, Object> cnf = new HashMap<>();
+        cnf.put("jwk", wptPublicKey.toJSONObject());
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .issuer(trustDomain.getDomainId())
                 .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .jwtID(java.util.UUID.randomUUID().toString())
-                .claim("cnf", cnfClaim)
+                .jwtID(UUID.randomUUID().toString())
+                .claim("cnf", cnf)
                 .build();
-
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .type(new JOSEObjectType("wit+jwt"))
-                        .build(),
-                claimsSet
-        );
-
-        signedJwt.sign(new Ed25519Signer(signingKey));
-        return signedJwt.serialize();
+        return sign(claims, signingKey);
     }
 
     private String createWitWithoutCnf() throws JOSEException {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
                 .issuer(trustDomain.getDomainId())
                 .subject("agent-001")
                 .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .jwtID(java.util.UUID.randomUUID().toString())
+                .jwtID(UUID.randomUUID().toString())
                 .build();
-
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .type(new JOSEObjectType("wit+jwt"))
-                        .build(),
-                claimsSet
-        );
-
-        signedJwt.sign(new Ed25519Signer(signingKey));
-        return signedJwt.serialize();
+        return sign(claims, signingKey);
     }
 
     private String createWitWithInvalidCnfJwk() throws JOSEException {
         Map<String, Object> invalidJwk = new HashMap<>();
         invalidJwk.put("kty", "INVALID");
         invalidJwk.put("x", "invalid-x");
-
-        Map<String, Object> cnfClaim = new HashMap<>();
-        cnfClaim.put("jwk", invalidJwk);
-
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .issuer(trustDomain.getDomainId())
-                .subject("agent-001")
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .jwtID(java.util.UUID.randomUUID().toString())
-                .claim("cnf", cnfClaim)
-                .build();
-
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .type(new JOSEObjectType("wit+jwt"))
-                        .build(),
-                claimsSet
-        );
-
-        signedJwt.sign(new Ed25519Signer(signingKey));
-        return signedJwt.serialize();
+        return signedWit(
+                trustDomain.getDomainId(),
+                "agent-001",
+                Date.from(Instant.now().plusSeconds(3600)),
+                invalidJwk,
+                signingKey);
     }
 
     private String tamperWithSignature(String witJwt) {
@@ -421,15 +357,26 @@ class WitValidatorTest {
         return witJwt;
     }
 
-    private AgentIdentity createAgentIdentity() {
-        return AgentIdentity.builder()
-                .version("1.0")
-                .id("agent-001")
-                .issuer("https://idp.example.com")
-                .issuedTo("https://idp.example.com|user-123")
-                .issuanceDate(Instant.now())
-                .validFrom(Instant.now())
-                .expires(Instant.now().plusSeconds(3600))
+    private static String signedWit(String issuer, String subject, Date expiration,
+                                    Map<String, Object> cnfJwk, OctetKeyPair signingKey) throws JOSEException {
+        Map<String, Object> cnf = new HashMap<>();
+        cnf.put("jwk", cnfJwk);
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .issuer(issuer)
+                .subject(subject)
+                .expirationTime(expiration)
+                .jwtID(UUID.randomUUID().toString())
+                .claim("cnf", cnf)
                 .build();
+        return sign(claims, signingKey);
+    }
+
+    private static String sign(JWTClaimsSet claims, OctetKeyPair signingKey) throws JOSEException {
+        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                .type(new JOSEObjectType("wit+jwt"))
+                .build();
+        SignedJWT jwt = new SignedJWT(header, claims);
+        jwt.sign(new Ed25519Signer(signingKey));
+        return jwt.serialize();
     }
 }
