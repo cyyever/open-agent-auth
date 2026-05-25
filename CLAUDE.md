@@ -128,15 +128,23 @@ Audited but not yet fixed (most need M1 rename first):
    + static `Base64.Encoder` already in place. JMH baseline (Temurin 26,
    Apple Silicon, 1024-byte JWT): 2.07 ops/μs single-thread, 10.35 ops/μs
    at 8 threads. Bench module: `open-agent-auth-bench` (opt-in `-P bench`).
-2. `WptValidator.convertToJWK` — rebuilds Nimbus `JWK` from internal
-   `Jwk` every validation (Base64-decode X/Y, new `BigInteger`,
-   anonymous `ECPublicKey`). Cache by `Jwk` identity.
-3. `JwksConsumerKeyResolver` — no TTL, no async refresh; key-not-found
-   refetches synchronously per request (thundering herd).
-4. `SignedJWT.parse` called twice per WPT validation (once in parser,
-   once in validator). Store parsed `SignedJWT` on the token record.
-5. `Token.isExpired/isValid` — `Date.from(Instant.now())` per check
-   allocates 2 objects. Switch internal type to `Instant`.
+2. ~~`WptValidator.convertToJWK`~~ — **done**. `ConcurrentHashMap<Jwk, JWK>`
+   keyed by record-value-equality on `Jwk`; first validation per cnf.jwk
+   pays the Base64-decode, subsequent ones hit cache.
+3. ~~`JwksConsumerKeyResolver`~~ — **done**. TTL + single-flight on cold
+   start (`compute`-locked) + key-not-found throttle were already in
+   place; stale-while-revalidate added so a TTL-expired entry serves
+   the stale value while one background virtual thread refreshes.
+   Cold-start fetches still block (correct).
+4. ~~`SignedJWT.parse` called twice per WPT validation~~ — **done**.
+   `WptParser.parse(SignedJWT)` now mirrors `WitParser`; orchestrator
+   parses once and stashes the `SignedJWT` on `ValidationContext`;
+   `WptValidator` reuses it for signature verify. Ad-hoc 2-arg
+   `validate(WPT, WIT)` kept as back-compat (still parses internally).
+5. ~~`Token.isExpired/isValid`~~ — **done**. Now compares
+   `expirationTime.getTime()` against `System.currentTimeMillis()` —
+   zero allocations. Internal `Date` field kept (the M1 rename of the
+   surrounding records may revisit type).
 
 ## Bookmarks
 
