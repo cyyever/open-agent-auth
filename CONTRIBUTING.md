@@ -14,8 +14,8 @@ for context.
 ## Setup
 
 ```bash
-git clone https://github.com/cyyever/open-agent-auth.git
-cd open-agent-auth
+git clone https://github.com/cyyever/aap-resource-server.git
+cd aap-resource-server
 mvn clean install
 mvn test
 ```
@@ -23,7 +23,7 @@ mvn test
 ## Module layout
 
 ```
-open-agent-auth/
+aap-resource-server/
 └── aap-resource-server-core/   # protocol primitives + server-side actor
                             #   (core.server.* for ResourceServer /
                             #   DefaultResourceServer / request models)

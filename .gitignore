@@ -104,8 +104,6 @@ node_modules/
 .aone_copilot
 
 ### Sample ###
-open-agent-auth-samples/logs
-open-agent-auth-samples/pids
 
 ### Maven Toolchains ###
 .mvn/toolchains.xml
