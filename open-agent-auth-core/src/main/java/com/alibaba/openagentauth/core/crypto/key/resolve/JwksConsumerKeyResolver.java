@@ -29,12 +29,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link KeyResolver} that loads keys from remote JWKS endpoints, with per-consumer
- * caching, TTL-based expiry, and a key-not-found refetch throttle to absorb upstream
- * key rotation without thundering-herd refetches.
- *
- * @see KeyResolver
- * @since 1.0
+ * {@link KeyResolver} that loads keys from remote JWKS endpoints. Cache discipline:
+ * per-consumer TTL with stale-while-revalidate (expired entries are served while a
+ * single background virtual thread refreshes), single-flight on cold start via
+ * {@link ConcurrentHashMap#compute}, and a key-not-found refetch throttle to absorb
+ * upstream key rotation without thundering-herd refetches.
  */
 public class JwksConsumerKeyResolver implements KeyResolver {
 
@@ -59,6 +58,9 @@ public class JwksConsumerKeyResolver implements KeyResolver {
      * for an unknown {@code kid}.
      */
     private final ConcurrentHashMap<String, Instant> lastNotFoundFetch = new ConcurrentHashMap<>();
+
+    /** Single-flight guard: at most one background refresh in flight per consumer. */
+    private final ConcurrentHashMap<String, Boolean> refreshInFlight = new ConcurrentHashMap<>();
 
     public JwksConsumerKeyResolver(Map<String, String> consumerEndpoints) {
         this(consumerEndpoints, DEFAULT_JWKS_TTL, DEFAULT_NOT_FOUND_RETRY_THROTTLE);
@@ -128,25 +130,57 @@ public class JwksConsumerKeyResolver implements KeyResolver {
     }
 
     private JWKSet getOrFetch(String consumerName, String jwksEndpoint) {
-        Instant now = Instant.now();
         CachedJwks cached = jwkSetCache.get(consumerName);
-        if (cached != null && now.isBefore(cached.expiresAt)) {
+        if (cached != null) {
+            if (Instant.now().isBefore(cached.expiresAt)) {
+                return cached.set;
+            }
+            // Stale-while-revalidate: serve stale, refresh in background.
+            triggerAsyncRefresh(consumerName, jwksEndpoint);
             return cached.set;
         }
-        // computeIfAbsent locks per-key, collapsing concurrent fetches to one
+        // Cold start: block. compute() locks per key, collapsing concurrent misses to one.
         return jwkSetCache.compute(consumerName, (name, existing) -> {
             if (existing != null && Instant.now().isBefore(existing.expiresAt)) {
                 return existing;
             }
-            logger.info("Fetching JWKS from consumer '{}': {}", name, jwksEndpoint);
-            try {
-                JWKSet set = JWKSet.load(URI.create(jwksEndpoint).toURL());
-                return new CachedJwks(set, Instant.now().plus(jwksTtl));
-            } catch (Exception e) {
-                throw new RuntimeException(
-                        "Failed to fetch JWKS from '" + name + "' at " + jwksEndpoint, e);
-            }
+            return fetchAndWrap(name, jwksEndpoint);
         }).set;
+    }
+
+    private void triggerAsyncRefresh(String consumerName, String jwksEndpoint) {
+        if (refreshInFlight.putIfAbsent(consumerName, Boolean.TRUE) != null) {
+            return;
+        }
+        Thread.startVirtualThread(() -> {
+            try {
+                jwkSetCache.compute(consumerName, (name, existing) -> {
+                    if (existing != null && Instant.now().isBefore(existing.expiresAt)) {
+                        return existing;
+                    }
+                    try {
+                        return fetchAndWrap(name, jwksEndpoint);
+                    } catch (RuntimeException e) {
+                        logger.warn("Background JWKS refresh failed for '{}': {}; keeping stale entry",
+                                name, e.getMessage());
+                        return existing;
+                    }
+                });
+            } finally {
+                refreshInFlight.remove(consumerName);
+            }
+        });
+    }
+
+    private CachedJwks fetchAndWrap(String consumerName, String jwksEndpoint) {
+        logger.info("Fetching JWKS from consumer '{}': {}", consumerName, jwksEndpoint);
+        try {
+            JWKSet set = JWKSet.load(URI.create(jwksEndpoint).toURL());
+            return new CachedJwks(set, Instant.now().plus(jwksTtl));
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Failed to fetch JWKS from '" + consumerName + "' at " + jwksEndpoint, e);
+        }
     }
 
     private boolean canRefetchAfterNotFound(String consumerName) {
@@ -163,6 +197,7 @@ public class JwksConsumerKeyResolver implements KeyResolver {
     public void clearCache() {
         jwkSetCache.clear();
         lastNotFoundFetch.clear();
+        refreshInFlight.clear();
         logger.info("Cleared all JWKS consumer caches");
     }
 
@@ -170,6 +205,7 @@ public class JwksConsumerKeyResolver implements KeyResolver {
     public void clearCache(String consumerName) {
         jwkSetCache.remove(consumerName);
         lastNotFoundFetch.remove(consumerName);
+        refreshInFlight.remove(consumerName);
         logger.info("Cleared JWKS cache for consumer: {}", consumerName);
     }
 
