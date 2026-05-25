@@ -12,8 +12,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  build:
-    name: Build & Test (JDK ${{ matrix.java }})
+  build-lint-test:
+    name: Build + Lint + Test (JDK ${{ matrix.java }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -31,9 +31,16 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build & Test
+      # Single mvn invocation runs:
+      #   - Spotless check (-P format, bound to `validate` phase)
+      #   - Error Prone + NullAway (-P errorprone, hooks compiler)
+      #   - main + test compile (one javac pass)
+      #   - Surefire tests
+      #   - dependency:analyze + modernizer + enforcer (verify phase, default build)
+      #   - SpotBugs + FindSecBugs check (-P spotbugs, verify phase)
+      - name: Build + Lint + Test
         id: build
-        run: mvn clean verify -B -ntp
+        run: mvn -B -ntp -P format,spotbugs,errorprone clean verify
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v3
@@ -57,70 +64,10 @@ jobs:
           path: '**/target/surefire-reports/'
           retention-days: 7
 
-  format:
-    name: Format check (Spotless)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Spotless check (google-java-format AOSP)
-        run: mvn -B -ntp -P format spotless:check
-
-  spotbugs:
-    name: SpotBugs + FindSecBugs
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: SpotBugs analysis
-        run: mvn -B -ntp -P spotbugs verify
-
-  errorprone:
-    name: Error Prone + NullAway
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-
-      - name: Error Prone + NullAway analysis
-        run: mvn -B -ntp -P errorprone clean test-compile
-
   coverage:
     name: Coverage (JaCoCo)
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-lint-test
     permissions:
       contents: read
 
@@ -164,4 +111,3 @@ jobs:
           print("| --- | --- | --- | --- |")
           print(f"| aap-resource-server-core | {pct('LINE')} | {pct('BRANCH')} | {pct('INSTRUCTION')} |")
           PY
-
