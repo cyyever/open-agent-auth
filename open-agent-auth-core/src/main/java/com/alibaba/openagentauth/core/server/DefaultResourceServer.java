@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.openagentauth.core.server.orchestration;
+package com.alibaba.openagentauth.core.server;
 
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
@@ -24,7 +24,6 @@ import com.alibaba.openagentauth.core.validation.layer.WorkloadIdentityValidator
 import com.alibaba.openagentauth.core.validation.layer.WorkloadProofValidator;
 import com.alibaba.openagentauth.core.validation.model.LayerValidationResult;
 import com.alibaba.openagentauth.core.validation.model.ValidationContext;
-import com.alibaba.openagentauth.core.server.actor.ResourceServer;
 import com.alibaba.openagentauth.core.server.exception.validation.ServerValidationException;
 import com.alibaba.openagentauth.core.server.model.request.ResourceRequest;
 import com.alibaba.openagentauth.core.server.model.validation.ValidationResult;
