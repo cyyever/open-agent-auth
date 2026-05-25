@@ -246,7 +246,7 @@ class DpopValidatorTest {
     }
 
     private CredentialToken createValidWit(String subject) throws JOSEException {
-        return signedWit(trustDomain.getDomainId(), subject,
+        return signedWit(trustDomain.domainId(), subject,
                 Date.from(Instant.now().plusSeconds(3600)),
                 wptPublicKey, witSigningKey);
     }

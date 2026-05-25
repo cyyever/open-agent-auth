@@ -104,7 +104,7 @@ class CtValidatorTest {
             TokenValidationResult<CredentialToken> result = ctValidator.validate(witJwt);
 
             assertThat(result.getToken()).isNotNull();
-            assertThat(result.getToken().getIssuer()).isEqualTo(trustDomain.getDomainId());
+            assertThat(result.getToken().getIssuer()).isEqualTo(trustDomain.domainId());
             assertThat(result.getToken().getConfirmation()).isNotNull();
             assertThat(result.getToken().getConfirmation().jwk()).isNotNull();
         }
@@ -283,7 +283,7 @@ class CtValidatorTest {
 
     private String createValidWit() throws JOSEException {
         return signedWit(
-                trustDomain.getDomainId(),
+                trustDomain.domainId(),
                 "agent-001",
                 Date.from(Instant.now().plusSeconds(3600)),
                 wptPublicKey.toJSONObject(),
@@ -292,7 +292,7 @@ class CtValidatorTest {
 
     private String createExpiredWit() throws JOSEException {
         return signedWit(
-                trustDomain.getDomainId(),
+                trustDomain.domainId(),
                 "agent-001",
                 Date.from(Instant.now().minusSeconds(3600)),
                 wptPublicKey.toJSONObject(),
@@ -303,7 +303,7 @@ class CtValidatorTest {
         Map<String, Object> cnf = new HashMap<>();
         cnf.put("jwk", wptPublicKey.toJSONObject());
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .issuer(trustDomain.getDomainId())
+                .issuer(trustDomain.domainId())
                 .subject("agent-001")
                 .jwtID(UUID.randomUUID().toString())
                 .claim("cnf", cnf)
@@ -315,7 +315,7 @@ class CtValidatorTest {
         Map<String, Object> cnf = new HashMap<>();
         cnf.put("jwk", wptPublicKey.toJSONObject());
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .issuer(trustDomain.getDomainId())
+                .issuer(trustDomain.domainId())
                 .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("cnf", cnf)
@@ -325,7 +325,7 @@ class CtValidatorTest {
 
     private String createWitWithoutCnf() throws JOSEException {
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .issuer(trustDomain.getDomainId())
+                .issuer(trustDomain.domainId())
                 .subject("agent-001")
                 .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
                 .jwtID(UUID.randomUUID().toString())
@@ -338,7 +338,7 @@ class CtValidatorTest {
         invalidJwk.put("kty", "INVALID");
         invalidJwk.put("x", "invalid-x");
         return signedWit(
-                trustDomain.getDomainId(),
+                trustDomain.domainId(),
                 "agent-001",
                 Date.from(Instant.now().plusSeconds(3600)),
                 invalidJwk,

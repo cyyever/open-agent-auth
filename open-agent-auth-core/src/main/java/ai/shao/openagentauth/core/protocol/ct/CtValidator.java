@@ -81,7 +81,7 @@ public class CtValidator {
         this.ctParser = new CtParser();
 
         logger.info("CtValidator initialized with KeyManager: {}, keyId: {}, domain: {}",
-                keyManager.getClass().getSimpleName(), verificationKeyId, expectedTrustDomain.getDomainId());
+                keyManager.getClass().getSimpleName(), verificationKeyId, expectedTrustDomain.domainId());
     }
 
     /**
@@ -185,12 +185,12 @@ public class CtValidator {
         try {
             // Get CT issuer
             String issuer = signedJwt.getJWTClaimsSet().getIssuer();
-            boolean isValid = expectedTrustDomain.getDomainId().equals(issuer);
+            boolean isValid = expectedTrustDomain.domainId().equals(issuer);
 
             // Log if trust domain is invalid
             if (!isValid) {
                 logger.warn("CT issuer '{}' does not match expected trust domain '{}'",
-                           issuer, expectedTrustDomain.getDomainId());
+                           issuer, expectedTrustDomain.domainId());
             }
             return isValid;
 

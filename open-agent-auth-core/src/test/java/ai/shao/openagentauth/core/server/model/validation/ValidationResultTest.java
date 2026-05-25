@@ -48,10 +48,10 @@ class ValidationResultTest {
 
         // Then
         assertThat(layerResult).isNotNull();
-        assertThat(layerResult.getLayer()).isEqualTo(1);
-        assertThat(layerResult.getLayerName()).isEqualTo(TEST_LAYER_NAME);
+        assertThat(layerResult.layer()).isEqualTo(1);
+        assertThat(layerResult.layerName()).isEqualTo(TEST_LAYER_NAME);
         assertThat(layerResult.isValid()).isTrue();
-        assertThat(layerResult.getMessage()).isEqualTo("Layer validation passed");
+        assertThat(layerResult.message()).isEqualTo("Layer validation passed");
     }
 
     @Test
@@ -70,8 +70,8 @@ class ValidationResultTest {
 
         // Then
         assertThat(layerResult).isNotNull();
-        assertThat(layerResult.getLayer()).isEqualTo(1);
-        assertThat(layerResult.getLayerName()).isEqualTo(TEST_LAYER_NAME);
+        assertThat(layerResult.layer()).isEqualTo(1);
+        assertThat(layerResult.layerName()).isEqualTo(TEST_LAYER_NAME);
         assertThat(layerResult.isValid()).isTrue();
     }
 
@@ -86,10 +86,10 @@ class ValidationResultTest {
 
         // Then
         assertThat(layerResult).isNotNull();
-        assertThat(layerResult.getLayer()).isEqualTo(1);
+        assertThat(layerResult.layer()).isEqualTo(1);
         assertThat(layerResult.isValid()).isTrue();
-        assertThat(layerResult.getLayerName()).isNull();
-        assertThat(layerResult.getMessage()).isNull();
+        assertThat(layerResult.layerName()).isNull();
+        assertThat(layerResult.message()).isNull();
     }
 
     @Test
@@ -119,8 +119,8 @@ class ValidationResultTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.isValid()).isFalse();
-        assertThat(result.getLayerResults()).hasSize(2);
-        assertThat(result.getErrors()).hasSize(2);
+        assertThat(result.layerResults()).hasSize(2);
+        assertThat(result.errors()).hasSize(2);
     }
 
     @Test
@@ -144,7 +144,7 @@ class ValidationResultTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.isValid()).isTrue();
-        assertThat(result.getLayerResults()).hasSize(1);
+        assertThat(result.layerResults()).hasSize(1);
     }
 
     @Test
@@ -158,8 +158,8 @@ class ValidationResultTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.isValid()).isTrue();
-        assertThat(result.getLayerResults()).isNull();
-        assertThat(result.getErrors()).isNull();
+        assertThat(result.layerResults()).isNull();
+        assertThat(result.errors()).isNull();
     }
 
     @Test
@@ -175,10 +175,10 @@ class ValidationResultTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.isValid()).isTrue();
-        assertThat(result.getLayerResults()).isNotNull();
-        assertThat(result.getLayerResults()).isEmpty();
-        assertThat(result.getErrors()).isNotNull();
-        assertThat(result.getErrors()).isEmpty();
+        assertThat(result.layerResults()).isNotNull();
+        assertThat(result.layerResults()).isEmpty();
+        assertThat(result.errors()).isNotNull();
+        assertThat(result.errors()).isEmpty();
     }
 
     @Test
@@ -198,9 +198,9 @@ class ValidationResultTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getLayerResults()).hasSize(3);
-        assertThat(result.getLayerResults().get(0).getLayer()).isEqualTo(1);
-        assertThat(result.getLayerResults().get(2).isValid()).isFalse();
+        assertThat(result.layerResults()).hasSize(3);
+        assertThat(result.layerResults().get(0).layer()).isEqualTo(1);
+        assertThat(result.layerResults().get(2).isValid()).isFalse();
     }
 
     @Test
@@ -220,8 +220,8 @@ class ValidationResultTest {
 
         // Then
         assertThat(result).isNotNull();
-        assertThat(result.getErrors()).hasSize(3);
-        assertThat(result.getErrors()).contains("Error 1: Invalid input");
+        assertThat(result.errors()).hasSize(3);
+        assertThat(result.errors()).contains("Error 1: Invalid input");
     }
 
     @Test
@@ -261,8 +261,8 @@ class ValidationResultTest {
         assertThat(result2).isNotNull();
         assertThat(result1.isValid()).isTrue();
         assertThat(result2.isValid()).isFalse();
-        assertThat(result1.getLayerResults().get(0).isValid()).isTrue();
-        assertThat(result2.getLayerResults().get(0).isValid()).isFalse();
+        assertThat(result1.layerResults().get(0).isValid()).isTrue();
+        assertThat(result2.layerResults().get(0).isValid()).isFalse();
     }
 
     @Test
@@ -285,9 +285,9 @@ class ValidationResultTest {
                 .build();
 
         // Then
-        assertThat(layer1.getLayer()).isEqualTo(1);
-        assertThat(layer2.getLayer()).isEqualTo(2);
-        assertThat(layer3.getLayer()).isEqualTo(3);
+        assertThat(layer1.layer()).isEqualTo(1);
+        assertThat(layer2.layer()).isEqualTo(2);
+        assertThat(layer3.layer()).isEqualTo(3);
     }
 
     @Test
@@ -306,7 +306,7 @@ class ValidationResultTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.isValid()).isTrue();
-        assertThat(result.getLayerResults()).allMatch(ValidationResult.LayerResult::isValid);
+        assertThat(result.layerResults()).allMatch(ValidationResult.LayerResult::isValid);
     }
 
     @Test
@@ -325,6 +325,6 @@ class ValidationResultTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.isValid()).isFalse();
-        assertThat(result.getErrors()).hasSize(1);
+        assertThat(result.errors()).hasSize(1);
     }
 }

@@ -17,35 +17,20 @@ package ai.shao.openagentauth.core.crypto.key.model;
 
 import org.jspecify.annotations.Nullable;
 
-import java.util.Objects;
-
 /**
  * Immutable value object describing how a key should be resolved and managed.
  * If {@code jwksConsumer} is set, the key is resolved from a remote JWKS endpoint;
  * otherwise, it is resolved from a local key store via the configured {@code provider}.
  */
-public final class KeyDefinition {
+public record KeyDefinition(
+        String keyId,
+        @Nullable String provider,
+        @Nullable String jwksConsumer) {
 
-    private final String keyId;
-    private final @Nullable String provider;
-    private final @Nullable String jwksConsumer;
-
-    private KeyDefinition(String keyId, @Nullable String provider, @Nullable String jwksConsumer) {
-        this.keyId = keyId;
-        this.provider = provider;
-        this.jwksConsumer = jwksConsumer;
-    }
-
-    public String getKeyId() {
-        return keyId;
-    }
-
-    public @Nullable String getProvider() {
-        return provider;
-    }
-
-    public @Nullable String getJwksConsumer() {
-        return jwksConsumer;
+    public KeyDefinition {
+        if (keyId == null || keyId.isBlank()) {
+            throw new IllegalArgumentException("KeyDefinition keyId cannot be null or empty");
+        }
     }
 
     public boolean isRemoteKey() {
@@ -54,30 +39,6 @@ public final class KeyDefinition {
 
     public boolean isLocalKey() {
         return !isRemoteKey();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        KeyDefinition that = (KeyDefinition) o;
-        return Objects.equals(keyId, that.keyId) &&
-                Objects.equals(provider, that.provider) &&
-                Objects.equals(jwksConsumer, that.jwksConsumer);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(keyId, provider, jwksConsumer);
-    }
-
-    @Override
-    public String toString() {
-        return "KeyDefinition{" +
-                "keyId='" + keyId + '\'' +
-                ", provider='" + provider + '\'' +
-                ", jwksConsumer='" + jwksConsumer + '\'' +
-                '}';
     }
 
     public static Builder builder() {

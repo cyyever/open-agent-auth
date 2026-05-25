@@ -86,15 +86,15 @@ public class JwksConsumerKeyResolver implements KeyResolver {
         if (keyDefinition == null || !keyDefinition.isRemoteKey()) {
             return false;
         }
-        return consumerEndpoints.containsKey(keyDefinition.getJwksConsumer());
+        return consumerEndpoints.containsKey(keyDefinition.jwksConsumer());
     }
 
     @Override
     public JWK resolve(KeyDefinition keyDefinition) throws KeyResolutionException {
         String consumerName = Objects.requireNonNull(
-                keyDefinition.getJwksConsumer(),
+                keyDefinition.jwksConsumer(),
                 "JwksConsumerKeyResolver.resolve called with a local-key KeyDefinition");
-        String keyId = keyDefinition.getKeyId();
+        String keyId = keyDefinition.keyId();
 
         String jwksEndpoint = consumerEndpoints.get(consumerName);
         if (jwksEndpoint == null || jwksEndpoint.isBlank()) {

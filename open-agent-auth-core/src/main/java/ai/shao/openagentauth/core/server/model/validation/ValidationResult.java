@@ -23,43 +23,26 @@ import org.jspecify.annotations.Nullable;
 import java.util.List;
 
 /**
- * Result of request validation.
- * <p>
- * This class encapsulates the result of validating a request, including
- * the overall status, validation details for each layer, and any errors.
- * </p>
+ * Result of request validation: overall valid flag, per-layer breakdown, and
+ * the flat list of error messages collected across all failed layers.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ValidationResult {
-    
-    @JsonProperty("valid")
-    private final boolean valid;
-
-    @JsonProperty("layerResults")
-    private final @Nullable List<LayerResult> layerResults;
-
-    @JsonProperty("errors")
-    private final @Nullable List<String> errors;
+public record ValidationResult(
+        @JsonProperty("valid") boolean valid,
+        @JsonProperty("layerResults") @Nullable List<LayerResult> layerResults,
+        @JsonProperty("errors") @Nullable List<String> errors) {
 
     @JsonCreator
-    public ValidationResult(
-            @JsonProperty("valid") boolean valid,
-            @JsonProperty("layerResults") @Nullable List<LayerResult> layerResults,
-            @JsonProperty("errors") @Nullable List<String> errors
-    ) {
-        this.valid = valid;
-        this.layerResults = layerResults;
-        this.errors = errors;
+    public ValidationResult {
     }
 
+    /** Boolean-getter alias for {@link #valid()}, matching the existing API. */
     public boolean isValid() { return valid; }
-    public @Nullable List<LayerResult> getLayerResults() { return layerResults; }
-    public @Nullable List<String> getErrors() { return errors; }
-    
+
     public static Builder builder() {
         return new Builder();
     }
-    
+
     public static class Builder {
         private boolean valid;
         private @Nullable List<LayerResult> layerResults;
@@ -84,38 +67,21 @@ public class ValidationResult {
             return new ValidationResult(valid, layerResults, errors);
         }
     }
-    
+
+    /** Outcome of validating a single layer (CT, DPoP, etc.). */
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class LayerResult {
-        @JsonProperty("layer")
-        private final int layer;
-        
-        @JsonProperty("layerName")
-        private final @Nullable String layerName;
-
-        @JsonProperty("valid")
-        private final boolean valid;
-
-        @JsonProperty("message")
-        private final @Nullable String message;
+    public record LayerResult(
+            @JsonProperty("layer") int layer,
+            @JsonProperty("layerName") @Nullable String layerName,
+            @JsonProperty("valid") boolean valid,
+            @JsonProperty("message") @Nullable String message) {
 
         @JsonCreator
-        public LayerResult(
-                @JsonProperty("layer") int layer,
-                @JsonProperty("layerName") @Nullable String layerName,
-                @JsonProperty("valid") boolean valid,
-                @JsonProperty("message") @Nullable String message
-        ) {
-            this.layer = layer;
-            this.layerName = layerName;
-            this.valid = valid;
-            this.message = message;
+        public LayerResult {
         }
 
-        public int getLayer() { return layer; }
-        public @Nullable String getLayerName() { return layerName; }
+        /** Boolean-getter alias for {@link #valid()}, matching the existing API. */
         public boolean isValid() { return valid; }
-        public @Nullable String getMessage() { return message; }
 
         public static Builder builder() {
             return new Builder();

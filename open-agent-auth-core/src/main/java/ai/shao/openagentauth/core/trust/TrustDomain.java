@@ -17,45 +17,16 @@ package ai.shao.openagentauth.core.trust;
 
 import ai.shao.openagentauth.core.util.ValidationUtils;
 
-import java.util.Objects;
-
 /**
- * Represents a trust domain: a logical boundary that defines a scope of trust for
- * agent identities. The identifier is compared against the {@code iss} claim of
- * incoming CTs verbatim — no scheme prefix is stripped.
+ * Logical scope-of-trust boundary for agent identities. The {@code domainId}
+ * is compared against the {@code iss} claim of incoming CTs verbatim — no
+ * scheme prefix is stripped.
  */
-public class TrustDomain {
+public record TrustDomain(String domainId) {
 
-    private final String domainId;
-
-    public TrustDomain(String domainId) {
+    public TrustDomain {
         if (ValidationUtils.isNullOrEmpty(domainId)) {
             throw new IllegalArgumentException("Domain ID cannot be null or empty");
         }
-        this.domainId = domainId;
-    }
-
-    public String getDomainId() {
-        return domainId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TrustDomain that = (TrustDomain) o;
-        return Objects.equals(domainId, that.domainId);
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(domainId);
-    }
-    
-    @Override
-    public String toString() {
-        return "TrustDomain{" +
-                "domainId='" + domainId + '\'' +
-                '}';
     }
 }

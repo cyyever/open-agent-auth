@@ -37,7 +37,7 @@ class TrustDomainTest {
             TrustDomain domain = new TrustDomain(VALID_DOMAIN_ID);
 
             assertThat(domain).isNotNull();
-            assertThat(domain.getDomainId()).isEqualTo(VALID_DOMAIN_ID);
+            assertThat(domain.domainId()).isEqualTo(VALID_DOMAIN_ID);
         }
 
         @Test

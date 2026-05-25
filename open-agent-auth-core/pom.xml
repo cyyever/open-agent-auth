@@ -15,7 +15,7 @@
     <packaging>jar</packaging>
 
     <name>Open Agent Auth Core</name>
-    <description>Core implementation of Agent Operation Authorization</description>
+    <description>Core implementation of the Agent Auth Protocol (AAP)</description>
 
     <dependencies>
         <!-- JWT -->

@@ -41,9 +41,9 @@ class KeyDefinitionTest {
                     .jwksConsumer("agent-idp")
                     .build();
 
-            assertThat(definition.getKeyId()).isEqualTo("test-key-001");
-            assertThat(definition.getProvider()).isEqualTo("local");
-            assertThat(definition.getJwksConsumer()).isEqualTo("agent-idp");
+            assertThat(definition.keyId()).isEqualTo("test-key-001");
+            assertThat(definition.provider()).isEqualTo("local");
+            assertThat(definition.jwksConsumer()).isEqualTo("agent-idp");
         }
 
         @Test
@@ -53,9 +53,9 @@ class KeyDefinitionTest {
                     .keyId("minimal-key")
                     .build();
 
-            assertThat(definition.getKeyId()).isEqualTo("minimal-key");
-            assertThat(definition.getProvider()).isNull();
-            assertThat(definition.getJwksConsumer()).isNull();
+            assertThat(definition.keyId()).isEqualTo("minimal-key");
+            assertThat(definition.provider()).isNull();
+            assertThat(definition.jwksConsumer()).isNull();
         }
 
         @Test
