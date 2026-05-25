@@ -15,7 +15,7 @@
  */
 package com.alibaba.openagentauth.bench;
 
-import com.alibaba.openagentauth.core.token.common.JwtHashUtil;
+import com.alibaba.openagentauth.core.crypto.JwtHashUtil;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;

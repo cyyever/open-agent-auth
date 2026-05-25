@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * <p>
  * Per spec §3 only Ed25519 ({@code kty=OKP}, {@code crv=Ed25519}) is permitted,
  * so those fields are wire-only constants emitted by {@link
- * com.alibaba.openagentauth.core.token.common.JwkConverter} and not carried on
+ * com.alibaba.openagentauth.core.crypto.JwkConverter} and not carried on
  * the record itself.
  *
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>

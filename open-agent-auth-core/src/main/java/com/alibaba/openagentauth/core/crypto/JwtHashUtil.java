@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alibaba.openagentauth.core.token.common;
+package com.alibaba.openagentauth.core.crypto;
 
 import com.alibaba.openagentauth.core.util.ValidationUtils;
 

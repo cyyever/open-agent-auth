@@ -18,7 +18,7 @@ package com.alibaba.openagentauth.core.protocol.wimse.wpt;
 import com.alibaba.openagentauth.core.model.jwk.Jwk;
 import com.alibaba.openagentauth.core.model.token.WorkloadIdentityToken;
 import com.alibaba.openagentauth.core.model.token.WorkloadProofToken;
-import com.alibaba.openagentauth.core.token.common.JwtHashUtil;
+import com.alibaba.openagentauth.core.crypto.JwtHashUtil;
 import com.alibaba.openagentauth.core.token.common.TokenValidationResult;
 import com.alibaba.openagentauth.core.trust.TrustDomain;
 import com.nimbusds.jose.JOSEException;
