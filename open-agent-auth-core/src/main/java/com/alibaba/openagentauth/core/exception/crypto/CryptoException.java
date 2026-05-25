@@ -33,7 +33,8 @@ import com.alibaba.openagentauth.core.exception.CoreException;
  *
  * @since 1.0
  */
-public abstract class CryptoException extends CoreException {
+public abstract sealed class CryptoException extends CoreException
+        permits KeyManagementException, KeyResolutionException {
 
     /**
      * Constructs a new Crypto exception with the specified error code and parameters.

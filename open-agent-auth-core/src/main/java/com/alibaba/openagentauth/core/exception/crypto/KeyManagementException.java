@@ -37,7 +37,7 @@ import com.alibaba.openagentauth.core.crypto.key.KeyManager;
  * @see KeyManager
  * @since 1.0
  */
-public class KeyManagementException extends CryptoException {
+public final class KeyManagementException extends CryptoException {
 
     /**
      * The error code for this exception.

@@ -34,7 +34,7 @@ import com.alibaba.openagentauth.core.crypto.key.resolve.KeyResolver;
  * @see KeyResolver
  * @since 1.0
  */
-public class KeyResolutionException extends CryptoException {
+public final class KeyResolutionException extends CryptoException {
 
     private static final CryptoErrorCode ERROR_CODE = CryptoErrorCode.KEY_RESOLUTION_FAILED;
 

@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -164,8 +163,7 @@ public class WitValidator {
                 return false;
             }
 
-            // Verify that the token is not expired
-            boolean isValid = expirationTime.after(Date.from(Instant.now()));
+            boolean isValid = System.currentTimeMillis() < expirationTime.getTime();
             if (!isValid) {
                 logger.warn("WIT has expired at: {}", expirationTime);
             }
