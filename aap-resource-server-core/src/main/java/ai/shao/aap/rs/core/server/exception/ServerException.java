@@ -16,7 +16,7 @@
 package ai.shao.aap.rs.core.server.exception;
 
 import ai.shao.aap.rs.core.exception.ErrorCode;
-import ai.shao.aap.rs.core.exception.OpenAgentAuthException;
+import ai.shao.aap.rs.core.exception.AapException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ import org.jspecify.annotations.Nullable;
  * Base exception for all Server module exceptions. Error code format: {@code AAP_RS_11_YYZZ}
  * (system 11, YY=domain, ZZ=error).
  */
-public abstract class ServerException extends OpenAgentAuthException {
+public abstract class ServerException extends AapException {
 
     /**
      * Constructs a new Server exception with the specified error code.

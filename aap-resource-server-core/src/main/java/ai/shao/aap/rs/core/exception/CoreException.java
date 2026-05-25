@@ -24,7 +24,7 @@ import org.jspecify.annotations.Nullable;
  * Base exception for all Core module exceptions. Error code format: {@code AAP_RS_10_YYZZ} (system
  * 10, YY=domain, ZZ=error).
  */
-public abstract class CoreException extends OpenAgentAuthException {
+public abstract class CoreException extends AapException {
 
     /**
      * Constructs a new Core exception with the specified error code.

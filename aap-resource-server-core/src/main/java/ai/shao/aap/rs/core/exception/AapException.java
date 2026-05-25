@@ -23,7 +23,7 @@ import org.jspecify.annotations.Nullable;
  * Root exception class for the project. Carries a structured error code, formatted message,
  * optional parameter list, and optional context map.
  */
-public abstract class OpenAgentAuthException extends RuntimeException {
+public abstract class AapException extends RuntimeException {
 
     /** The error code associated with this exception. */
     private final String errorCode;
@@ -38,12 +38,12 @@ public abstract class OpenAgentAuthException extends RuntimeException {
     private final String formattedMessage;
 
     /**
-     * Constructs a new Open Agent Auth exception with the specified error code and message.
+     * Constructs a new AAP exception with the specified error code and message.
      *
      * @param errorCode the error code
      * @param formattedMessage the formatted error message
      */
-    protected OpenAgentAuthException(String errorCode, String formattedMessage) {
+    protected AapException(String errorCode, String formattedMessage) {
         super(formattedMessage);
         this.errorCode = errorCode;
         this.errorParams = null;
@@ -52,13 +52,13 @@ public abstract class OpenAgentAuthException extends RuntimeException {
     }
 
     /**
-     * Constructs a new Open Agent Auth exception with the specified error code, message, and cause.
+     * Constructs a new AAP exception with the specified error code, message, and cause.
      *
      * @param errorCode the error code
      * @param formattedMessage the formatted error message
      * @param cause the cause
      */
-    protected OpenAgentAuthException(
+    protected AapException(
             String errorCode, String formattedMessage, @Nullable Throwable cause) {
         super(formattedMessage, cause);
         this.errorCode = errorCode;
@@ -68,7 +68,7 @@ public abstract class OpenAgentAuthException extends RuntimeException {
     }
 
     /**
-     * Constructs a new Open Agent Auth exception with the specified error code, message, error
+     * Constructs a new AAP exception with the specified error code, message, error
      * parameters, and context.
      *
      * @param errorCode the error code
@@ -76,7 +76,7 @@ public abstract class OpenAgentAuthException extends RuntimeException {
      * @param errorParams the error parameters
      * @param context the context information
      */
-    protected OpenAgentAuthException(
+    protected AapException(
             String errorCode,
             String formattedMessage,
             @Nullable List<Object> errorParams,
@@ -89,7 +89,7 @@ public abstract class OpenAgentAuthException extends RuntimeException {
     }
 
     /**
-     * Constructs a new Open Agent Auth exception with the specified error code, message, error
+     * Constructs a new AAP exception with the specified error code, message, error
      * parameters, context, and cause.
      *
      * @param errorCode the error code
@@ -98,7 +98,7 @@ public abstract class OpenAgentAuthException extends RuntimeException {
      * @param context the context information
      * @param cause the cause
      */
-    protected OpenAgentAuthException(
+    protected AapException(
             String errorCode,
             String formattedMessage,
             @Nullable List<Object> errorParams,
