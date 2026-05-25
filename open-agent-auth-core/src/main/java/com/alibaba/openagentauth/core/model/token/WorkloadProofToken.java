@@ -84,11 +84,11 @@ public record WorkloadProofToken(
         }
 
         public boolean isExpired() {
-            return expirationTime != null && expirationTime.before(new Date());
+            return expirationTime != null && expirationTime.getTime() < System.currentTimeMillis();
         }
 
         public boolean isValid() {
-            return expirationTime == null || !new Date().after(expirationTime);
+            return expirationTime == null || System.currentTimeMillis() <= expirationTime.getTime();
         }
 
         public static ClaimsBuilder builder() { return new ClaimsBuilder(); }

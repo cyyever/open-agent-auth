@@ -20,7 +20,6 @@ import com.alibaba.openagentauth.core.util.ValidationUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -96,11 +95,11 @@ public record WorkloadIdentityToken(
         public Jwk jwk() { return confirmation != null ? confirmation.jwk() : null; }
 
         public boolean isExpired() {
-            return expirationTime != null && expirationTime.before(Date.from(Instant.now()));
+            return expirationTime != null && expirationTime.getTime() < System.currentTimeMillis();
         }
 
         public boolean isValid() {
-            return expirationTime == null || !Date.from(Instant.now()).after(expirationTime);
+            return expirationTime == null || System.currentTimeMillis() <= expirationTime.getTime();
         }
 
         public static ClaimsBuilder builder() { return new ClaimsBuilder(); }
