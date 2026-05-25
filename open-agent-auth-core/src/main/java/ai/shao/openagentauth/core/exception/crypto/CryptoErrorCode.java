@@ -16,7 +16,6 @@
 package ai.shao.openagentauth.core.exception.crypto;
 
 import ai.shao.openagentauth.core.exception.CoreErrorCode;
-import ai.shao.openagentauth.core.exception.HttpStatus;
 
 /**
  * Error codes for Crypto domain.
@@ -42,47 +41,37 @@ public enum CryptoErrorCode implements CoreErrorCode {
      * Corresponds to {@link KeyResolutionException}.
      * Template: {0}
      */
-    KEY_RESOLUTION_FAILED("06", "KeyResolutionFailed", "Key resolution failed: {0}", HttpStatus.INTERNAL_SERVER_ERROR);
-    
-    /**
-     * Domain code for Crypto.
-     */
+    KEY_RESOLUTION_FAILED("06", "KeyResolutionFailed", "Key resolution failed: {0}");
+
     public static final String DOMAIN_CODE = CoreErrorCode.DOMAIN_CODE_CRYPTO;
-    
+
     private final String subCode;
     private final String errorName;
     private final String messageTemplate;
-    private final HttpStatus httpStatus;
-    
-    CryptoErrorCode(String subCode, String errorName, String messageTemplate, HttpStatus httpStatus) {
+
+    CryptoErrorCode(String subCode, String errorName, String messageTemplate) {
         this.subCode = subCode;
         this.errorName = errorName;
         this.messageTemplate = messageTemplate;
-        this.httpStatus = httpStatus;
     }
-    
+
     @Override
     public String getDomainCode() {
         return DOMAIN_CODE;
     }
-    
+
     @Override
     public String getSubCode() {
         return subCode;
     }
-    
+
     @Override
     public String getErrorName() {
         return errorName;
     }
-    
+
     @Override
     public String getMessageTemplate() {
         return messageTemplate;
-    }
-    
-    @Override
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
     }
 }

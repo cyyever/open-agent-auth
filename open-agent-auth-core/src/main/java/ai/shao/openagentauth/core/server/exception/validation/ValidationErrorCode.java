@@ -15,7 +15,6 @@
  */
 package ai.shao.openagentauth.core.server.exception.validation;
 
-import ai.shao.openagentauth.core.exception.HttpStatus;
 import ai.shao.openagentauth.core.server.exception.ServerErrorCode;
 
 /**
@@ -42,23 +41,18 @@ public enum ValidationErrorCode implements ServerErrorCode {
      * Corresponds to {@link ServerValidationException}.
      * Template: {0}
      */
-    VALIDATION_FAILED("01", "ServerValidationFailed", "Server validation failed: {0}", HttpStatus.BAD_REQUEST);
+    VALIDATION_FAILED("01", "ServerValidationFailed", "Server validation failed: {0}");
 
-    /**
-     * Domain code for Validation.
-     */
     public static final String DOMAIN_CODE = ServerErrorCode.DOMAIN_CODE_VALIDATION;
 
     private final String subCode;
     private final String errorName;
     private final String messageTemplate;
-    private final HttpStatus httpStatus;
 
-    ValidationErrorCode(String subCode, String errorName, String messageTemplate, HttpStatus httpStatus) {
+    ValidationErrorCode(String subCode, String errorName, String messageTemplate) {
         this.subCode = subCode;
         this.errorName = errorName;
         this.messageTemplate = messageTemplate;
-        this.httpStatus = httpStatus;
     }
 
     @Override
@@ -79,10 +73,5 @@ public enum ValidationErrorCode implements ServerErrorCode {
     @Override
     public String getMessageTemplate() {
         return messageTemplate;
-    }
-
-    @Override
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
     }
 }

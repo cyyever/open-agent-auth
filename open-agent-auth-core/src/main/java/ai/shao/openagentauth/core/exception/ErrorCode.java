@@ -78,13 +78,6 @@ public interface ErrorCode {
     String getMessageTemplate();
 
     /**
-     * Gets the HTTP status code for this error.
-     *
-     * @return the HTTP status code
-     */
-    HttpStatus getHttpStatus();
-
-    /**
      * Formats the message using the template with the provided parameters.
      * <p>
      * Uses index-based placeholders {0}, {1}, {2}, etc. to substitute parameters.

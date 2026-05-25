@@ -16,7 +16,6 @@
 package ai.shao.openagentauth.core.server.exception;
 
 import ai.shao.openagentauth.core.exception.ErrorCode;
-import ai.shao.openagentauth.core.exception.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -43,23 +42,21 @@ class ServerExceptionTest {
      * Test error code implementation for Server module.
      */
     private enum TestServerErrorCode implements ServerErrorCode {
-        TEST_AUTH_FAILED("01", "TestAuthFailed", 
-                        "Server authentication failed: {0}", HttpStatus.UNAUTHORIZED),
-        TEST_TOKEN_ERROR("02", "TestTokenError", 
-                        "Server token generation failed: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
+        TEST_AUTH_FAILED("01", "TestAuthFailed",
+                        "Server authentication failed: {0}"),
+        TEST_TOKEN_ERROR("02", "TestTokenError",
+                        "Server token generation failed: {0}"),
         TEST_VALIDATION_ERROR("03", "TestValidationError",
-                             "Server validation failed: {0} - {1}", HttpStatus.BAD_REQUEST);
+                             "Server validation failed: {0} - {1}");
 
         private final String subCode;
         private final String errorName;
         private final String messageTemplate;
-        private final HttpStatus httpStatus;
 
-        TestServerErrorCode(String subCode, String errorName, String messageTemplate, HttpStatus httpStatus) {
+        TestServerErrorCode(String subCode, String errorName, String messageTemplate) {
             this.subCode = subCode;
             this.errorName = errorName;
             this.messageTemplate = messageTemplate;
-            this.httpStatus = httpStatus;
         }
 
         @Override
@@ -80,11 +77,6 @@ class ServerExceptionTest {
         @Override
         public String getMessageTemplate() {
             return messageTemplate;
-        }
-
-        @Override
-        public HttpStatus getHttpStatus() {
-            return httpStatus;
         }
     }
 
@@ -239,7 +231,6 @@ class ServerExceptionTest {
         assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
         assertThat(errorCode.getErrorName()).isEqualTo("TestAuthFailed");
         assertThat(errorCode.getMessageTemplate()).isEqualTo("Server authentication failed: {0}");
-        assertThat(errorCode.getHttpStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test

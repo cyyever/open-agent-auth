@@ -15,7 +15,6 @@
  */
 package ai.shao.openagentauth.core.server.exception;
 
-import ai.shao.openagentauth.core.exception.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -37,20 +36,18 @@ class ServerErrorCodeTest {
      * Test implementation of ServerErrorCode for testing.
      */
     private enum TestServerErrorCode implements ServerErrorCode {
-        TEST_AUTH_ERROR("01", "TestAuthError", "Auth error: {0}", HttpStatus.BAD_REQUEST),
-        TEST_TOKEN_ERROR("02", "TestTokenError", "Token error: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
-        TEST_VALIDATION_ERROR("03", "TestValidationError", "Validation error: {0}", HttpStatus.BAD_REQUEST);
+        TEST_AUTH_ERROR("01", "TestAuthError", "Auth error: {0}"),
+        TEST_TOKEN_ERROR("02", "TestTokenError", "Token error: {0}"),
+        TEST_VALIDATION_ERROR("03", "TestValidationError", "Validation error: {0}");
 
         private final String subCode;
         private final String errorName;
         private final String messageTemplate;
-        private final HttpStatus httpStatus;
 
-        TestServerErrorCode(String subCode, String errorName, String messageTemplate, HttpStatus httpStatus) {
+        TestServerErrorCode(String subCode, String errorName, String messageTemplate) {
             this.subCode = subCode;
             this.errorName = errorName;
             this.messageTemplate = messageTemplate;
-            this.httpStatus = httpStatus;
         }
 
         @Override
@@ -71,11 +68,6 @@ class ServerErrorCodeTest {
         @Override
         public String getMessageTemplate() {
             return messageTemplate;
-        }
-
-        @Override
-        public HttpStatus getHttpStatus() {
-            return httpStatus;
         }
     }
 

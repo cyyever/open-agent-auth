@@ -33,7 +33,6 @@ class CryptoErrorCodeTest {
         assertThat(errorCode.getSubCode()).isEqualTo("06");
         assertThat(errorCode.getErrorName()).isEqualTo("KeyResolutionFailed");
         assertThat(errorCode.getMessageTemplate()).isEqualTo("Key resolution failed: {0}");
-        assertThat(errorCode.getHttpStatus().value()).isEqualTo(500);
     }
 
     @Test
@@ -67,11 +66,4 @@ class CryptoErrorCodeTest {
         }
     }
 
-    @Test
-    @DisplayName("Should verify all error codes have HTTP status 500")
-    void shouldVerifyAllErrorCodesHaveHttpStatus500() {
-        for (CryptoErrorCode errorCode : CryptoErrorCode.values()) {
-            assertThat(errorCode.getHttpStatus().value()).isEqualTo(500);
-        }
-    }
 }

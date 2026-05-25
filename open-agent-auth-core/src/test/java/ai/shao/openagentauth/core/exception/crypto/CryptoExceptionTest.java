@@ -55,12 +55,6 @@ class CryptoExceptionTest {
     }
 
     @Test
-    @DisplayName("Test CryptoErrorCode HTTP status")
-    void testCryptoErrorCodeHttpStatus() {
-        assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getHttpStatus().value()).isEqualTo(500);
-    }
-
-    @Test
     @DisplayName("Test CryptoErrorCode domain code constant")
     void testCryptoErrorCodeDomainCodeConstant() {
         assertThat(CryptoErrorCode.DOMAIN_CODE).isEqualTo("03");

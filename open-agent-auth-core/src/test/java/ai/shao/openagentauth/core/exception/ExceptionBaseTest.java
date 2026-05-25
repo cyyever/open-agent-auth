@@ -41,23 +41,21 @@ class ExceptionBaseTest {
      * Test error code implementation for Core module.
      */
     private enum TestCoreErrorCode implements CoreErrorCode {
-        TEST_AUTH_FAILED("0001", "TEST_AUTH_FAILED", 
-                        "Authentication failed for user {0}", HttpStatus.UNAUTHORIZED),
-        TEST_TOKEN_EXPIRED("0001", "TEST_TOKEN_EXPIRED", 
-                          "Token expired at {0}", HttpStatus.UNAUTHORIZED),
-        TEST_VALIDATION_ERROR("0001", "TEST_VALIDATION_ERROR", 
-                             "Validation failed: {0} - {1}", HttpStatus.BAD_REQUEST);
+        TEST_AUTH_FAILED("0001", "TEST_AUTH_FAILED",
+                        "Authentication failed for user {0}"),
+        TEST_TOKEN_EXPIRED("0001", "TEST_TOKEN_EXPIRED",
+                          "Token expired at {0}"),
+        TEST_VALIDATION_ERROR("0001", "TEST_VALIDATION_ERROR",
+                             "Validation failed: {0} - {1}");
 
         private final String subCode;
         private final String errorName;
         private final String messageTemplate;
-        private final HttpStatus httpStatus;
 
-        TestCoreErrorCode(String subCode, String errorName, String messageTemplate, HttpStatus httpStatus) {
+        TestCoreErrorCode(String subCode, String errorName, String messageTemplate) {
             this.subCode = subCode;
             this.errorName = errorName;
             this.messageTemplate = messageTemplate;
-            this.httpStatus = httpStatus;
         }
 
         @Override
@@ -84,38 +82,31 @@ class ExceptionBaseTest {
         public String getMessageTemplate() {
             return messageTemplate;
         }
-
-        @Override
-        public HttpStatus getHttpStatus() {
-            return httpStatus;
-        }
     }
 
     /**
      * Test error code implementation for Framework module.
      */
     private enum TestFrameworkErrorCode implements ErrorCode {
-        TEST_AGENT_ERROR("10", "01", "0001", "TEST_AGENT_ERROR", 
-                        "Agent operation failed: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
-        TEST_AUTHORIZATION_ERROR("11", "02", "0001", "TEST_AUTHORIZATION_ERROR", 
-                                "Authorization denied for resource {0}", HttpStatus.FORBIDDEN),
-        TEST_TOKEN_ERROR("11", "03", "0001", "TEST_TOKEN_ERROR", 
-                        "Token generation failed: {0}", HttpStatus.BAD_REQUEST);
+        TEST_AGENT_ERROR("10", "01", "0001", "TEST_AGENT_ERROR",
+                        "Agent operation failed: {0}"),
+        TEST_AUTHORIZATION_ERROR("11", "02", "0001", "TEST_AUTHORIZATION_ERROR",
+                                "Authorization denied for resource {0}"),
+        TEST_TOKEN_ERROR("11", "03", "0001", "TEST_TOKEN_ERROR",
+                        "Token generation failed: {0}");
 
         private final String systemCode;
         private final String domainCode;
         private final String subCode;
         private final String errorName;
         private final String messageTemplate;
-        private final HttpStatus httpStatus;
 
-        TestFrameworkErrorCode(String systemCode, String domainCode, String subCode, String errorName, String messageTemplate, HttpStatus httpStatus) {
+        TestFrameworkErrorCode(String systemCode, String domainCode, String subCode, String errorName, String messageTemplate) {
             this.systemCode = systemCode;
             this.domainCode = domainCode;
             this.subCode = subCode;
             this.errorName = errorName;
             this.messageTemplate = messageTemplate;
-            this.httpStatus = httpStatus;
         }
 
         @Override
@@ -141,11 +132,6 @@ class ExceptionBaseTest {
         @Override
         public String getMessageTemplate() {
             return messageTemplate;
-        }
-
-        @Override
-        public HttpStatus getHttpStatus() {
-            return httpStatus;
         }
     }
 
@@ -221,11 +207,6 @@ class ExceptionBaseTest {
             @Override
             public String getMessageTemplate() {
                 return template;
-            }
-
-            @Override
-            public HttpStatus getHttpStatus() {
-                return HttpStatus.BAD_REQUEST;
             }
         };
         String message = errorCode.formatMessage();
@@ -332,7 +313,6 @@ class ExceptionBaseTest {
         assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
         assertThat(errorCode.getErrorName()).isEqualTo("TEST_AGENT_ERROR");
         assertThat(errorCode.getMessageTemplate()).isEqualTo("Agent operation failed: {0}");
-        assertThat(errorCode.getHttpStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Test
@@ -369,7 +349,6 @@ class ExceptionBaseTest {
         assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
         assertThat(errorCode.getErrorName()).isEqualTo("TEST_AUTH_FAILED");
         assertThat(errorCode.getMessageTemplate()).isEqualTo("Authentication failed for user {0}");
-        assertThat(errorCode.getHttpStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -384,27 +363,4 @@ class ExceptionBaseTest {
         assertThat(toString).contains("formattedMessage='Authentication failed for user john.doe'");
     }
 
-    @Test
-    @DisplayName("Test HttpStatus enum")
-    void testHttpStatusEnum() {
-        assertThat(HttpStatus.OK.value()).isEqualTo(200);
-        assertThat(HttpStatus.BAD_REQUEST.value()).isEqualTo(400);
-        assertThat(HttpStatus.UNAUTHORIZED.value()).isEqualTo(401);
-        assertThat(HttpStatus.FORBIDDEN.value()).isEqualTo(403);
-        assertThat(HttpStatus.INTERNAL_SERVER_ERROR.value()).isEqualTo(500);
-        
-        assertThat(HttpStatus.OK.is2xxSuccessful()).isTrue();
-        assertThat(HttpStatus.BAD_REQUEST.is4xxClientError()).isTrue();
-        assertThat(HttpStatus.INTERNAL_SERVER_ERROR.is5xxServerError()).isTrue();
-        assertThat(HttpStatus.OK.isError()).isFalse();
-        assertThat(HttpStatus.BAD_REQUEST.isError()).isTrue();
-    }
-
-    @Test
-    @DisplayName("Test HttpStatus valueOf")
-    void testHttpStatusValueOf() {
-        assertThat(HttpStatus.valueOf(200)).isEqualTo(HttpStatus.OK);
-        assertThat(HttpStatus.valueOf(404)).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(HttpStatus.valueOf(500)).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 }

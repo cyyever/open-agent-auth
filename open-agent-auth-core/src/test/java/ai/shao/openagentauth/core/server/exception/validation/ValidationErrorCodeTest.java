@@ -15,7 +15,6 @@
  */
 package ai.shao.openagentauth.core.server.exception.validation;
 
-import ai.shao.openagentauth.core.exception.HttpStatus;
 import ai.shao.openagentauth.core.server.exception.ServerErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,13 +61,6 @@ class ValidationErrorCodeTest {
     void shouldHaveCorrectMessageTemplates() {
         assertThat(ValidationErrorCode.VALIDATION_FAILED.getMessageTemplate())
                 .isEqualTo("Server validation failed: {0}");
-    }
-
-    @Test
-    @DisplayName("Should have correct HTTP status codes")
-    void shouldHaveCorrectHttpStatusCodes() {
-        assertThat(ValidationErrorCode.VALIDATION_FAILED.getHttpStatus())
-                .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     @Test

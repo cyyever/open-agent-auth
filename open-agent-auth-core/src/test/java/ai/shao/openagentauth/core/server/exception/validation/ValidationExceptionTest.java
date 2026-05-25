@@ -79,7 +79,6 @@ class ValidationExceptionTest {
 
         assertThat(ValidationErrorCode.VALIDATION_FAILED.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
         assertThat(ValidationErrorCode.VALIDATION_FAILED.getErrorName()).isEqualTo("ServerValidationFailed");
-        assertThat(ValidationErrorCode.VALIDATION_FAILED.getHttpStatus().value()).isEqualTo(400);
     }
 
     @Test
