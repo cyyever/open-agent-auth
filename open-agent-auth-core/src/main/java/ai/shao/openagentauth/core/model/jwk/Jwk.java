@@ -22,19 +22,16 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Minimal Ed25519 JSON Web Key as used in AAP CT cnf.jwk and DPoP header.jwk.
- * <p>
- * Per spec §3 only Ed25519 ({@code kty=OKP}, {@code crv=Ed25519}) is permitted,
- * so those fields are wire-only constants emitted by {@link
- * ai.shao.openagentauth.core.crypto.JwkConverter} and not carried on
- * the record itself.
+ *
+ * <p>Per spec §3 only Ed25519 ({@code kty=OKP}, {@code crv=Ed25519}) is permitted, so those fields
+ * are wire-only constants emitted by {@link ai.shao.openagentauth.core.crypto.JwkConverter} and not
+ * carried on the record itself.
  *
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc7517">RFC 7517</a>
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc8037">RFC 8037</a>
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record Jwk(
-        @JsonProperty("x") String x,
-        @JsonProperty("kid") @Nullable String keyId) {
+public record Jwk(@JsonProperty("x") String x, @JsonProperty("kid") @Nullable String keyId) {
 
     public Jwk {
         if (ValidationUtils.isNullOrEmpty(x)) {
@@ -50,8 +47,15 @@ public record Jwk(
         private @Nullable String x;
         private @Nullable String keyId;
 
-        public Builder x(@Nullable String x)         { this.x     = x;     return this; }
-        public Builder keyId(@Nullable String keyId) { this.keyId = keyId; return this; }
+        public Builder x(@Nullable String x) {
+            this.x = x;
+            return this;
+        }
+
+        public Builder keyId(@Nullable String keyId) {
+            this.keyId = keyId;
+            return this;
+        }
 
         public Jwk build() {
             if (x == null) {

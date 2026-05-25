@@ -15,6 +15,12 @@
  */
 package ai.shao.openagentauth.core.crypto.verify;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import ai.shao.openagentauth.core.crypto.key.KeyManager;
 import ai.shao.openagentauth.core.exception.crypto.KeyResolutionException;
 import com.nimbusds.jose.JOSEException;
@@ -29,18 +35,11 @@ import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.Date;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link SignatureVerificationUtils}.
@@ -71,7 +70,9 @@ class SignatureVerificationUtilsTest {
             KeyManager keyManager = mock(KeyManager.class);
             when(keyManager.resolveVerificationKey(anyString())).thenReturn(edKey.toPublicJWK());
 
-            boolean result = SignatureVerificationUtils.verifySignature(signedJwt, keyManager, VERIFICATION_KEY_ID);
+            boolean result =
+                    SignatureVerificationUtils.verifySignature(
+                            signedJwt, keyManager, VERIFICATION_KEY_ID);
 
             assertThat(result).isTrue();
         }
@@ -81,11 +82,15 @@ class SignatureVerificationUtilsTest {
         void shouldReturnFalseForInvalidSignature() throws Exception {
             SignedJWT signedJwt = createSignedJwt(new Ed25519Signer(edKey), edKey.getKeyID());
 
-            OctetKeyPair differentKey = new OctetKeyPairGenerator(Curve.Ed25519).keyID("different-key").generate();
+            OctetKeyPair differentKey =
+                    new OctetKeyPairGenerator(Curve.Ed25519).keyID("different-key").generate();
             KeyManager keyManager = mock(KeyManager.class);
-            when(keyManager.resolveVerificationKey(anyString())).thenReturn(differentKey.toPublicJWK());
+            when(keyManager.resolveVerificationKey(anyString()))
+                    .thenReturn(differentKey.toPublicJWK());
 
-            boolean result = SignatureVerificationUtils.verifySignature(signedJwt, keyManager, VERIFICATION_KEY_ID);
+            boolean result =
+                    SignatureVerificationUtils.verifySignature(
+                            signedJwt, keyManager, VERIFICATION_KEY_ID);
 
             assertThat(result).isFalse();
         }
@@ -99,7 +104,9 @@ class SignatureVerificationUtilsTest {
             when(keyManager.resolveVerificationKey(anyString()))
                     .thenThrow(new KeyResolutionException("Key not found"));
 
-            boolean result = SignatureVerificationUtils.verifySignature(signedJwt, keyManager, VERIFICATION_KEY_ID);
+            boolean result =
+                    SignatureVerificationUtils.verifySignature(
+                            signedJwt, keyManager, VERIFICATION_KEY_ID);
 
             assertThat(result).isFalse();
         }
@@ -108,16 +115,19 @@ class SignatureVerificationUtilsTest {
         @DisplayName("Should reject non-EdDSA algorithm")
         void shouldRejectNonEdDsaAlgorithm() throws Exception {
             // Build a JWT carrying alg=RS256 and let SignatureVerificationUtils short-circuit.
-            String header = com.nimbusds.jose.util.Base64URL.encode(
-                    "{\"alg\":\"RS256\",\"typ\":\"JWT\"}").toString();
-            String payload = com.nimbusds.jose.util.Base64URL.encode(
-                    "{\"sub\":\"test\"}").toString();
+            String header =
+                    com.nimbusds.jose.util.Base64URL.encode("{\"alg\":\"RS256\",\"typ\":\"JWT\"}")
+                            .toString();
+            String payload =
+                    com.nimbusds.jose.util.Base64URL.encode("{\"sub\":\"test\"}").toString();
             String fakeJwt = header + "." + payload + ".AAAA";
             SignedJWT parsed = SignedJWT.parse(fakeJwt);
 
             KeyManager keyManager = mock(KeyManager.class);
 
-            boolean result = SignatureVerificationUtils.verifySignature(parsed, keyManager, VERIFICATION_KEY_ID);
+            boolean result =
+                    SignatureVerificationUtils.verifySignature(
+                            parsed, keyManager, VERIFICATION_KEY_ID);
 
             assertThat(result).isFalse();
         }
@@ -139,7 +149,8 @@ class SignatureVerificationUtilsTest {
         @Test
         @DisplayName("Should throw exception for unsupported key type")
         void shouldThrowExceptionForUnsupportedKeyType() throws JOSEException {
-            OctetSequenceKey octKey = new OctetSequenceKeyGenerator(256).keyID("oct-key").generate();
+            OctetSequenceKey octKey =
+                    new OctetSequenceKeyGenerator(256).keyID("oct-key").generate();
 
             assertThatThrownBy(() -> SignatureVerificationUtils.createVerifier(octKey))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -149,16 +160,16 @@ class SignatureVerificationUtilsTest {
 
     private SignedJWT createSignedJwt(com.nimbusds.jose.JWSSigner signer, String keyId)
             throws JOSEException {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .issuer("https://example.com")
-                .subject("test-subject")
-                .expirationTime(new Date(System.currentTimeMillis() + 3600_000))
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .issuer("https://example.com")
+                        .subject("test-subject")
+                        .expirationTime(new Date(System.currentTimeMillis() + 3600_000))
+                        .build();
 
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA).keyID(keyId).build(),
-                claimsSet
-        );
+        SignedJWT signedJwt =
+                new SignedJWT(
+                        new JWSHeader.Builder(JWSAlgorithm.EdDSA).keyID(keyId).build(), claimsSet);
         signedJwt.sign(signer);
         return signedJwt;
     }

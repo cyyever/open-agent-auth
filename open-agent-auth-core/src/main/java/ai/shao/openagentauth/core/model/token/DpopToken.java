@@ -17,16 +17,15 @@ package ai.shao.openagentauth.core.model.token;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Date;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Date;
-
 /**
- * Represents a DPoP Proof (DPoP). A DPoP is a JWT that proves possession of
- * the private key corresponding to the public key in the associated Credential
- * Token (CT). It binds to the CT via the {@code wth} claim. Per AAP spec §3
- * the JOSE header is fixed at {@code {alg=EdDSA, typ=dpop+jwt}} (DPoP also
- * permits {@code jwk}), so those parameters are not carried on this record.
+ * Represents a DPoP Proof (DPoP). A DPoP is a JWT that proves possession of the private key
+ * corresponding to the public key in the associated Credential Token (CT). It binds to the CT via
+ * the {@code wth} claim. Per AAP spec §3 the JOSE header is fixed at {@code {alg=EdDSA,
+ * typ=dpop+jwt}} (DPoP also permits {@code jwk}), so those parameters are not carried on this
+ * record.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record DpopToken(
@@ -44,25 +43,57 @@ public record DpopToken(
     }
 
     /** Audience (aud) — convenience delegate to claims. */
-    public @Nullable String getAudience()        { return claims.audience();          }
-    public Date            getExpirationTime()   { return claims.expirationTime();    }
-    public @Nullable String getJwtId()           { return claims.jwtId();             }
-    public String          getWorkloadTokenHash() { return claims.workloadTokenHash(); }
-    public @Nullable String getAccessTokenHash() { return claims.accessTokenHash();   }
+    public @Nullable String getAudience() {
+        return claims.audience();
+    }
 
-    public boolean isExpired() { return claims.isExpired(); }
-    public boolean isValid()   { return claims.isValid();   }
+    public Date getExpirationTime() {
+        return claims.expirationTime();
+    }
 
-    public static Builder builder() { return new Builder(); }
+    public @Nullable String getJwtId() {
+        return claims.jwtId();
+    }
+
+    public String getWorkloadTokenHash() {
+        return claims.workloadTokenHash();
+    }
+
+    public @Nullable String getAccessTokenHash() {
+        return claims.accessTokenHash();
+    }
+
+    public boolean isExpired() {
+        return claims.isExpired();
+    }
+
+    public boolean isValid() {
+        return claims.isValid();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public static class Builder {
         private @Nullable Claims claims;
         private @Nullable String signature;
         private @Nullable String jwtString;
 
-        public Builder claims(Claims claims)        { this.claims = claims;       return this; }
-        public Builder signature(String signature)  { this.signature = signature; return this; }
-        public Builder jwtString(String jwtString)  { this.jwtString = jwtString; return this; }
+        public Builder claims(Claims claims) {
+            this.claims = claims;
+            return this;
+        }
+
+        public Builder signature(String signature) {
+            this.signature = signature;
+            return this;
+        }
+
+        public Builder jwtString(String jwtString) {
+            this.jwtString = jwtString;
+            return this;
+        }
 
         public DpopToken build() {
             if (claims == null) {
@@ -98,7 +129,9 @@ public record DpopToken(
             return System.currentTimeMillis() <= expirationTime.getTime();
         }
 
-        public static ClaimsBuilder builder() { return new ClaimsBuilder(); }
+        public static ClaimsBuilder builder() {
+            return new ClaimsBuilder();
+        }
 
         public static class ClaimsBuilder {
             private @Nullable String audience;
@@ -107,11 +140,30 @@ public record DpopToken(
             private @Nullable String workloadTokenHash;
             private @Nullable String accessTokenHash;
 
-            public ClaimsBuilder audience(@Nullable String audience)         { this.audience = audience;                   return this; }
-            public ClaimsBuilder expirationTime(@Nullable Date expirationTime) { this.expirationTime = expirationTime;     return this; }
-            public ClaimsBuilder jwtId(@Nullable String jwtId)               { this.jwtId = jwtId;                         return this; }
-            public ClaimsBuilder workloadTokenHash(@Nullable String workloadTokenHash) { this.workloadTokenHash = workloadTokenHash; return this; }
-            public ClaimsBuilder accessTokenHash(@Nullable String accessTokenHash)     { this.accessTokenHash = accessTokenHash;     return this; }
+            public ClaimsBuilder audience(@Nullable String audience) {
+                this.audience = audience;
+                return this;
+            }
+
+            public ClaimsBuilder expirationTime(@Nullable Date expirationTime) {
+                this.expirationTime = expirationTime;
+                return this;
+            }
+
+            public ClaimsBuilder jwtId(@Nullable String jwtId) {
+                this.jwtId = jwtId;
+                return this;
+            }
+
+            public ClaimsBuilder workloadTokenHash(@Nullable String workloadTokenHash) {
+                this.workloadTokenHash = workloadTokenHash;
+                return this;
+            }
+
+            public ClaimsBuilder accessTokenHash(@Nullable String accessTokenHash) {
+                this.accessTokenHash = accessTokenHash;
+                return this;
+            }
 
             public Claims build() {
                 if (workloadTokenHash == null || workloadTokenHash.isEmpty()) {
@@ -120,7 +172,8 @@ public record DpopToken(
                 if (expirationTime == null) {
                     throw new IllegalStateException("expirationTime (exp) is REQUIRED");
                 }
-                return new Claims(audience, expirationTime, jwtId, workloadTokenHash, accessTokenHash);
+                return new Claims(
+                        audience, expirationTime, jwtId, workloadTokenHash, accessTokenHash);
             }
         }
     }

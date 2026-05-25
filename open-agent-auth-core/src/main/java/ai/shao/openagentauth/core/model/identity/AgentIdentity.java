@@ -17,13 +17,10 @@ package ai.shao.openagentauth.core.model.identity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.Instant;
 import org.jspecify.annotations.Nullable;
 
-import java.time.Instant;
-
-/**
- * Represents the identity of an AI agent.
- */
+/** Represents the identity of an AI agent. */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record AgentIdentity(
         @JsonProperty("version") @Nullable String version,
@@ -54,9 +51,20 @@ public record AgentIdentity(
             private @Nullable String client;
             private @Nullable String clientInstance;
 
-            public Builder platform(@Nullable String platform)             { this.platform = platform;             return this; }
-            public Builder client(@Nullable String client)                 { this.client = client;                 return this; }
-            public Builder clientInstance(@Nullable String clientInstance) { this.clientInstance = clientInstance; return this; }
+            public Builder platform(@Nullable String platform) {
+                this.platform = platform;
+                return this;
+            }
+
+            public Builder client(@Nullable String client) {
+                this.client = client;
+                return this;
+            }
+
+            public Builder clientInstance(@Nullable String clientInstance) {
+                this.clientInstance = clientInstance;
+                return this;
+            }
 
             public IssuedFor build() {
                 return new IssuedFor(platform, client, clientInstance);
@@ -74,17 +82,49 @@ public record AgentIdentity(
         private @Nullable Instant validFrom;
         private @Nullable Instant expires;
 
-        public Builder version(@Nullable String version)             { this.version = version;           return this; }
-        public Builder id(@Nullable String id)                       { this.id = id;                     return this; }
-        public Builder issuer(@Nullable String issuer)               { this.issuer = issuer;             return this; }
-        public Builder issuedTo(@Nullable String issuedTo)           { this.issuedTo = issuedTo;         return this; }
-        public Builder issuedFor(@Nullable IssuedFor issuedFor)      { this.issuedFor = issuedFor;       return this; }
-        public Builder issuanceDate(@Nullable Instant issuanceDate)  { this.issuanceDate = issuanceDate; return this; }
-        public Builder validFrom(@Nullable Instant validFrom)        { this.validFrom = validFrom;       return this; }
-        public Builder expires(@Nullable Instant expires)            { this.expires = expires;           return this; }
+        public Builder version(@Nullable String version) {
+            this.version = version;
+            return this;
+        }
+
+        public Builder id(@Nullable String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder issuer(@Nullable String issuer) {
+            this.issuer = issuer;
+            return this;
+        }
+
+        public Builder issuedTo(@Nullable String issuedTo) {
+            this.issuedTo = issuedTo;
+            return this;
+        }
+
+        public Builder issuedFor(@Nullable IssuedFor issuedFor) {
+            this.issuedFor = issuedFor;
+            return this;
+        }
+
+        public Builder issuanceDate(@Nullable Instant issuanceDate) {
+            this.issuanceDate = issuanceDate;
+            return this;
+        }
+
+        public Builder validFrom(@Nullable Instant validFrom) {
+            this.validFrom = validFrom;
+            return this;
+        }
+
+        public Builder expires(@Nullable Instant expires) {
+            this.expires = expires;
+            return this;
+        }
 
         public AgentIdentity build() {
-            return new AgentIdentity(version, id, issuer, issuedTo, issuedFor, issuanceDate, validFrom, expires);
+            return new AgentIdentity(
+                    version, id, issuer, issuedTo, issuedFor, issuanceDate, validFrom, expires);
         }
     }
 }

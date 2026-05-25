@@ -15,39 +15,32 @@
  */
 package ai.shao.openagentauth.core.server.exception;
 
-import ai.shao.openagentauth.core.exception.ErrorCode;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import ai.shao.openagentauth.core.exception.ErrorCode;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test class for Server exception base classes and error code functionality.
- * <p>
- * This test class validates the core functionality of the Server exception hierarchy,
- * including message formatting, error code handling, and parameter passing.
- * </p>
+ *
+ * <p>This test class validates the core functionality of the Server exception hierarchy, including
+ * message formatting, error code handling, and parameter passing.
  *
  * @since 1.0
  */
 @DisplayName("Server Exception Base Classes Test")
 class ServerExceptionTest {
 
-    /**
-     * Test error code implementation for Server module.
-     */
+    /** Test error code implementation for Server module. */
     private enum TestServerErrorCode implements ServerErrorCode {
-        TEST_AUTH_FAILED("01", "TestAuthFailed",
-                        "Server authentication failed: {0}"),
-        TEST_TOKEN_ERROR("02", "TestTokenError",
-                        "Server token generation failed: {0}"),
-        TEST_VALIDATION_ERROR("03", "TestValidationError",
-                             "Server validation failed: {0} - {1}");
+        TEST_AUTH_FAILED("01", "TestAuthFailed", "Server authentication failed: {0}"),
+        TEST_TOKEN_ERROR("02", "TestTokenError", "Server token generation failed: {0}"),
+        TEST_VALIDATION_ERROR("03", "TestValidationError", "Server validation failed: {0} - {1}");
 
         private final String subCode;
         private final String errorName;
@@ -80,9 +73,7 @@ class ServerExceptionTest {
         }
     }
 
-    /**
-     * Test Server exception implementation.
-     */
+    /** Test Server exception implementation. */
     private static class TestServerException extends ServerException {
         public TestServerException(ErrorCode errorCode) {
             super(errorCode);
@@ -92,7 +83,8 @@ class ServerExceptionTest {
             super(errorCode, errorParams);
         }
 
-        public TestServerException(ErrorCode errorCode, List<Object> errorParams, Map<String, Object> context) {
+        public TestServerException(
+                ErrorCode errorCode, List<Object> errorParams, Map<String, Object> context) {
             super(errorCode, errorParams, context);
         }
 
@@ -104,8 +96,11 @@ class ServerExceptionTest {
             super(errorCode, cause, errorParams);
         }
 
-        public TestServerException(ErrorCode errorCode, List<Object> errorParams, 
-                                     Map<String, Object> context, Throwable cause) {
+        public TestServerException(
+                ErrorCode errorCode,
+                List<Object> errorParams,
+                Map<String, Object> context,
+                Throwable cause) {
             super(errorCode, errorParams, context, cause);
         }
     }
@@ -134,14 +129,17 @@ class ServerExceptionTest {
     @Test
     @DisplayName("Test ErrorCode formatMessage with multiple parameters")
     void testFormatMessageWithMultipleParameters() {
-        String message = TestServerErrorCode.TEST_VALIDATION_ERROR.formatMessage("username", "cannot be empty");
+        String message =
+                TestServerErrorCode.TEST_VALIDATION_ERROR.formatMessage(
+                        "username", "cannot be empty");
         assertThat(message).isEqualTo("Server validation failed: username - cannot be empty");
     }
 
     @Test
     @DisplayName("Test ServerException with error code only")
     void testServerExceptionWithErrorCodeOnly() {
-        TestServerException exception = new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED);
+        TestServerException exception =
+                new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED);
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
         assertThat(exception.getFormattedMessage()).isEqualTo("Server authentication failed: {0}");
         assertThat(exception.getErrorParams()).isNull();
@@ -150,19 +148,23 @@ class ServerExceptionTest {
     @Test
     @DisplayName("Test ServerException with varargs parameters")
     void testServerExceptionWithVarargsParameters() {
-        TestServerException exception = new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, "john.doe");
+        TestServerException exception =
+                new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, "john.doe");
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Server authentication failed: john.doe");
+        assertThat(exception.getFormattedMessage())
+                .isEqualTo("Server authentication failed: john.doe");
         assertThat(exception.getErrorParams()).containsExactly("john.doe");
     }
 
     @Test
     @DisplayName("Test ServerException with multiple varargs parameters")
     void testServerExceptionWithMultipleVarargsParameters() {
-        TestServerException exception = new TestServerException(
-            TestServerErrorCode.TEST_VALIDATION_ERROR, "username", "cannot be empty");
+        TestServerException exception =
+                new TestServerException(
+                        TestServerErrorCode.TEST_VALIDATION_ERROR, "username", "cannot be empty");
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Server validation failed: username - cannot be empty");
+        assertThat(exception.getFormattedMessage())
+                .isEqualTo("Server validation failed: username - cannot be empty");
         assertThat(exception.getErrorParams()).containsExactly("username", "cannot be empty");
     }
 
@@ -174,11 +176,12 @@ class ServerExceptionTest {
         context.put("userId", "12345");
         context.put("ipAddress", "192.168.1.1");
 
-        TestServerException exception = new TestServerException(
-            TestServerErrorCode.TEST_AUTH_FAILED, errorParams, context);
-        
+        TestServerException exception =
+                new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, errorParams, context);
+
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Server authentication failed: john.doe");
+        assertThat(exception.getFormattedMessage())
+                .isEqualTo("Server authentication failed: john.doe");
         assertThat(exception.getErrorParams()).containsExactly("john.doe");
         assertThat(exception.getContext()).containsExactlyEntriesOf(context);
     }
@@ -187,8 +190,9 @@ class ServerExceptionTest {
     @DisplayName("Test ServerException with cause")
     void testServerExceptionWithCause() {
         Throwable cause = new RuntimeException("Root cause");
-        TestServerException exception = new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, cause);
-        
+        TestServerException exception =
+                new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, cause);
+
         assertThat(exception.getCause()).isEqualTo(cause);
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
     }
@@ -197,12 +201,13 @@ class ServerExceptionTest {
     @DisplayName("Test ServerException with cause and varargs parameters")
     void testServerExceptionWithCauseAndVarargsParameters() {
         Throwable cause = new RuntimeException("Root cause");
-        TestServerException exception = new TestServerException(
-            TestServerErrorCode.TEST_AUTH_FAILED, cause, "john.doe");
-        
+        TestServerException exception =
+                new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, cause, "john.doe");
+
         assertThat(exception.getCause()).isEqualTo(cause);
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Server authentication failed: john.doe");
+        assertThat(exception.getFormattedMessage())
+                .isEqualTo("Server authentication failed: john.doe");
     }
 
     @Test
@@ -213,12 +218,14 @@ class ServerExceptionTest {
         context.put("field", "username");
         Throwable cause = new RuntimeException("Validation failed");
 
-        TestServerException exception = new TestServerException(
-            TestServerErrorCode.TEST_VALIDATION_ERROR, errorParams, context, cause);
-        
+        TestServerException exception =
+                new TestServerException(
+                        TestServerErrorCode.TEST_VALIDATION_ERROR, errorParams, context, cause);
+
         assertThat(exception.getCause()).isEqualTo(cause);
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Server validation failed: username - cannot be empty");
+        assertThat(exception.getFormattedMessage())
+                .isEqualTo("Server validation failed: username - cannot be empty");
         assertThat(exception.getErrorParams()).containsExactly("username", "cannot be empty");
         assertThat(exception.getContext()).containsExactlyEntriesOf(context);
     }
@@ -227,7 +234,7 @@ class ServerExceptionTest {
     @DisplayName("Test error code properties")
     void testErrorCodeProperties() {
         TestServerErrorCode errorCode = TestServerErrorCode.TEST_AUTH_FAILED;
-        
+
         assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
         assertThat(errorCode.getErrorName()).isEqualTo("TestAuthFailed");
         assertThat(errorCode.getMessageTemplate()).isEqualTo("Server authentication failed: {0}");
@@ -236,9 +243,9 @@ class ServerExceptionTest {
     @Test
     @DisplayName("Test exception toString")
     void testExceptionToString() {
-        TestServerException exception = new TestServerException(
-            TestServerErrorCode.TEST_AUTH_FAILED, "john.doe");
-        
+        TestServerException exception =
+                new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, "john.doe");
+
         String toString = exception.toString();
         assertThat(toString).contains("TestServerException");
         assertThat(toString).contains("errorCode='OPEN_AGENT_AUTH_11_0101'");
@@ -248,12 +255,12 @@ class ServerExceptionTest {
     @Test
     @DisplayName("Test errorParams is unmodifiable")
     void testErrorParamsIsUnmodifiable() {
-        TestServerException exception = new TestServerException(
-            TestServerErrorCode.TEST_AUTH_FAILED, "john.doe");
-        
+        TestServerException exception =
+                new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, "john.doe");
+
         List<Object> errorParams = exception.getErrorParams();
         assertThat(errorParams).isNotNull();
-        
+
         // Attempting to modify should throw UnsupportedOperationException
         try {
             errorParams.add("another.param");

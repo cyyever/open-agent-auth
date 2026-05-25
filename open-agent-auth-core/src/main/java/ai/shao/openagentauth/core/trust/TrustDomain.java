@@ -18,9 +18,8 @@ package ai.shao.openagentauth.core.trust;
 import ai.shao.openagentauth.core.util.ValidationUtils;
 
 /**
- * Logical scope-of-trust boundary for agent identities. The {@code domainId}
- * is compared against the {@code iss} claim of incoming CTs verbatim — no
- * scheme prefix is stripped.
+ * Logical scope-of-trust boundary for agent identities. The {@code domainId} is compared against
+ * the {@code iss} claim of incoming CTs verbatim — no scheme prefix is stripped.
  */
 public record TrustDomain(String domainId) {
 

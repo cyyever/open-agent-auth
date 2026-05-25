@@ -15,11 +15,11 @@
  */
 package ai.shao.openagentauth.core.model.jwk;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 @DisplayName("Jwk Tests")
 class JwkTest {
@@ -30,10 +30,7 @@ class JwkTest {
     @Test
     @DisplayName("Should build Jwk with x and keyId")
     void shouldBuildJwkWithAllFields() {
-        Jwk jwk = Jwk.builder()
-                .x(X_COORDINATE)
-                .keyId(KEY_ID)
-                .build();
+        Jwk jwk = Jwk.builder().x(X_COORDINATE).keyId(KEY_ID).build();
 
         assertThat(jwk).isNotNull();
         assertThat(jwk.x()).isEqualTo(X_COORDINATE);
@@ -43,9 +40,7 @@ class JwkTest {
     @Test
     @DisplayName("Should build Jwk with only required x")
     void shouldBuildJwkWithOnlyRequiredX() {
-        Jwk jwk = Jwk.builder()
-                .x(X_COORDINATE)
-                .build();
+        Jwk jwk = Jwk.builder().x(X_COORDINATE).build();
 
         assertThat(jwk).isNotNull();
         assertThat(jwk.x()).isEqualTo(X_COORDINATE);

@@ -21,23 +21,22 @@ import com.nimbusds.jose.jwk.JWK;
 
 /**
  * Service Provider Interface (SPI) for resolving cryptographic keys from various sources.
- * <p>
- * This interface enables a pluggable key resolution strategy, allowing the framework
- * to resolve keys from different backends without coupling to any specific implementation.
- * Each {@code KeyResolver} implementation handles a specific type of key source
- * (e.g., local key store, remote JWKS endpoint, file system, external KMS).
- * </p>
  *
- * <p><b>Design Pattern:</b> Strategy Pattern + Chain of Responsibility</p>
- * <p>
- * Multiple {@code KeyResolver} implementations can be registered in the application context.
- * The framework iterates through them in order, using the first resolver that
- * {@linkplain #supports(KeyDefinition) supports} the given key definition.
- * </p>
+ * <p>This interface enables a pluggable key resolution strategy, allowing the framework to resolve
+ * keys from different backends without coupling to any specific implementation. Each {@code
+ * KeyResolver} implementation handles a specific type of key source (e.g., local key store, remote
+ * JWKS endpoint, file system, external KMS).
  *
- * <p><b>Built-in Implementations:</b></p>
+ * <p><b>Design Pattern:</b> Strategy Pattern + Chain of Responsibility
+ *
+ * <p>Multiple {@code KeyResolver} implementations can be registered in the application context. The
+ * framework iterates through them in order, using the first resolver that {@linkplain
+ * #supports(KeyDefinition) supports} the given key definition.
+ *
+ * <p><b>Built-in Implementations:</b>
+ *
  * <ul>
- *   <li>{@link JwksConsumerKeyResolver} — resolves keys from remote JWKS endpoints</li>
+ *   <li>{@link JwksConsumerKeyResolver} — resolves keys from remote JWKS endpoints
  * </ul>
  *
  * @see KeyDefinition
@@ -47,12 +46,10 @@ public interface KeyResolver {
 
     /**
      * Determines whether this resolver can handle the given key definition.
-     * <p>
-     * The framework calls this method before {@link #resolve(KeyDefinition)} to check
-     * if this resolver is appropriate for the key's configuration. Implementations
-     * should inspect the key definition's properties (e.g., provider, jwksConsumer)
-     * to make this determination.
-     * </p>
+     *
+     * <p>The framework calls this method before {@link #resolve(KeyDefinition)} to check if this
+     * resolver is appropriate for the key's configuration. Implementations should inspect the key
+     * definition's properties (e.g., provider, jwksConsumer) to make this determination.
      *
      * @param keyDefinition the key definition to check
      * @return {@code true} if this resolver can resolve the key, {@code false} otherwise
@@ -61,12 +58,11 @@ public interface KeyResolver {
 
     /**
      * Resolves a JWK from the configured source based on the key definition.
-     * <p>
-     * This method is called only when {@link #supports(KeyDefinition)} returns {@code true}.
-     * Implementations should fetch or construct the JWK from their respective backend
-     * and return it. The returned JWK may be either a public key (for verification/encryption)
-     * or a key pair (for signing/decryption), depending on the source.
-     * </p>
+     *
+     * <p>This method is called only when {@link #supports(KeyDefinition)} returns {@code true}.
+     * Implementations should fetch or construct the JWK from their respective backend and return
+     * it. The returned JWK may be either a public key (for verification/encryption) or a key pair
+     * (for signing/decryption), depending on the source.
      *
      * @param keyDefinition the key definition describing which key to resolve
      * @return the resolved JWK (never {@code null})
@@ -76,14 +72,12 @@ public interface KeyResolver {
 
     /**
      * Returns the priority order of this resolver.
-     * <p>
-     * Lower values indicate higher priority. When multiple resolvers support the same
-     * key definition, the one with the lowest order value is used first.
-     * </p>
-     * <p>
-     * The built-in {@link JwksConsumerKeyResolver} uses order value 10; custom
-     * resolvers should use values of 100 or higher to avoid conflicts.
-     * </p>
+     *
+     * <p>Lower values indicate higher priority. When multiple resolvers support the same key
+     * definition, the one with the lowest order value is used first.
+     *
+     * <p>The built-in {@link JwksConsumerKeyResolver} uses order value 10; custom resolvers should
+     * use values of 100 or higher to avoid conflicts.
      *
      * @return the order value (lower = higher priority)
      */

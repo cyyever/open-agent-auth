@@ -15,23 +15,20 @@
  */
 package ai.shao.openagentauth.core.crypto.key.resolve;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import ai.shao.openagentauth.core.crypto.key.model.KeyDefinition;
 import ai.shao.openagentauth.core.exception.crypto.KeyResolutionException;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-/**
- * Unit tests for {@link JwksConsumerKeyResolver}.
- */
+/** Unit tests for {@link JwksConsumerKeyResolver}. */
 @DisplayName("JwksConsumerKeyResolver Tests")
 class JwksConsumerKeyResolverTest {
 
@@ -86,10 +83,8 @@ class JwksConsumerKeyResolverTest {
         @Test
         @DisplayName("Should return false for local key (no jwksConsumer)")
         void shouldReturnFalseForLocalKey() {
-            KeyDefinition localKeyDefinition = KeyDefinition.builder()
-                    .keyId("local-key")
-                    .provider("local")
-                    .build();
+            KeyDefinition localKeyDefinition =
+                    KeyDefinition.builder().keyId("local-key").provider("local").build();
 
             assertThat(resolver.supports(localKeyDefinition)).isFalse();
         }
@@ -97,10 +92,8 @@ class JwksConsumerKeyResolverTest {
         @Test
         @DisplayName("Should return false for remote key with consumer not in endpoints")
         void shouldReturnFalseForRemoteKeyWithUnknownConsumer() {
-            KeyDefinition remoteKeyDefinition = KeyDefinition.builder()
-                    .keyId("remote-key")
-                    .jwksConsumer("unknown-idp")
-                    .build();
+            KeyDefinition remoteKeyDefinition =
+                    KeyDefinition.builder().keyId("remote-key").jwksConsumer("unknown-idp").build();
 
             assertThat(resolver.supports(remoteKeyDefinition)).isFalse();
         }
@@ -108,10 +101,8 @@ class JwksConsumerKeyResolverTest {
         @Test
         @DisplayName("Should return true for remote key with consumer in endpoints")
         void shouldReturnTrueForRemoteKeyWithKnownConsumer() {
-            KeyDefinition remoteKeyDefinition = KeyDefinition.builder()
-                    .keyId("remote-key")
-                    .jwksConsumer("agent-idp")
-                    .build();
+            KeyDefinition remoteKeyDefinition =
+                    KeyDefinition.builder().keyId("remote-key").jwksConsumer("agent-idp").build();
 
             assertThat(resolver.supports(remoteKeyDefinition)).isTrue();
         }
@@ -119,10 +110,8 @@ class JwksConsumerKeyResolverTest {
         @Test
         @DisplayName("Should return false for remote key with blank jwksConsumer")
         void shouldReturnFalseForRemoteKeyWithBlankConsumer() {
-            KeyDefinition blankConsumerKeyDefinition = KeyDefinition.builder()
-                    .keyId("remote-key")
-                    .jwksConsumer("  ")
-                    .build();
+            KeyDefinition blankConsumerKeyDefinition =
+                    KeyDefinition.builder().keyId("remote-key").jwksConsumer("  ").build();
 
             assertThat(resolver.supports(blankConsumerKeyDefinition)).isFalse();
         }
@@ -146,15 +135,13 @@ class JwksConsumerKeyResolverTest {
         @Test
         @DisplayName("Should not throw exception when clearing all cache")
         void shouldNotThrowExceptionWhenClearingAllCache() {
-            assertThatCode(() -> resolver.clearCache())
-                    .doesNotThrowAnyException();
+            assertThatCode(() -> resolver.clearCache()).doesNotThrowAnyException();
         }
 
         @Test
         @DisplayName("Should not throw exception when clearing cache for specific consumer")
         void shouldNotThrowExceptionWhenClearingCacheForSpecificConsumer() {
-            assertThatCode(() -> resolver.clearCache("agent-idp"))
-                    .doesNotThrowAnyException();
+            assertThatCode(() -> resolver.clearCache("agent-idp")).doesNotThrowAnyException();
         }
 
         @Test
@@ -172,14 +159,16 @@ class JwksConsumerKeyResolverTest {
         @Test
         @DisplayName("Should throw KeyResolutionException when consumer not in endpoints")
         void shouldThrowExceptionWhenConsumerNotInEndpoints() {
-            KeyDefinition keyDefinition = KeyDefinition.builder()
-                    .keyId("test-key")
-                    .jwksConsumer("unknown-consumer")
-                    .build();
+            KeyDefinition keyDefinition =
+                    KeyDefinition.builder()
+                            .keyId("test-key")
+                            .jwksConsumer("unknown-consumer")
+                            .build();
 
             assertThatThrownBy(() -> resolver.resolve(keyDefinition))
                     .isInstanceOf(KeyResolutionException.class)
-                    .hasMessageContaining("No JWKS endpoint configured for consumer 'unknown-consumer'");
+                    .hasMessageContaining(
+                            "No JWKS endpoint configured for consumer 'unknown-consumer'");
         }
 
         @Test
@@ -188,12 +177,11 @@ class JwksConsumerKeyResolverTest {
             Map<String, String> emptyEndpointMap = new HashMap<>();
             emptyEndpointMap.put("empty-idp", "");
 
-            JwksConsumerKeyResolver resolverWithEmptyEndpoint = new JwksConsumerKeyResolver(emptyEndpointMap);
+            JwksConsumerKeyResolver resolverWithEmptyEndpoint =
+                    new JwksConsumerKeyResolver(emptyEndpointMap);
 
-            KeyDefinition keyDefinition = KeyDefinition.builder()
-                    .keyId("test-key")
-                    .jwksConsumer("empty-idp")
-                    .build();
+            KeyDefinition keyDefinition =
+                    KeyDefinition.builder().keyId("test-key").jwksConsumer("empty-idp").build();
 
             assertThatThrownBy(() -> resolverWithEmptyEndpoint.resolve(keyDefinition))
                     .isInstanceOf(KeyResolutionException.class)
@@ -206,12 +194,11 @@ class JwksConsumerKeyResolverTest {
             Map<String, String> blankEndpointMap = new HashMap<>();
             blankEndpointMap.put("blank-idp", "   ");
 
-            JwksConsumerKeyResolver resolverWithBlankEndpoint = new JwksConsumerKeyResolver(blankEndpointMap);
+            JwksConsumerKeyResolver resolverWithBlankEndpoint =
+                    new JwksConsumerKeyResolver(blankEndpointMap);
 
-            KeyDefinition keyDefinition = KeyDefinition.builder()
-                    .keyId("test-key")
-                    .jwksConsumer("blank-idp")
-                    .build();
+            KeyDefinition keyDefinition =
+                    KeyDefinition.builder().keyId("test-key").jwksConsumer("blank-idp").build();
 
             assertThatThrownBy(() -> resolverWithBlankEndpoint.resolve(keyDefinition))
                     .isInstanceOf(KeyResolutionException.class)

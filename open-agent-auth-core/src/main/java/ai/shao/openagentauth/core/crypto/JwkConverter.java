@@ -16,21 +16,18 @@
 package ai.shao.openagentauth.core.crypto;
 
 import ai.shao.openagentauth.core.model.jwk.Jwk;
-import org.jspecify.annotations.Nullable;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 /**
- * Converts between RFC 7517 JWK maps and the internal {@link Jwk} record.
- * Only Ed25519 ({@code kty=OKP}, {@code crv=Ed25519}, {@code alg=EdDSA}) is
- * accepted; those parameters are wire-only constants and never stored on the
- * record.
+ * Converts between RFC 7517 JWK maps and the internal {@link Jwk} record. Only Ed25519 ({@code
+ * kty=OKP}, {@code crv=Ed25519}, {@code alg=EdDSA}) is accepted; those parameters are wire-only
+ * constants and never stored on the record.
  */
 public final class JwkConverter {
 
-    private JwkConverter() {
-    }
+    private JwkConverter() {}
 
     public static Jwk convertMapToJwk(Map<String, Object> jwkMap) {
 
@@ -48,8 +45,7 @@ public final class JwkConverter {
             throw new IllegalArgumentException("JWK alg must be 'EdDSA', got: " + alg);
         }
 
-        Jwk.Builder builder = Jwk.builder()
-                .x(getClaimAsString(jwkMap, "x"));
+        Jwk.Builder builder = Jwk.builder().x(getClaimAsString(jwkMap, "x"));
 
         String kid = getClaimAsString(jwkMap, "kid");
         if (kid != null) {
@@ -67,8 +63,9 @@ public final class JwkConverter {
         if (value instanceof String s) {
             return s;
         }
-        throw new IllegalArgumentException("Invalid claim '%s': expected String, got %s"
-                .formatted(key, value.getClass().getSimpleName()));
+        throw new IllegalArgumentException(
+                "Invalid claim '%s': expected String, got %s"
+                        .formatted(key, value.getClass().getSimpleName()));
     }
 
     public static Map<String, Object> convertJwkToMap(Jwk jwk) {

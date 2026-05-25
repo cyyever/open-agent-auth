@@ -15,15 +15,14 @@
  */
 package ai.shao.openagentauth.core.server.model.request;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 @DisplayName("ResourceRequest Tests")
 class ResourceRequestTest {
@@ -88,12 +87,13 @@ class ResourceRequestTest {
             Map<String, String> headers = new HashMap<>();
             headers.put("Content-Type", "application/json");
 
-            ResourceRequest request = validBuilder()
-                .httpMethod("POST")
-                .httpUri("/api/resource")
-                .httpHeaders(headers)
-                .httpBody("{\"key\":\"value\"}")
-                .build();
+            ResourceRequest request =
+                    validBuilder()
+                            .httpMethod("POST")
+                            .httpUri("/api/resource")
+                            .httpHeaders(headers)
+                            .httpBody("{\"key\":\"value\"}")
+                            .build();
 
             assertThat(request.getHttpMethod()).isEqualTo("POST");
             assertThat(request.getHttpUri()).isEqualTo("/api/resource");
@@ -104,10 +104,8 @@ class ResourceRequestTest {
         @Test
         @DisplayName("Should support method chaining")
         void shouldSupportMethodChaining() {
-            ResourceRequest request = validBuilder()
-                .httpMethod("POST")
-                .httpUri("/api/resource")
-                .build();
+            ResourceRequest request =
+                    validBuilder().httpMethod("POST").httpUri("/api/resource").build();
 
             assertThat(request).isNotNull();
         }
@@ -115,12 +113,13 @@ class ResourceRequestTest {
         @Test
         @DisplayName("Should accept null values for optional HTTP fields")
         void shouldAcceptNullValuesForOptionalHttpFields() {
-            ResourceRequest request = validBuilder()
-                .httpMethod(null)
-                .httpUri(null)
-                .httpHeaders(null)
-                .httpBody(null)
-                .build();
+            ResourceRequest request =
+                    validBuilder()
+                            .httpMethod(null)
+                            .httpUri(null)
+                            .httpHeaders(null)
+                            .httpBody(null)
+                            .build();
 
             assertThat(request.getCt()).isEqualTo("ct-token");
             assertThat(request.getDpop()).isEqualTo("dpop-token");
@@ -156,7 +155,8 @@ class ResourceRequestTest {
         @Test
         @DisplayName("Should return httpUri")
         void shouldReturnHttpUri() {
-            assertThat(validBuilder().httpUri("/api/resource").build().getHttpUri()).isEqualTo("/api/resource");
+            assertThat(validBuilder().httpUri("/api/resource").build().getHttpUri())
+                    .isEqualTo("/api/resource");
         }
 
         @Test

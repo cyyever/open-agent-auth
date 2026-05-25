@@ -15,26 +15,23 @@
  */
 package ai.shao.openagentauth.core.server.exception;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * Test class for ServerErrorCode interface.
- * <p>
- * This test class validates the constants and default methods defined
- * in the ServerErrorCode interface, ensuring proper error code structure.
- * </p>
+ *
+ * <p>This test class validates the constants and default methods defined in the ServerErrorCode
+ * interface, ensuring proper error code structure.
  *
  * @since 1.0
  */
 @DisplayName("ServerErrorCode Test")
 class ServerErrorCodeTest {
 
-    /**
-     * Test implementation of ServerErrorCode for testing.
-     */
+    /** Test implementation of ServerErrorCode for testing. */
     private enum TestServerErrorCode implements ServerErrorCode {
         TEST_AUTH_ERROR("01", "TestAuthError", "Auth error: {0}"),
         TEST_TOKEN_ERROR("02", "TestTokenError", "Token error: {0}"),

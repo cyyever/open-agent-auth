@@ -18,14 +18,12 @@ package ai.shao.openagentauth.core.crypto.key.model;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Immutable value object describing how a key should be resolved and managed.
- * If {@code jwksConsumer} is set, the key is resolved from a remote JWKS endpoint;
- * otherwise, it is resolved from a local key store via the configured {@code provider}.
+ * Immutable value object describing how a key should be resolved and managed. If {@code
+ * jwksConsumer} is set, the key is resolved from a remote JWKS endpoint; otherwise, it is resolved
+ * from a local key store via the configured {@code provider}.
  */
 public record KeyDefinition(
-        String keyId,
-        @Nullable String provider,
-        @Nullable String jwksConsumer) {
+        String keyId, @Nullable String provider, @Nullable String jwksConsumer) {
 
     public KeyDefinition {
         if (keyId == null || keyId.isBlank()) {
@@ -51,8 +49,7 @@ public record KeyDefinition(
         private @Nullable String provider;
         private @Nullable String jwksConsumer;
 
-        private Builder() {
-        }
+        private Builder() {}
 
         public Builder keyId(@Nullable String keyId) {
             this.keyId = keyId;

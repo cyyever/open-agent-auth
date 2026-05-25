@@ -15,14 +15,10 @@
  */
 package ai.shao.openagentauth.core.server.exception.validation;
 
-/**
- * Exception thrown when request validation fails in framework orchestration layer.
- */
+/** Exception thrown when request validation fails in framework orchestration layer. */
 public class ServerValidationException extends ValidationException {
 
-    /**
-     * The error code for this exception.
-     */
+    /** The error code for this exception. */
     private static final ValidationErrorCode ERROR_CODE = ValidationErrorCode.VALIDATION_FAILED;
 
     /**
@@ -35,10 +31,11 @@ public class ServerValidationException extends ValidationException {
     }
 
     /**
-     * Constructs a new framework validation exception with the specified detail message and failed layer.
+     * Constructs a new framework validation exception with the specified detail message and failed
+     * layer.
      *
      * @param failedLayer the layer where validation failed
-     * @param message     the detail message
+     * @param message the detail message
      */
     public ServerValidationException(int failedLayer, String message) {
         super(failedLayer, ERROR_CODE, message);
@@ -55,11 +52,12 @@ public class ServerValidationException extends ValidationException {
     }
 
     /**
-     * Constructs a new framework validation exception with the specified detail message, failed layer, and cause.
+     * Constructs a new framework validation exception with the specified detail message, failed
+     * layer, and cause.
      *
      * @param failedLayer the layer where validation failed
-     * @param message     the detail message
-     * @param cause       the cause
+     * @param message the detail message
+     * @param cause the cause
      */
     public ServerValidationException(int failedLayer, String message, Throwable cause) {
         super(failedLayer, ERROR_CODE, cause, message);

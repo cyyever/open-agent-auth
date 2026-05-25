@@ -15,27 +15,26 @@
  */
 package ai.shao.openagentauth.core.model.identity;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * Unit tests for {@link AgentIdentity}.
- * <p>
- * Tests the Agent Identity model's behavior including:
+ *
+ * <p>Tests the Agent Identity model's behavior including:
+ *
  * <ul>
- *   <li>Building identities with all required and optional fields</li>
- *   <li>Getter methods for all properties</li>
- *   <li>Equals, hashCode, and toString methods</li>
- *   <li>Builder pattern with validation</li>
- *   <li>IssuedFor inner class</li>
- *   <li>Default version behavior</li>
+ *   <li>Building identities with all required and optional fields
+ *   <li>Getter methods for all properties
+ *   <li>Equals, hashCode, and toString methods
+ *   <li>Builder pattern with validation
+ *   <li>IssuedFor inner class
+ *   <li>Default version behavior
  * </ul>
- * </p>
  *
  * @since 1.0
  */
@@ -56,23 +55,25 @@ class AgentIdentityTest {
         @DisplayName("Should build identity with all fields")
         void shouldBuildIdentityWithAllFields() {
             // Given
-            AgentIdentity.IssuedFor issuedFor = AgentIdentity.IssuedFor.builder()
-                    .platform("cloud-platform")
-                    .client("web-app")
-                    .clientInstance("instance-1")
-                    .build();
+            AgentIdentity.IssuedFor issuedFor =
+                    AgentIdentity.IssuedFor.builder()
+                            .platform("cloud-platform")
+                            .client("web-app")
+                            .clientInstance("instance-1")
+                            .build();
 
             // When
-            AgentIdentity identity = AgentIdentity.builder()
-                    .version(VERSION)
-                    .id(AGENT_ID)
-                    .issuer(ISSUER)
-                    .issuedTo(ISSUED_TO)
-                    .issuedFor(issuedFor)
-                    .issuanceDate(NOW)
-                    .validFrom(NOW)
-                    .expires(NOW.plusSeconds(3600))
-                    .build();
+            AgentIdentity identity =
+                    AgentIdentity.builder()
+                            .version(VERSION)
+                            .id(AGENT_ID)
+                            .issuer(ISSUER)
+                            .issuedTo(ISSUED_TO)
+                            .issuedFor(issuedFor)
+                            .issuanceDate(NOW)
+                            .validFrom(NOW)
+                            .expires(NOW.plusSeconds(3600))
+                            .build();
 
             // Then
             assertThat(identity).isNotNull();
@@ -93,11 +94,8 @@ class AgentIdentityTest {
         @DisplayName("Should build identity with default version")
         void shouldBuildIdentityWithDefaultVersion() {
             // When
-            AgentIdentity identity = AgentIdentity.builder()
-                    .id(AGENT_ID)
-                    .issuer(ISSUER)
-                    .issuedTo(ISSUED_TO)
-                    .build();
+            AgentIdentity identity =
+                    AgentIdentity.builder().id(AGENT_ID).issuer(ISSUER).issuedTo(ISSUED_TO).build();
 
             // Then
             assertThat(identity.version()).isEqualTo("1.0");
@@ -107,11 +105,8 @@ class AgentIdentityTest {
         @DisplayName("Should build identity with null optional fields")
         void shouldBuildIdentityWithNullOptionalFields() {
             // When
-            AgentIdentity identity = AgentIdentity.builder()
-                    .id(AGENT_ID)
-                    .issuer(ISSUER)
-                    .issuedTo(ISSUED_TO)
-                    .build();
+            AgentIdentity identity =
+                    AgentIdentity.builder().id(AGENT_ID).issuer(ISSUER).issuedTo(ISSUED_TO).build();
 
             // Then
             assertThat(identity.issuedFor()).isNull();
@@ -121,9 +116,6 @@ class AgentIdentityTest {
         }
     }
 
-
-
-
     @Nested
     @DisplayName("IssuedFor Tests")
     class IssuedForTests {
@@ -132,11 +124,12 @@ class AgentIdentityTest {
         @DisplayName("Should build IssuedFor with all fields")
         void shouldBuildIssuedForWithAllFields() {
             // When
-            AgentIdentity.IssuedFor issuedFor = AgentIdentity.IssuedFor.builder()
-                    .platform("platform-1")
-                    .client("client-1")
-                    .clientInstance("instance-1")
-                    .build();
+            AgentIdentity.IssuedFor issuedFor =
+                    AgentIdentity.IssuedFor.builder()
+                            .platform("platform-1")
+                            .client("client-1")
+                            .clientInstance("instance-1")
+                            .build();
 
             // Then
             assertThat(issuedFor.platform()).isEqualTo("platform-1");
@@ -160,16 +153,18 @@ class AgentIdentityTest {
         @DisplayName("IssuedFor should be equal when all fields match")
         void issuedForShouldBeEqualWhenAllFieldsMatch() {
             // Given
-            AgentIdentity.IssuedFor issuedFor1 = AgentIdentity.IssuedFor.builder()
-                    .platform("platform-1")
-                    .client("client-1")
-                    .clientInstance("instance-1")
-                    .build();
-            AgentIdentity.IssuedFor issuedFor2 = AgentIdentity.IssuedFor.builder()
-                    .platform("platform-1")
-                    .client("client-1")
-                    .clientInstance("instance-1")
-                    .build();
+            AgentIdentity.IssuedFor issuedFor1 =
+                    AgentIdentity.IssuedFor.builder()
+                            .platform("platform-1")
+                            .client("client-1")
+                            .clientInstance("instance-1")
+                            .build();
+            AgentIdentity.IssuedFor issuedFor2 =
+                    AgentIdentity.IssuedFor.builder()
+                            .platform("platform-1")
+                            .client("client-1")
+                            .clientInstance("instance-1")
+                            .build();
 
             // When & Then
             assertThat(issuedFor1).isEqualTo(issuedFor2);
@@ -180,11 +175,12 @@ class AgentIdentityTest {
         @DisplayName("IssuedFor should have correct toString")
         void issuedForShouldHaveCorrectToString() {
             // Given
-            AgentIdentity.IssuedFor issuedFor = AgentIdentity.IssuedFor.builder()
-                    .platform("platform-1")
-                    .client("client-1")
-                    .clientInstance("instance-1")
-                    .build();
+            AgentIdentity.IssuedFor issuedFor =
+                    AgentIdentity.IssuedFor.builder()
+                            .platform("platform-1")
+                            .client("client-1")
+                            .clientInstance("instance-1")
+                            .build();
 
             // When
             String toString = issuedFor.toString();
@@ -203,11 +199,12 @@ class AgentIdentityTest {
      * @return a test AgentIdentity instance
      */
     private AgentIdentity createTestIdentity() {
-        AgentIdentity.IssuedFor issuedFor = AgentIdentity.IssuedFor.builder()
-                .platform("cloud-platform")
-                .client("web-app")
-                .clientInstance("instance-1")
-                .build();
+        AgentIdentity.IssuedFor issuedFor =
+                AgentIdentity.IssuedFor.builder()
+                        .platform("cloud-platform")
+                        .client("web-app")
+                        .clientInstance("instance-1")
+                        .build();
 
         return AgentIdentity.builder()
                 .version(VERSION)

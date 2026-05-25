@@ -15,12 +15,11 @@
  */
 package ai.shao.openagentauth.core.protocol.dpop;
 
+import ai.shao.openagentauth.core.crypto.JwtHashUtil;
 import ai.shao.openagentauth.core.model.jwk.Jwk;
 import ai.shao.openagentauth.core.model.token.CredentialToken;
 import ai.shao.openagentauth.core.model.token.DpopToken;
-import ai.shao.openagentauth.core.crypto.JwtHashUtil;
 import ai.shao.openagentauth.core.token.common.TokenValidationResult;
-import ai.shao.openagentauth.core.util.ValidationUtils;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSVerifier;
@@ -30,31 +29,28 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
+import java.util.concurrent.ConcurrentHashMap;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
- * Validator for DPoP proofs. Verifies the signature and validity of a
- * {@link DpopToken} against the binding {@link CredentialToken}. Only Ed25519
- * ({@code alg=EdDSA}) is supported.
+ * Validator for DPoP proofs. Verifies the signature and validity of a {@link DpopToken} against the
+ * binding {@link CredentialToken}. Only Ed25519 ({@code alg=EdDSA}) is supported.
  */
 public class DpopValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(DpopValidator.class);
 
     /**
-     * Cache from internal {@link Jwk} to its Nimbus {@link JWK} translation. Avoids
-     * re-decoding the {@code x} parameter on every DPoP validation against the same
-     * cnf.jwk. {@code Jwk} is a record, so value-based equality keys this map correctly.
+     * Cache from internal {@link Jwk} to its Nimbus {@link JWK} translation. Avoids re-decoding the
+     * {@code x} parameter on every DPoP validation against the same cnf.jwk. {@code Jwk} is a
+     * record, so value-based equality keys this map correctly.
      */
     private final ConcurrentHashMap<Jwk, JWK> jwkCache = new ConcurrentHashMap<>();
 
-    public DpopValidator() {
-    }
+    public DpopValidator() {}
 
     public TokenValidationResult<DpopToken> validate(DpopToken dpop, CredentialToken ct) {
         return validate(null, dpop, ct);
@@ -106,6 +102,7 @@ public class DpopValidator {
     /** Outcome of a single verification step. */
     private sealed interface Result {
         record Ok() implements Result {}
+
         record Err(String message) implements Result {}
     }
 
@@ -129,15 +126,17 @@ public class DpopValidator {
     }
 
     private JWK buildNimbusJwk(Jwk jwk) {
-        OctetKeyPair.Builder builder = new OctetKeyPair.Builder(Curve.Ed25519, new Base64URL(jwk.x()))
-                .algorithm(JWSAlgorithm.EdDSA);
+        OctetKeyPair.Builder builder =
+                new OctetKeyPair.Builder(Curve.Ed25519, new Base64URL(jwk.x()))
+                        .algorithm(JWSAlgorithm.EdDSA);
         if (jwk.keyId() != null) {
             builder.keyID(jwk.keyId());
         }
         return builder.build();
     }
 
-    private Result verifySignature(@Nullable SignedJWT signedJwt, DpopToken dpop, CredentialToken ct) {
+    private Result verifySignature(
+            @Nullable SignedJWT signedJwt, DpopToken dpop, CredentialToken ct) {
         try {
             SignedJWT jwt = signedJwt;
             if (jwt == null) {
@@ -191,7 +190,8 @@ public class DpopValidator {
 
             if (!expectedWth.equals(actualWth)) {
                 return new Result.Err(
-                        "DPoP wth '%s' does not match CT hash '%s'".formatted(actualWth, expectedWth));
+                        "DPoP wth '%s' does not match CT hash '%s'"
+                                .formatted(actualWth, expectedWth));
             }
             return OK;
         } catch (Exception e) {

@@ -18,8 +18,8 @@ package ai.shao.openagentauth.core.exception;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Interface for error codes used in the Open Agent Auth framework.
- * Error code format: {@code OPEN_AGENT_AUTH_XX_YYZZ} (XX=system, YY=domain, ZZ=error).
+ * Interface for error codes used in the Open Agent Auth framework. Error code format: {@code
+ * OPEN_AGENT_AUTH_XX_YYZZ} (XX=system, YY=domain, ZZ=error).
  */
 public interface ErrorCode {
 
@@ -46,9 +46,8 @@ public interface ErrorCode {
 
     /**
      * Gets the full error code.
-     * <p>
-     * The error code follows the format: OPEN_AGENT_AUTH_<system>_<domain><sub>
-     * </p>
+     *
+     * <p>The error code follows the format: OPEN_AGENT_AUTH_<system>_<domain><sub>
      *
      * @return the full error code
      */
@@ -58,9 +57,8 @@ public interface ErrorCode {
 
     /**
      * Gets the error name.
-     * <p>
-     * A descriptive name for the error, typically in UPPER_SNAKE_CASE.
-     * </p>
+     *
+     * <p>A descriptive name for the error, typically in UPPER_SNAKE_CASE.
      *
      * @return the error name
      */
@@ -68,10 +66,9 @@ public interface ErrorCode {
 
     /**
      * Gets the message template.
-     * <p>
-     * A template string that can be formatted with error parameters.
-     * Placeholders should use the format {0}, {1}, {2}, etc. (index-based).
-     * </p>
+     *
+     * <p>A template string that can be formatted with error parameters. Placeholders should use the
+     * format {0}, {1}, {2}, etc. (index-based).
      *
      * @return the message template
      */
@@ -79,9 +76,8 @@ public interface ErrorCode {
 
     /**
      * Formats the message using the template with the provided parameters.
-     * <p>
-     * Uses index-based placeholders {0}, {1}, {2}, etc. to substitute parameters.
-     * </p>
+     *
+     * <p>Uses index-based placeholders {0}, {1}, {2}, etc. to substitute parameters.
      *
      * @param params the parameters to substitute in the template (varargs)
      * @return the formatted message

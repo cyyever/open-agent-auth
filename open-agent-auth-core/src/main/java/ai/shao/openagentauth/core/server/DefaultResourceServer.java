@@ -27,17 +27,16 @@ import ai.shao.openagentauth.core.server.model.validation.ValidationResult;
 import ai.shao.openagentauth.core.token.common.TokenValidationResult;
 import ai.shao.openagentauth.core.util.ValidationUtils;
 import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Default {@link ResourceServer} implementation. Chains CT then DPoP validation,
- * fail-fast on the first error.
+ * Default {@link ResourceServer} implementation. Chains CT then DPoP validation, fail-fast on the
+ * first error.
  */
 public class DefaultResourceServer implements ResourceServer {
 
@@ -57,7 +56,8 @@ public class DefaultResourceServer implements ResourceServer {
     }
 
     @Override
-    public ValidationResult validateRequest(ResourceRequest request) throws ServerValidationException {
+    public ValidationResult validateRequest(ResourceRequest request)
+            throws ServerValidationException {
         ValidationUtils.validateNotNull(request, "Resource request");
 
         String ctString = request.getCt();
@@ -123,11 +123,13 @@ public class DefaultResourceServer implements ResourceServer {
                 .build();
     }
 
-    private static ValidationResult.LayerResult toLayerResult(int layer, String name, TokenValidationResult<?> result) {
-        String message = switch (result) {
-            case TokenValidationResult.Success<?> __ -> "Validation passed";
-            case TokenValidationResult.Failure<?>(String msg) -> msg;
-        };
+    private static ValidationResult.LayerResult toLayerResult(
+            int layer, String name, TokenValidationResult<?> result) {
+        String message =
+                switch (result) {
+                    case TokenValidationResult.Success<?> __ -> "Validation passed";
+                    case TokenValidationResult.Failure<?>(String msg) -> msg;
+                };
         return ValidationResult.LayerResult.builder()
                 .layer(layer)
                 .layerName(name)

@@ -15,10 +15,10 @@
  */
 package ai.shao.openagentauth.core.exception.crypto;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Crypto Error Code Test")
 class CryptoErrorCodeTest {
@@ -65,5 +65,4 @@ class CryptoErrorCodeTest {
             assertThat(errorCode.getErrorCode()).hasSize(23);
         }
     }
-
 }

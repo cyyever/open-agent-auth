@@ -15,10 +15,12 @@
  */
 package ai.shao.openagentauth.core.protocol.dpop;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import ai.shao.openagentauth.core.crypto.JwtHashUtil;
 import ai.shao.openagentauth.core.model.jwk.Jwk;
 import ai.shao.openagentauth.core.model.token.CredentialToken;
 import ai.shao.openagentauth.core.model.token.DpopToken;
-import ai.shao.openagentauth.core.crypto.JwtHashUtil;
 import ai.shao.openagentauth.core.token.common.TokenValidationResult;
 import ai.shao.openagentauth.core.trust.TrustDomain;
 import com.nimbusds.jose.JOSEException;
@@ -31,22 +33,17 @@ import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * Unit tests for {@link DpopValidator}.
- */
+/** Unit tests for {@link DpopValidator}. */
 @DisplayName("DPoP Validator Tests")
 class DpopValidatorTest {
 
@@ -58,13 +55,9 @@ class DpopValidatorTest {
 
     @BeforeEach
     void setUp() throws JOSEException {
-        witSigningKey = new OctetKeyPairGenerator(Curve.Ed25519)
-                .keyID("ct-signing-key")
-                .generate();
+        witSigningKey = new OctetKeyPairGenerator(Curve.Ed25519).keyID("ct-signing-key").generate();
 
-        wptPrivateKey = new OctetKeyPairGenerator(Curve.Ed25519)
-                .keyID("dpop-key")
-                .generate();
+        wptPrivateKey = new OctetKeyPairGenerator(Curve.Ed25519).keyID("dpop-key").generate();
         wptPublicKey = wptPrivateKey.toPublicJWK();
 
         trustDomain = new TrustDomain("example.com");
@@ -246,40 +239,54 @@ class DpopValidatorTest {
     }
 
     private CredentialToken createValidWit(String subject) throws JOSEException {
-        return signedWit(trustDomain.domainId(), subject,
+        return signedWit(
+                trustDomain.domainId(),
+                subject,
                 Date.from(Instant.now().plusSeconds(3600)),
-                wptPublicKey, witSigningKey);
+                wptPublicKey,
+                witSigningKey);
     }
 
-    private static CredentialToken signedWit(String issuer, String subject, Date expiration,
-                                                   OctetKeyPair cnfPublicKey, OctetKeyPair signingKey)
+    private static CredentialToken signedWit(
+            String issuer,
+            String subject,
+            Date expiration,
+            OctetKeyPair cnfPublicKey,
+            OctetKeyPair signingKey)
             throws JOSEException {
         Map<String, Object> cnf = new HashMap<>();
         cnf.put("jwk", cnfPublicKey.toJSONObject());
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .issuer(issuer)
-                .subject(subject)
-                .expirationTime(expiration)
-                .jwtID(UUID.randomUUID().toString())
-                .claim("cnf", cnf)
-                .build();
-        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                .type(new JOSEObjectType("ct+jwt"))
-                .build();
+        JWTClaimsSet claims =
+                new JWTClaimsSet.Builder()
+                        .issuer(issuer)
+                        .subject(subject)
+                        .expirationTime(expiration)
+                        .jwtID(UUID.randomUUID().toString())
+                        .claim("cnf", cnf)
+                        .build();
+        JWSHeader header =
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                        .type(new JOSEObjectType("ct+jwt"))
+                        .build();
         SignedJWT jwt = new SignedJWT(header, claims);
         jwt.sign(new Ed25519Signer(signingKey));
         String jwtString = jwt.serialize();
 
-        Jwk cnfJwk = Jwk.builder().x(cnfPublicKey.getX().toString()).keyId(cnfPublicKey.getKeyID()).build();
+        Jwk cnfJwk =
+                Jwk.builder()
+                        .x(cnfPublicKey.getX().toString())
+                        .keyId(cnfPublicKey.getKeyID())
+                        .build();
         CredentialToken.Claims.Confirmation confirmation =
                 CredentialToken.Claims.Confirmation.builder().jwk(cnfJwk).build();
-        CredentialToken.Claims witClaims = CredentialToken.Claims.builder()
-                .issuer(issuer)
-                .subject(subject)
-                .expirationTime(expiration)
-                .jwtId(UUID.randomUUID().toString())
-                .confirmation(confirmation)
-                .build();
+        CredentialToken.Claims witClaims =
+                CredentialToken.Claims.builder()
+                        .issuer(issuer)
+                        .subject(subject)
+                        .expirationTime(expiration)
+                        .jwtId(UUID.randomUUID().toString())
+                        .confirmation(confirmation)
+                        .build();
         String[] parts = jwtString.split("\\.");
         String signature = parts.length > 2 ? parts[2] : "";
         return CredentialToken.builder()
@@ -289,31 +296,35 @@ class DpopValidatorTest {
                 .build();
     }
 
-    private static DpopToken signedWpt(CredentialToken ct, OctetKeyPair signingKey,
-                                                long expirationSeconds) throws JOSEException {
+    private static DpopToken signedWpt(
+            CredentialToken ct, OctetKeyPair signingKey, long expirationSeconds)
+            throws JOSEException {
         String wth = JwtHashUtil.computeWitHash(ct.jwtString());
         Date expiration = Date.from(Instant.now().plusSeconds(expirationSeconds));
         String jti = UUID.randomUUID().toString();
 
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .expirationTime(expiration)
-                .jwtID(jti)
-                .claim("wth", wth)
-                .build();
-        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                .type(new JOSEObjectType("dpop+jwt"))
-                .build();
+        JWTClaimsSet claims =
+                new JWTClaimsSet.Builder()
+                        .expirationTime(expiration)
+                        .jwtID(jti)
+                        .claim("wth", wth)
+                        .build();
+        JWSHeader header =
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                        .type(new JOSEObjectType("dpop+jwt"))
+                        .build();
         SignedJWT jwt = new SignedJWT(header, claims);
         jwt.sign(new Ed25519Signer(signingKey));
         String jwtString = jwt.serialize();
         String[] parts = jwtString.split("\\.");
         String signature = parts.length > 2 ? parts[2] : "";
 
-        DpopToken.Claims wptClaims = DpopToken.Claims.builder()
-                .expirationTime(expiration)
-                .jwtId(jti)
-                .workloadTokenHash(wth)
-                .build();
+        DpopToken.Claims wptClaims =
+                DpopToken.Claims.builder()
+                        .expirationTime(expiration)
+                        .jwtId(jti)
+                        .workloadTokenHash(wth)
+                        .build();
         return DpopToken.builder()
                 .claims(wptClaims)
                 .signature(signature)
@@ -323,11 +334,12 @@ class DpopValidatorTest {
 
     private DpopToken createExpiredWpt() {
         return DpopToken.builder()
-                .claims(DpopToken.Claims.builder()
-                        .expirationTime(Date.from(Instant.now().minusSeconds(300)))
-                        .jwtId(UUID.randomUUID().toString())
-                        .workloadTokenHash("test-wth-hash")
-                        .build())
+                .claims(
+                        DpopToken.Claims.builder()
+                                .expirationTime(Date.from(Instant.now().minusSeconds(300)))
+                                .jwtId(UUID.randomUUID().toString())
+                                .workloadTokenHash("test-wth-hash")
+                                .build())
                 .signature("test-signature")
                 .jwtString("test.jwt.string")
                 .build();
@@ -335,11 +347,12 @@ class DpopValidatorTest {
 
     private DpopToken createWptWithoutWth() {
         return DpopToken.builder()
-                .claims(DpopToken.Claims.builder()
-                        .expirationTime(Date.from(Instant.now().plusSeconds(300)))
-                        .jwtId(UUID.randomUUID().toString())
-                        .workloadTokenHash("   ")
-                        .build())
+                .claims(
+                        DpopToken.Claims.builder()
+                                .expirationTime(Date.from(Instant.now().plusSeconds(300)))
+                                .jwtId(UUID.randomUUID().toString())
+                                .workloadTokenHash("   ")
+                                .build())
                 .signature("test-signature")
                 .jwtString("test.jwt.string")
                 .build();
@@ -349,7 +362,10 @@ class DpopValidatorTest {
         String jwtString = dpop.jwtString();
         if (jwtString != null && jwtString.contains(".")) {
             int lastDotIndex = jwtString.lastIndexOf(".");
-            String tamperedJwtString = jwtString.substring(0, lastDotIndex + 1) + "tampered" + jwtString.substring(lastDotIndex + 1);
+            String tamperedJwtString =
+                    jwtString.substring(0, lastDotIndex + 1)
+                            + "tampered"
+                            + jwtString.substring(lastDotIndex + 1);
 
             return DpopToken.builder()
                     .claims(dpop.claims())

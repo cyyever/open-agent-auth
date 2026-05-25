@@ -19,23 +19,21 @@ import ai.shao.openagentauth.core.crypto.key.model.KeyDefinition;
 import ai.shao.openagentauth.core.exception.crypto.KeyResolutionException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
+import java.net.URI;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Objects;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
- * {@link KeyResolver} that loads keys from remote JWKS endpoints. Cache discipline:
- * per-consumer TTL with stale-while-revalidate (expired entries are served while a
- * single background virtual thread refreshes), single-flight on cold start via
- * {@link ConcurrentHashMap#compute}, and a key-not-found refetch throttle to absorb
- * upstream key rotation without thundering-herd refetches.
+ * {@link KeyResolver} that loads keys from remote JWKS endpoints. Cache discipline: per-consumer
+ * TTL with stale-while-revalidate (expired entries are served while a single background virtual
+ * thread refreshes), single-flight on cold start via {@link ConcurrentHashMap#compute}, and a
+ * key-not-found refetch throttle to absorb upstream key rotation without thundering-herd refetches.
  */
 public class JwksConsumerKeyResolver implements KeyResolver {
 
@@ -55,9 +53,9 @@ public class JwksConsumerKeyResolver implements KeyResolver {
     private final ConcurrentHashMap<String, CachedJwks> jwkSetCache = new ConcurrentHashMap<>();
 
     /**
-     * Last time a key-not-found refetch was attempted per consumer. Used to throttle
-     * back-to-back refetches when an attacker (or a misconfigured client) keeps asking
-     * for an unknown {@code kid}.
+     * Last time a key-not-found refetch was attempted per consumer. Used to throttle back-to-back
+     * refetches when an attacker (or a misconfigured client) keeps asking for an unknown {@code
+     * kid}.
      */
     private final ConcurrentHashMap<String, Instant> lastNotFoundFetch = new ConcurrentHashMap<>();
 
@@ -68,17 +66,23 @@ public class JwksConsumerKeyResolver implements KeyResolver {
         this(consumerEndpoints, DEFAULT_JWKS_TTL, DEFAULT_NOT_FOUND_RETRY_THROTTLE);
     }
 
-    public JwksConsumerKeyResolver(Map<String, String> consumerEndpoints,
-                                   Duration jwksTtl,
-                                   Duration notFoundRetryThrottle) {
+    public JwksConsumerKeyResolver(
+            Map<String, String> consumerEndpoints,
+            Duration jwksTtl,
+            Duration notFoundRetryThrottle) {
         if (consumerEndpoints == null) {
             throw new IllegalArgumentException("Consumer endpoints map cannot be null");
         }
         this.consumerEndpoints = consumerEndpoints;
         this.jwksTtl = jwksTtl;
         this.notFoundRetryThrottle = notFoundRetryThrottle;
-        logger.info("JwksConsumerKeyResolver initialized: {} consumer(s) {}, ttl={}, notFoundThrottle={}",
-                consumerEndpoints.size(), consumerEndpoints.keySet(), jwksTtl, notFoundRetryThrottle);
+        logger.info(
+                "JwksConsumerKeyResolver initialized: {} consumer(s) {}, ttl={},"
+                        + " notFoundThrottle={}",
+                consumerEndpoints.size(),
+                consumerEndpoints.keySet(),
+                jwksTtl,
+                notFoundRetryThrottle);
     }
 
     @Override
@@ -91,9 +95,10 @@ public class JwksConsumerKeyResolver implements KeyResolver {
 
     @Override
     public JWK resolve(KeyDefinition keyDefinition) throws KeyResolutionException {
-        String consumerName = Objects.requireNonNull(
-                keyDefinition.jwksConsumer(),
-                "JwksConsumerKeyResolver.resolve called with a local-key KeyDefinition");
+        String consumerName =
+                Objects.requireNonNull(
+                        keyDefinition.jwksConsumer(),
+                        "JwksConsumerKeyResolver.resolve called with a local-key KeyDefinition");
         String keyId = keyDefinition.keyId();
 
         String jwksEndpoint = consumerEndpoints.get(consumerName);
@@ -107,8 +112,10 @@ public class JwksConsumerKeyResolver implements KeyResolver {
             JWK resolvedKey = jwkSet.getKeyByKeyId(keyId);
 
             if (resolvedKey == null && canRefetchAfterNotFound(consumerName)) {
-                logger.info("Key '{}' not found in cached JWKS for consumer '{}', forcing refresh",
-                        keyId, consumerName);
+                logger.info(
+                        "Key '{}' not found in cached JWKS for consumer '{}', forcing refresh",
+                        keyId,
+                        consumerName);
                 lastNotFoundFetch.put(consumerName, Instant.now());
                 jwkSetCache.remove(consumerName);
                 jwkSet = getOrFetch(consumerName, jwksEndpoint);
@@ -117,19 +124,31 @@ public class JwksConsumerKeyResolver implements KeyResolver {
 
             if (resolvedKey == null) {
                 throw new KeyResolutionException(
-                        "Key '" + keyId + "' not found in JWKS from consumer '" +
-                                consumerName + "' at " + jwksEndpoint);
+                        "Key '"
+                                + keyId
+                                + "' not found in JWKS from consumer '"
+                                + consumerName
+                                + "' at "
+                                + jwksEndpoint);
             }
 
-            logger.debug("Resolved remote key: keyId={}, consumer={}, keyType={}",
-                    keyId, consumerName, resolvedKey.getKeyType());
+            logger.debug(
+                    "Resolved remote key: keyId={}, consumer={}, keyType={}",
+                    keyId,
+                    consumerName,
+                    resolvedKey.getKeyType());
             return resolvedKey;
         } catch (KeyResolutionException e) {
             throw e;
         } catch (Exception e) {
             throw new KeyResolutionException(
-                    "Failed to resolve key '" + keyId + "' from consumer '" +
-                            consumerName + "': " + e.getMessage(), e);
+                    "Failed to resolve key '"
+                            + keyId
+                            + "' from consumer '"
+                            + consumerName
+                            + "': "
+                            + e.getMessage(),
+                    e);
         }
     }
 
@@ -144,36 +163,46 @@ public class JwksConsumerKeyResolver implements KeyResolver {
             return cached.set;
         }
         // Cold start: block. compute() locks per key, collapsing concurrent misses to one.
-        return jwkSetCache.compute(consumerName, (name, existing) -> {
-            if (existing != null && Instant.now().isBefore(existing.expiresAt)) {
-                return existing;
-            }
-            return fetchAndWrap(name, jwksEndpoint);
-        }).set;
+        return jwkSetCache.compute(
+                        consumerName,
+                        (name, existing) -> {
+                            if (existing != null && Instant.now().isBefore(existing.expiresAt)) {
+                                return existing;
+                            }
+                            return fetchAndWrap(name, jwksEndpoint);
+                        })
+                .set;
     }
 
     private void triggerAsyncRefresh(String consumerName, String jwksEndpoint) {
         if (refreshInFlight.putIfAbsent(consumerName, Boolean.TRUE) != null) {
             return;
         }
-        Thread.startVirtualThread(() -> {
-            try {
-                jwkSetCache.compute(consumerName, (name, existing) -> {
-                    if (existing != null && Instant.now().isBefore(existing.expiresAt)) {
-                        return existing;
-                    }
+        Thread.startVirtualThread(
+                () -> {
                     try {
-                        return fetchAndWrap(name, jwksEndpoint);
-                    } catch (RuntimeException e) {
-                        logger.warn("Background JWKS refresh failed for '{}': {}; keeping stale entry",
-                                name, e.getMessage());
-                        return existing;
+                        jwkSetCache.compute(
+                                consumerName,
+                                (name, existing) -> {
+                                    if (existing != null
+                                            && Instant.now().isBefore(existing.expiresAt)) {
+                                        return existing;
+                                    }
+                                    try {
+                                        return fetchAndWrap(name, jwksEndpoint);
+                                    } catch (RuntimeException e) {
+                                        logger.warn(
+                                                "Background JWKS refresh failed for '{}': {};"
+                                                        + " keeping stale entry",
+                                                name,
+                                                e.getMessage());
+                                        return existing;
+                                    }
+                                });
+                    } finally {
+                        refreshInFlight.remove(consumerName);
                     }
                 });
-            } finally {
-                refreshInFlight.remove(consumerName);
-            }
-        });
     }
 
     private CachedJwks fetchAndWrap(String consumerName, String jwksEndpoint) {
@@ -189,7 +218,8 @@ public class JwksConsumerKeyResolver implements KeyResolver {
 
     private boolean canRefetchAfterNotFound(String consumerName) {
         Instant last = lastNotFoundFetch.get(consumerName);
-        return last == null || Duration.between(last, Instant.now()).compareTo(notFoundRetryThrottle) >= 0;
+        return last == null
+                || Duration.between(last, Instant.now()).compareTo(notFoundRetryThrottle) >= 0;
     }
 
     @Override

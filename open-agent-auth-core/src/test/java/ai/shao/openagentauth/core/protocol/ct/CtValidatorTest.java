@@ -15,6 +15,10 @@
  */
 package ai.shao.openagentauth.core.protocol.ct;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import ai.shao.openagentauth.core.crypto.key.KeyManager;
 import ai.shao.openagentauth.core.model.token.CredentialToken;
 import ai.shao.openagentauth.core.token.common.TokenValidationResult;
@@ -29,25 +33,18 @@ import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
-
-/**
- * Unit tests for {@link CtValidator}.
- */
+/** Unit tests for {@link CtValidator}. */
 @DisplayName("CT Validator Tests")
 class CtValidatorTest {
 
@@ -62,15 +59,11 @@ class CtValidatorTest {
 
     @BeforeEach
     void setUp() throws JOSEException {
-        signingKey = new OctetKeyPairGenerator(Curve.Ed25519)
-                .keyID(VERIFICATION_KEY_ID)
-                .generate();
+        signingKey = new OctetKeyPairGenerator(Curve.Ed25519).keyID(VERIFICATION_KEY_ID).generate();
         verificationKey = signingKey.toPublicJWK();
 
-        wptPublicKey = new OctetKeyPairGenerator(Curve.Ed25519)
-                .keyID("dpop-key")
-                .generate()
-                .toPublicJWK();
+        wptPublicKey =
+                new OctetKeyPairGenerator(Curve.Ed25519).keyID("dpop-key").generate().toPublicJWK();
 
         trustDomain = new TrustDomain("example.com");
 
@@ -161,12 +154,13 @@ class CtValidatorTest {
         @Test
         @DisplayName("Should reject CT with wrong trust domain")
         void shouldRejectWitWithWrongTrustDomain() throws Exception {
-            String witJwt = signedWit(
-                    "wrong-domain.com",
-                    "agent-001",
-                    Date.from(Instant.now().plusSeconds(3600)),
-                    wptPublicKey.toJSONObject(),
-                    signingKey);
+            String witJwt =
+                    signedWit(
+                            "wrong-domain.com",
+                            "agent-001",
+                            Date.from(Instant.now().plusSeconds(3600)),
+                            wptPublicKey.toJSONObject(),
+                            signingKey);
 
             TokenValidationResult<CredentialToken> result = ctValidator.validate(witJwt);
 
@@ -302,34 +296,37 @@ class CtValidatorTest {
     private String createWitWithoutExpiration() throws JOSEException {
         Map<String, Object> cnf = new HashMap<>();
         cnf.put("jwk", wptPublicKey.toJSONObject());
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .issuer(trustDomain.domainId())
-                .subject("agent-001")
-                .jwtID(UUID.randomUUID().toString())
-                .claim("cnf", cnf)
-                .build();
+        JWTClaimsSet claims =
+                new JWTClaimsSet.Builder()
+                        .issuer(trustDomain.domainId())
+                        .subject("agent-001")
+                        .jwtID(UUID.randomUUID().toString())
+                        .claim("cnf", cnf)
+                        .build();
         return sign(claims, signingKey);
     }
 
     private String createWitWithoutSubject() throws JOSEException {
         Map<String, Object> cnf = new HashMap<>();
         cnf.put("jwk", wptPublicKey.toJSONObject());
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .issuer(trustDomain.domainId())
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .jwtID(UUID.randomUUID().toString())
-                .claim("cnf", cnf)
-                .build();
+        JWTClaimsSet claims =
+                new JWTClaimsSet.Builder()
+                        .issuer(trustDomain.domainId())
+                        .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                        .jwtID(UUID.randomUUID().toString())
+                        .claim("cnf", cnf)
+                        .build();
         return sign(claims, signingKey);
     }
 
     private String createWitWithoutCnf() throws JOSEException {
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .issuer(trustDomain.domainId())
-                .subject("agent-001")
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .jwtID(UUID.randomUUID().toString())
-                .build();
+        JWTClaimsSet claims =
+                new JWTClaimsSet.Builder()
+                        .issuer(trustDomain.domainId())
+                        .subject("agent-001")
+                        .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                        .jwtID(UUID.randomUUID().toString())
+                        .build();
         return sign(claims, signingKey);
     }
 
@@ -357,24 +354,31 @@ class CtValidatorTest {
         return witJwt;
     }
 
-    private static String signedWit(String issuer, String subject, Date expiration,
-                                    Map<String, Object> cnfJwk, OctetKeyPair signingKey) throws JOSEException {
+    private static String signedWit(
+            String issuer,
+            String subject,
+            Date expiration,
+            Map<String, Object> cnfJwk,
+            OctetKeyPair signingKey)
+            throws JOSEException {
         Map<String, Object> cnf = new HashMap<>();
         cnf.put("jwk", cnfJwk);
-        JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                .issuer(issuer)
-                .subject(subject)
-                .expirationTime(expiration)
-                .jwtID(UUID.randomUUID().toString())
-                .claim("cnf", cnf)
-                .build();
+        JWTClaimsSet claims =
+                new JWTClaimsSet.Builder()
+                        .issuer(issuer)
+                        .subject(subject)
+                        .expirationTime(expiration)
+                        .jwtID(UUID.randomUUID().toString())
+                        .claim("cnf", cnf)
+                        .build();
         return sign(claims, signingKey);
     }
 
     private static String sign(JWTClaimsSet claims, OctetKeyPair signingKey) throws JOSEException {
-        JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                .type(new JOSEObjectType("ct+jwt"))
-                .build();
+        JWSHeader header =
+                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                        .type(new JOSEObjectType("ct+jwt"))
+                        .build();
         SignedJWT jwt = new SignedJWT(header, claims);
         jwt.sign(new Ed25519Signer(signingKey));
         return jwt.serialize();

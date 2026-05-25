@@ -28,22 +28,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Resolves a verification key from {@link KeyManager} and verifies a JWT signature.
- * Only Ed25519 ({@code alg=EdDSA}) is supported.
+ * Resolves a verification key from {@link KeyManager} and verifies a JWT signature. Only Ed25519
+ * ({@code alg=EdDSA}) is supported.
  */
 public final class SignatureVerificationUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(SignatureVerificationUtils.class);
 
-    private SignatureVerificationUtils() {
-    }
+    private SignatureVerificationUtils() {}
 
-    public static boolean verifySignature(SignedJWT signedJwt, KeyManager keyManager, String verificationKeyId) {
+    public static boolean verifySignature(
+            SignedJWT signedJwt, KeyManager keyManager, String verificationKeyId) {
 
         JWSAlgorithm algorithm = signedJwt.getHeader().getAlgorithm();
         String headerKeyId = signedJwt.getHeader().getKeyID();
-        logger.debug("Verifying signature - header kid: {}, algorithm: {}, verificationKeyId: {}",
-                headerKeyId, algorithm, verificationKeyId);
+        logger.debug(
+                "Verifying signature - header kid: {}, algorithm: {}, verificationKeyId: {}",
+                headerKeyId,
+                algorithm,
+                verificationKeyId);
 
         if (!JWSAlgorithm.EdDSA.equals(algorithm)) {
             logger.warn("Unsupported algorithm: {} (only EdDSA is allowed)", algorithm);
@@ -56,13 +59,17 @@ public final class SignatureVerificationUtils {
             boolean isValid = signedJwt.verify(verifier);
 
             if (!isValid) {
-                logger.warn("Signature verification failed - header kid: {}, verificationKeyId: {}",
-                        headerKeyId, verificationKeyId);
+                logger.warn(
+                        "Signature verification failed - header kid: {}, verificationKeyId: {}",
+                        headerKeyId,
+                        verificationKeyId);
             }
             return isValid;
         } catch (KeyResolutionException e) {
-            logger.error("Failed to resolve verification key for keyId '{}': {}",
-                    verificationKeyId, e.getMessage());
+            logger.error(
+                    "Failed to resolve verification key for keyId '{}': {}",
+                    verificationKeyId,
+                    e.getMessage());
             return false;
         } catch (JOSEException e) {
             logger.error("Error during signature verification: {}", e.getMessage());

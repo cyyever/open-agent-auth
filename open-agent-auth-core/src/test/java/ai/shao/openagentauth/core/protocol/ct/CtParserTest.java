@@ -15,7 +15,8 @@
  */
 package ai.shao.openagentauth.core.protocol.ct;
 
-import ai.shao.openagentauth.core.model.jwk.Jwk;
+import static org.assertj.core.api.Assertions.*;
+
 import ai.shao.openagentauth.core.model.token.CredentialToken;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -30,22 +31,17 @@ import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
-
-/**
- * Unit tests for {@link CtParser}.
- */
+/** Unit tests for {@link CtParser}. */
 @DisplayName("CT Parser Tests")
 class CtParserTest {
 
@@ -57,14 +53,10 @@ class CtParserTest {
     void setUp() throws JOSEException {
         ctParser = new CtParser();
 
-        signingKey = new OctetKeyPairGenerator(Curve.Ed25519)
-                .keyID("ct-signing-key")
-                .generate();
+        signingKey = new OctetKeyPairGenerator(Curve.Ed25519).keyID("ct-signing-key").generate();
 
-        wptPublicKey = new OctetKeyPairGenerator(Curve.Ed25519)
-                .keyID("dpop-key")
-                .generate()
-                .toPublicJWK();
+        wptPublicKey =
+                new OctetKeyPairGenerator(Curve.Ed25519).keyID("dpop-key").generate().toPublicJWK();
     }
 
     @Nested
@@ -160,16 +152,18 @@ class CtParserTest {
         @DisplayName("Should reject CT signed with non-EdDSA algorithm")
         void shouldRejectWitSignedWithNonEdDsaAlgorithm() throws Exception {
             RSAKey rsaKey = new RSAKeyGenerator(2048).keyID("rs-key").generate();
-            JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                    .subject("agent-001")
-                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                    .build();
-            SignedJWT rsaSigned = new SignedJWT(
-                    new JWSHeader.Builder(JWSAlgorithm.RS256)
-                            .keyID(rsaKey.getKeyID())
-                            .type(new JOSEObjectType("ct+jwt"))
-                            .build(),
-                    claims);
+            JWTClaimsSet claims =
+                    new JWTClaimsSet.Builder()
+                            .subject("agent-001")
+                            .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                            .build();
+            SignedJWT rsaSigned =
+                    new SignedJWT(
+                            new JWSHeader.Builder(JWSAlgorithm.RS256)
+                                    .keyID(rsaKey.getKeyID())
+                                    .type(new JOSEObjectType("ct+jwt"))
+                                    .build(),
+                            claims);
             rsaSigned.sign(new RSASSASigner(rsaKey));
 
             assertThatThrownBy(() -> ctParser.parse(rsaSigned))
@@ -180,16 +174,18 @@ class CtParserTest {
         @Test
         @DisplayName("Should reject CT with disallowed JOSE header parameter (kid)")
         void shouldRejectWitWithKidHeader() throws Exception {
-            JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                    .subject("agent-001")
-                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                    .build();
-            SignedJWT signedJwt = new SignedJWT(
-                    new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                            .keyID(signingKey.getKeyID())
-                            .type(new JOSEObjectType("ct+jwt"))
-                            .build(),
-                    claims);
+            JWTClaimsSet claims =
+                    new JWTClaimsSet.Builder()
+                            .subject("agent-001")
+                            .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                            .build();
+            SignedJWT signedJwt =
+                    new SignedJWT(
+                            new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                                    .keyID(signingKey.getKeyID())
+                                    .type(new JOSEObjectType("ct+jwt"))
+                                    .build(),
+                            claims);
             signedJwt.sign(new com.nimbusds.jose.crypto.Ed25519Signer(signingKey));
 
             assertThatThrownBy(() -> ctParser.parse(signedJwt))
@@ -202,13 +198,14 @@ class CtParserTest {
         Map<String, Object> cnfClaim = new HashMap<>();
         cnfClaim.put("jwk", createJwkMap());
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .issuer("example.com")
-                .subject("agent-001")
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .jwtID("test-jti-001")
-                .claim("cnf", cnfClaim)
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .issuer("example.com")
+                        .subject("agent-001")
+                        .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                        .jwtID("test-jti-001")
+                        .claim("cnf", cnfClaim)
+                        .build();
 
         return signJwt(claimsSet);
     }
@@ -217,11 +214,12 @@ class CtParserTest {
         Map<String, Object> cnfClaim = new HashMap<>();
         cnfClaim.put("jwk", createJwkMap());
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject("agent-001")
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .claim("cnf", cnfClaim)
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .subject("agent-001")
+                        .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                        .claim("cnf", cnfClaim)
+                        .build();
 
         return signJwt(claimsSet);
     }
@@ -230,11 +228,12 @@ class CtParserTest {
         Map<String, Object> cnfClaim = new HashMap<>();
         cnfClaim.put("jwk", createJwkMap());
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject("agent-001")
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .claim("cnf", cnfClaim)
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .subject("agent-001")
+                        .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                        .claim("cnf", cnfClaim)
+                        .build();
 
         return signJwt(claimsSet);
     }
@@ -242,11 +241,12 @@ class CtParserTest {
     private SignedJWT createSignedJwtWithCnfMissingJwk() throws Exception {
         Map<String, Object> cnfClaim = new HashMap<>();
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject("agent-001")
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .claim("cnf", cnfClaim)
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .subject("agent-001")
+                        .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                        .claim("cnf", cnfClaim)
+                        .build();
 
         return signJwt(claimsSet);
     }
@@ -257,20 +257,22 @@ class CtParserTest {
         invalidJwk.put("kty", "INVALID");
         cnfClaim.put("jwk", invalidJwk);
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject("agent-001")
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .claim("cnf", cnfClaim)
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .subject("agent-001")
+                        .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                        .claim("cnf", cnfClaim)
+                        .build();
 
         return signJwt(claimsSet);
     }
 
     private SignedJWT createSignedJwtWithoutCnf() throws Exception {
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject("agent-001")
-                .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .subject("agent-001")
+                        .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                        .build();
 
         return signJwt(claimsSet);
     }
@@ -282,12 +284,12 @@ class CtParserTest {
     }
 
     private SignedJWT signJwt(JWTClaimsSet claimsSet) throws Exception {
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .type(new JOSEObjectType("ct+jwt"))
-                        .build(),
-                claimsSet
-        );
+        SignedJWT signedJwt =
+                new SignedJWT(
+                        new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                                .type(new JOSEObjectType("ct+jwt"))
+                                .build(),
+                        claimsSet);
         signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt;
     }

@@ -17,12 +17,12 @@ package ai.shao.openagentauth.core.util;
 
 /**
  * Utility class for parameter validation in the core module.
- * <p>
- * This class provides static utility methods for validating method parameters,
- * following the fail-fast principle to detect invalid inputs early.
- * </p>
- * <p>
- * <b>Usage Example:</b></p>
+ *
+ * <p>This class provides static utility methods for validating method parameters, following the
+ * fail-fast principle to detect invalid inputs early.
+ *
+ * <p><b>Usage Example:</b>
+ *
  * <pre>{@code
  * public MyClass(String name, Object obj) {
  *     this.name = ValidationUtils.validateNotEmpty(name, "name");
@@ -32,9 +32,7 @@ package ai.shao.openagentauth.core.util;
  */
 public final class ValidationUtils {
 
-    /**
-     * Private constructor to prevent instantiation.
-     */
+    /** Private constructor to prevent instantiation. */
     private ValidationUtils() {
         throw new UnsupportedOperationException("Utility class cannot be instantiated");
     }
@@ -57,9 +55,8 @@ public final class ValidationUtils {
 
     /**
      * Validates that the given string is not null or empty.
-     * <p>
-     * This method also checks that the string is not blank (contains only whitespace).
-     * </p>
+     *
+     * <p>This method also checks that the string is not blank (contains only whitespace).
      *
      * @param str the string to validate
      * @param paramName the parameter name for error message
@@ -75,9 +72,8 @@ public final class ValidationUtils {
 
     /**
      * Checks if the given string is null or empty.
-     * <p>
-     * This method also checks that the string is not blank (contains only whitespace).
-     * </p>
+     *
+     * <p>This method also checks that the string is not blank (contains only whitespace).
      *
      * @param str the string to check
      * @return true if the string is null or empty (after trimming), false otherwise

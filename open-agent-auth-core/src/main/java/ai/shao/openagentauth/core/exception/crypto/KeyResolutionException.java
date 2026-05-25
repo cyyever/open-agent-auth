@@ -19,16 +19,16 @@ import ai.shao.openagentauth.core.crypto.key.resolve.KeyResolver;
 
 /**
  * Exception thrown when a key resolution operation fails.
- * <p>
- * This exception indicates that a {@link KeyResolver} was unable to resolve a
- * cryptographic key from its configured source. Common causes include:
- * </p>
+ *
+ * <p>This exception indicates that a {@link KeyResolver} was unable to resolve a cryptographic key
+ * from its configured source. Common causes include:
+ *
  * <ul>
- *   <li>Key not found in the local key store</li>
- *   <li>Remote JWKS endpoint unreachable or returned an error</li>
- *   <li>Key ID not found in the JWKS response</li>
- *   <li>No {@code KeyResolver} supports the given key definition</li>
- *   <li>Key type mismatch (e.g., expected EC key but found RSA key)</li>
+ *   <li>Key not found in the local key store
+ *   <li>Remote JWKS endpoint unreachable or returned an error
+ *   <li>Key ID not found in the JWKS response
+ *   <li>No {@code KeyResolver} supports the given key definition
+ *   <li>Key type mismatch (e.g., expected EC key but found RSA key)
  * </ul>
  *
  * @see KeyResolver

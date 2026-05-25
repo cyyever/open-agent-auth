@@ -15,16 +15,14 @@
  */
 package ai.shao.openagentauth.core.crypto.key.model;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-/**
- * Unit tests for {@link KeyDefinition}.
- */
+/** Unit tests for {@link KeyDefinition}. */
 @DisplayName("KeyDefinition Tests")
 class KeyDefinitionTest {
 
@@ -35,11 +33,12 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should build KeyDefinition with all fields")
         void shouldBuildKeyDefinitionWithAllFields() {
-            KeyDefinition definition = KeyDefinition.builder()
-                    .keyId("test-key-001")
-                    .provider("local")
-                    .jwksConsumer("agent-idp")
-                    .build();
+            KeyDefinition definition =
+                    KeyDefinition.builder()
+                            .keyId("test-key-001")
+                            .provider("local")
+                            .jwksConsumer("agent-idp")
+                            .build();
 
             assertThat(definition.keyId()).isEqualTo("test-key-001");
             assertThat(definition.provider()).isEqualTo("local");
@@ -49,9 +48,7 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should build KeyDefinition with only required fields")
         void shouldBuildKeyDefinitionWithOnlyRequiredFields() {
-            KeyDefinition definition = KeyDefinition.builder()
-                    .keyId("minimal-key")
-                    .build();
+            KeyDefinition definition = KeyDefinition.builder().keyId("minimal-key").build();
 
             assertThat(definition.keyId()).isEqualTo("minimal-key");
             assertThat(definition.provider()).isNull();
@@ -90,10 +87,8 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should be remote key when jwksConsumer is set")
         void shouldBeRemoteKeyWhenJwksConsumerIsSet() {
-            KeyDefinition definition = KeyDefinition.builder()
-                    .keyId("remote-key")
-                    .jwksConsumer("agent-idp")
-                    .build();
+            KeyDefinition definition =
+                    KeyDefinition.builder().keyId("remote-key").jwksConsumer("agent-idp").build();
 
             assertThat(definition.isRemoteKey()).isTrue();
             assertThat(definition.isLocalKey()).isFalse();
@@ -102,10 +97,8 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should be local key when jwksConsumer is null")
         void shouldBeLocalKeyWhenJwksConsumerIsNull() {
-            KeyDefinition definition = KeyDefinition.builder()
-                    .keyId("local-key")
-                    .provider("local")
-                    .build();
+            KeyDefinition definition =
+                    KeyDefinition.builder().keyId("local-key").provider("local").build();
 
             assertThat(definition.isLocalKey()).isTrue();
             assertThat(definition.isRemoteKey()).isFalse();
@@ -114,10 +107,8 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should be local key when jwksConsumer is blank")
         void shouldBeLocalKeyWhenJwksConsumerIsBlank() {
-            KeyDefinition definition = KeyDefinition.builder()
-                    .keyId("local-key")
-                    .jwksConsumer("   ")
-                    .build();
+            KeyDefinition definition =
+                    KeyDefinition.builder().keyId("local-key").jwksConsumer("   ").build();
 
             assertThat(definition.isLocalKey()).isTrue();
             assertThat(definition.isRemoteKey()).isFalse();
@@ -131,17 +122,19 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should be equal when all properties are the same")
         void shouldBeEqualWhenAllPropertiesAreTheSame() {
-            KeyDefinition definition1 = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .provider("local")
-                    .jwksConsumer("consumer-1")
-                    .build();
+            KeyDefinition definition1 =
+                    KeyDefinition.builder()
+                            .keyId("key-1")
+                            .provider("local")
+                            .jwksConsumer("consumer-1")
+                            .build();
 
-            KeyDefinition definition2 = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .provider("local")
-                    .jwksConsumer("consumer-1")
-                    .build();
+            KeyDefinition definition2 =
+                    KeyDefinition.builder()
+                            .keyId("key-1")
+                            .provider("local")
+                            .jwksConsumer("consumer-1")
+                            .build();
 
             assertThat(definition1).isEqualTo(definition2);
             assertThat(definition1.hashCode()).isEqualTo(definition2.hashCode());
@@ -150,13 +143,9 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should not be equal when keyId differs")
         void shouldNotBeEqualWhenKeyIdDiffers() {
-            KeyDefinition definition1 = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .build();
+            KeyDefinition definition1 = KeyDefinition.builder().keyId("key-1").build();
 
-            KeyDefinition definition2 = KeyDefinition.builder()
-                    .keyId("key-2")
-                    .build();
+            KeyDefinition definition2 = KeyDefinition.builder().keyId("key-2").build();
 
             assertThat(definition1).isNotEqualTo(definition2);
         }
@@ -164,15 +153,11 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should not be equal when provider differs")
         void shouldNotBeEqualWhenProviderDiffers() {
-            KeyDefinition definition1 = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .provider("local")
-                    .build();
+            KeyDefinition definition1 =
+                    KeyDefinition.builder().keyId("key-1").provider("local").build();
 
-            KeyDefinition definition2 = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .provider("file")
-                    .build();
+            KeyDefinition definition2 =
+                    KeyDefinition.builder().keyId("key-1").provider("file").build();
 
             assertThat(definition1).isNotEqualTo(definition2);
         }
@@ -180,15 +165,11 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should not be equal when jwksConsumer differs")
         void shouldNotBeEqualWhenJwksConsumerDiffers() {
-            KeyDefinition definition1 = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .jwksConsumer("consumer-1")
-                    .build();
+            KeyDefinition definition1 =
+                    KeyDefinition.builder().keyId("key-1").jwksConsumer("consumer-1").build();
 
-            KeyDefinition definition2 = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .jwksConsumer("consumer-2")
-                    .build();
+            KeyDefinition definition2 =
+                    KeyDefinition.builder().keyId("key-1").jwksConsumer("consumer-2").build();
 
             assertThat(definition1).isNotEqualTo(definition2);
         }
@@ -196,9 +177,7 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should not be equal to null")
         void shouldNotBeEqualToNull() {
-            KeyDefinition definition = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .build();
+            KeyDefinition definition = KeyDefinition.builder().keyId("key-1").build();
 
             assertThat(definition).isNotEqualTo(null);
         }
@@ -206,9 +185,7 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should be equal to itself")
         void shouldBeEqualToItself() {
-            KeyDefinition definition = KeyDefinition.builder()
-                    .keyId("key-1")
-                    .build();
+            KeyDefinition definition = KeyDefinition.builder().keyId("key-1").build();
 
             assertThat(definition).isEqualTo(definition);
         }
@@ -221,11 +198,12 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should contain all fields in toString output")
         void shouldContainAllFieldsInToStringOutput() {
-            KeyDefinition definition = KeyDefinition.builder()
-                    .keyId("test-key")
-                    .provider("local")
-                    .jwksConsumer("agent-idp")
-                    .build();
+            KeyDefinition definition =
+                    KeyDefinition.builder()
+                            .keyId("test-key")
+                            .provider("local")
+                            .jwksConsumer("agent-idp")
+                            .build();
 
             String result = definition.toString();
 
@@ -237,9 +215,7 @@ class KeyDefinitionTest {
         @Test
         @DisplayName("Should handle null fields in toString output")
         void shouldHandleNullFieldsInToStringOutput() {
-            KeyDefinition definition = KeyDefinition.builder()
-                    .keyId("minimal-key")
-                    .build();
+            KeyDefinition definition = KeyDefinition.builder().keyId("minimal-key").build();
 
             String result = definition.toString();
 

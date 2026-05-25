@@ -15,11 +15,11 @@
  */
 package ai.shao.openagentauth.core.server.exception.validation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import ai.shao.openagentauth.core.server.exception.ServerErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("ValidationErrorCode Test")
 class ValidationErrorCodeTest {
@@ -66,7 +66,8 @@ class ValidationErrorCodeTest {
     @Test
     @DisplayName("Should format messages correctly")
     void shouldFormatMessagesCorrectly() {
-        String validationMessage = ValidationErrorCode.VALIDATION_FAILED.formatMessage("Invalid parameter");
+        String validationMessage =
+                ValidationErrorCode.VALIDATION_FAILED.formatMessage("Invalid parameter");
         assertThat(validationMessage).isEqualTo("Server validation failed: Invalid parameter");
     }
 
@@ -80,7 +81,6 @@ class ValidationErrorCodeTest {
     @Test
     @DisplayName("Should implement ServerErrorCode")
     void shouldImplementServerErrorCode() {
-        assertThat(ValidationErrorCode.VALIDATION_FAILED)
-                .isInstanceOf(ServerErrorCode.class);
+        assertThat(ValidationErrorCode.VALIDATION_FAILED).isInstanceOf(ServerErrorCode.class);
     }
 }

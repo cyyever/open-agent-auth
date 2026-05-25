@@ -15,19 +15,17 @@
  */
 package ai.shao.openagentauth.core.server.model.validation;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link ValidationResult.Builder} and {@link ValidationResult.LayerResult.Builder}.
- * <p>
- * Tests cover normal construction scenarios, method chaining, optional field settings,
- * and verification that build() returns the correct instance.
- * </p>
+ *
+ * <p>Tests cover normal construction scenarios, method chaining, optional field settings, and
+ * verification that build() returns the correct instance.
  */
 @DisplayName("ValidationResult.Builder and LayerResult.Builder Tests")
 class ValidationResultTest {
@@ -39,12 +37,13 @@ class ValidationResultTest {
     @DisplayName("Should build LayerResult instance with all fields when all setters are called")
     void shouldBuildLayerResultInstanceWithAllFieldsWhenAllSettersAreCalled() {
         // Given
-        ValidationResult.LayerResult layerResult = ValidationResult.LayerResult.builder()
-                .layer(1)
-                .layerName(TEST_LAYER_NAME)
-                .valid(true)
-                .message("Layer validation passed")
-                .build();
+        ValidationResult.LayerResult layerResult =
+                ValidationResult.LayerResult.builder()
+                        .layer(1)
+                        .layerName(TEST_LAYER_NAME)
+                        .valid(true)
+                        .message("Layer validation passed")
+                        .build();
 
         // Then
         assertThat(layerResult).isNotNull();
@@ -61,12 +60,12 @@ class ValidationResultTest {
         ValidationResult.LayerResult.Builder builder = ValidationResult.LayerResult.builder();
 
         // When
-        ValidationResult.LayerResult layerResult = builder
-                .layer(1)
-                .layerName(TEST_LAYER_NAME)
-                .valid(true)
-                .message("Validation passed")
-                .build();
+        ValidationResult.LayerResult layerResult =
+                builder.layer(1)
+                        .layerName(TEST_LAYER_NAME)
+                        .valid(true)
+                        .message("Validation passed")
+                        .build();
 
         // Then
         assertThat(layerResult).isNotNull();
@@ -79,10 +78,8 @@ class ValidationResultTest {
     @DisplayName("Should build LayerResult instance with only layer and valid")
     void shouldBuildLayerResultInstanceWithOnlyLayerAndValidWhenOnlyLayerAndValidAreSet() {
         // Given
-        ValidationResult.LayerResult layerResult = ValidationResult.LayerResult.builder()
-                .layer(1)
-                .valid(true)
-                .build();
+        ValidationResult.LayerResult layerResult =
+                ValidationResult.LayerResult.builder().layer(1).valid(true).build();
 
         // Then
         assertThat(layerResult).isNotNull();
@@ -93,28 +90,32 @@ class ValidationResultTest {
     }
 
     @Test
-    @DisplayName("Should build ValidationResult instance with all fields when all setters are called")
+    @DisplayName(
+            "Should build ValidationResult instance with all fields when all setters are called")
     void shouldBuildValidationResultInstanceWithAllFieldsWhenAllSettersAreCalled() {
         // Given
-        ValidationResult.LayerResult layerResult1 = ValidationResult.LayerResult.builder()
-                .layer(1)
-                .layerName("Layer1")
-                .valid(true)
-                .message("Passed")
-                .build();
+        ValidationResult.LayerResult layerResult1 =
+                ValidationResult.LayerResult.builder()
+                        .layer(1)
+                        .layerName("Layer1")
+                        .valid(true)
+                        .message("Passed")
+                        .build();
 
-        ValidationResult.LayerResult layerResult2 = ValidationResult.LayerResult.builder()
-                .layer(2)
-                .layerName("Layer2")
-                .valid(false)
-                .message("Failed")
-                .build();
+        ValidationResult.LayerResult layerResult2 =
+                ValidationResult.LayerResult.builder()
+                        .layer(2)
+                        .layerName("Layer2")
+                        .valid(false)
+                        .message("Failed")
+                        .build();
 
-        ValidationResult result = ValidationResult.builder()
-                .valid(false)
-                .layerResults(List.of(layerResult1, layerResult2))
-                .errors(List.of("Error 1", "Error 2"))
-                .build();
+        ValidationResult result =
+                ValidationResult.builder()
+                        .valid(false)
+                        .layerResults(List.of(layerResult1, layerResult2))
+                        .errors(List.of("Error 1", "Error 2"))
+                        .build();
 
         // Then
         assertThat(result).isNotNull();
@@ -127,19 +128,14 @@ class ValidationResultTest {
     @DisplayName("Should support method chaining when using ValidationResult builder")
     void shouldSupportMethodChainingWhenUsingValidationResultBuilder() {
         // Given
-        ValidationResult.LayerResult layerResult = ValidationResult.LayerResult.builder()
-                .layer(1)
-                .valid(true)
-                .build();
+        ValidationResult.LayerResult layerResult =
+                ValidationResult.LayerResult.builder().layer(1).valid(true).build();
 
         ValidationResult.Builder builder = ValidationResult.builder();
 
         // When
-        ValidationResult result = builder
-                .valid(true)
-                .layerResults(List.of(layerResult))
-                .errors(List.of())
-                .build();
+        ValidationResult result =
+                builder.valid(true).layerResults(List.of(layerResult)).errors(List.of()).build();
 
         // Then
         assertThat(result).isNotNull();
@@ -151,9 +147,7 @@ class ValidationResultTest {
     @DisplayName("Should build ValidationResult instance with only valid flag")
     void shouldBuildValidationResultInstanceWithOnlyValidFlagWhenOnlyValidIsSet() {
         // Given
-        ValidationResult result = ValidationResult.builder()
-                .valid(true)
-                .build();
+        ValidationResult result = ValidationResult.builder().valid(true).build();
 
         // Then
         assertThat(result).isNotNull();
@@ -166,11 +160,12 @@ class ValidationResultTest {
     @DisplayName("Should build ValidationResult with empty layer results and errors")
     void shouldBuildValidationResultWithEmptyLayerResultsAndErrorsWhenEmptyListsAreSet() {
         // Given
-        ValidationResult result = ValidationResult.builder()
-                .valid(true)
-                .layerResults(List.of())
-                .errors(List.of())
-                .build();
+        ValidationResult result =
+                ValidationResult.builder()
+                        .valid(true)
+                        .layerResults(List.of())
+                        .errors(List.of())
+                        .build();
 
         // Then
         assertThat(result).isNotNull();
@@ -185,16 +180,14 @@ class ValidationResultTest {
     @DisplayName("Should handle multiple layer results")
     void shouldHandleMultipleLayerResultsWhenMultipleLayerResultsAreAdded() {
         // Given
-        List<ValidationResult.LayerResult> layerResults = List.of(
-                ValidationResult.LayerResult.builder().layer(1).valid(true).build(),
-                ValidationResult.LayerResult.builder().layer(2).valid(true).build(),
-                ValidationResult.LayerResult.builder().layer(3).valid(false).build()
-        );
+        List<ValidationResult.LayerResult> layerResults =
+                List.of(
+                        ValidationResult.LayerResult.builder().layer(1).valid(true).build(),
+                        ValidationResult.LayerResult.builder().layer(2).valid(true).build(),
+                        ValidationResult.LayerResult.builder().layer(3).valid(false).build());
 
-        ValidationResult result = ValidationResult.builder()
-                .valid(false)
-                .layerResults(layerResults)
-                .build();
+        ValidationResult result =
+                ValidationResult.builder().valid(false).layerResults(layerResults).build();
 
         // Then
         assertThat(result).isNotNull();
@@ -207,16 +200,13 @@ class ValidationResultTest {
     @DisplayName("Should handle multiple errors")
     void shouldHandleMultipleErrorsWhenMultipleErrorsAreAdded() {
         // Given
-        List<String> errors = List.of(
-                "Error 1: Invalid input",
-                "Error 2: Missing required field",
-                "Error 3: Validation failed"
-        );
+        List<String> errors =
+                List.of(
+                        "Error 1: Invalid input",
+                        "Error 2: Missing required field",
+                        "Error 3: Validation failed");
 
-        ValidationResult result = ValidationResult.builder()
-                .valid(false)
-                .errors(errors)
-                .build();
+        ValidationResult result = ValidationResult.builder().valid(false).errors(errors).build();
 
         // Then
         assertThat(result).isNotNull();
@@ -244,17 +234,27 @@ class ValidationResultTest {
         ValidationResult.Builder builder = ValidationResult.builder();
 
         // When
-        ValidationResult result1 = builder
-                .valid(true)
-                .layerResults(List.of(ValidationResult.LayerResult.builder().layer(1).valid(true).build()))
-                .errors(List.of())
-                .build();
+        ValidationResult result1 =
+                builder.valid(true)
+                        .layerResults(
+                                List.of(
+                                        ValidationResult.LayerResult.builder()
+                                                .layer(1)
+                                                .valid(true)
+                                                .build()))
+                        .errors(List.of())
+                        .build();
 
-        ValidationResult result2 = builder
-                .valid(false)
-                .layerResults(List.of(ValidationResult.LayerResult.builder().layer(1).valid(false).build()))
-                .errors(List.of("Error"))
-                .build();
+        ValidationResult result2 =
+                builder.valid(false)
+                        .layerResults(
+                                List.of(
+                                        ValidationResult.LayerResult.builder()
+                                                .layer(1)
+                                                .valid(false)
+                                                .build()))
+                        .errors(List.of("Error"))
+                        .build();
 
         // Then
         assertThat(result1).isNotNull();
@@ -269,20 +269,14 @@ class ValidationResultTest {
     @DisplayName("Should handle different layer numbers")
     void shouldHandleDifferentLayerNumbersWhenDifferentLayersAreSet() {
         // Given
-        ValidationResult.LayerResult layer1 = ValidationResult.LayerResult.builder()
-                .layer(1)
-                .valid(true)
-                .build();
+        ValidationResult.LayerResult layer1 =
+                ValidationResult.LayerResult.builder().layer(1).valid(true).build();
 
-        ValidationResult.LayerResult layer2 = ValidationResult.LayerResult.builder()
-                .layer(2)
-                .valid(true)
-                .build();
+        ValidationResult.LayerResult layer2 =
+                ValidationResult.LayerResult.builder().layer(2).valid(true).build();
 
-        ValidationResult.LayerResult layer3 = ValidationResult.LayerResult.builder()
-                .layer(3)
-                .valid(false)
-                .build();
+        ValidationResult.LayerResult layer3 =
+                ValidationResult.LayerResult.builder().layer(3).valid(false).build();
 
         // Then
         assertThat(layer1.layer()).isEqualTo(1);
@@ -294,14 +288,21 @@ class ValidationResultTest {
     @DisplayName("Should build successful validation result")
     void shouldBuildSuccessfulValidationResultWhenValidIsTrue() {
         // Given
-        ValidationResult result = ValidationResult.builder()
-                .valid(true)
-                .layerResults(List.of(
-                        ValidationResult.LayerResult.builder().layer(1).valid(true).build(),
-                        ValidationResult.LayerResult.builder().layer(2).valid(true).build()
-                ))
-                .errors(List.of())
-                .build();
+        ValidationResult result =
+                ValidationResult.builder()
+                        .valid(true)
+                        .layerResults(
+                                List.of(
+                                        ValidationResult.LayerResult.builder()
+                                                .layer(1)
+                                                .valid(true)
+                                                .build(),
+                                        ValidationResult.LayerResult.builder()
+                                                .layer(2)
+                                                .valid(true)
+                                                .build()))
+                        .errors(List.of())
+                        .build();
 
         // Then
         assertThat(result).isNotNull();
@@ -313,14 +314,21 @@ class ValidationResultTest {
     @DisplayName("Should build failed validation result")
     void shouldBuildFailedValidationResultWhenValidIsFalse() {
         // Given
-        ValidationResult result = ValidationResult.builder()
-                .valid(false)
-                .layerResults(List.of(
-                        ValidationResult.LayerResult.builder().layer(1).valid(true).build(),
-                        ValidationResult.LayerResult.builder().layer(2).valid(false).build()
-                ))
-                .errors(List.of("Validation failed at layer 2"))
-                .build();
+        ValidationResult result =
+                ValidationResult.builder()
+                        .valid(false)
+                        .layerResults(
+                                List.of(
+                                        ValidationResult.LayerResult.builder()
+                                                .layer(1)
+                                                .valid(true)
+                                                .build(),
+                                        ValidationResult.LayerResult.builder()
+                                                .layer(2)
+                                                .valid(false)
+                                                .build()))
+                        .errors(List.of("Validation failed at layer 2"))
+                        .build();
 
         // Then
         assertThat(result).isNotNull();

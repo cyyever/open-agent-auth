@@ -16,10 +16,10 @@
 
 package ai.shao.openagentauth.core.exception.crypto;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("Crypto Exception Test")
 class CryptoExceptionTest {
@@ -27,7 +27,8 @@ class CryptoExceptionTest {
     @Test
     @DisplayName("Test CryptoErrorCode error code format")
     void testCryptoErrorCodeFormat() {
-        assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0306");
+        assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getErrorCode())
+                .isEqualTo("OPEN_AGENT_AUTH_10_0306");
     }
 
     @Test
@@ -51,7 +52,8 @@ class CryptoExceptionTest {
     @Test
     @DisplayName("Test CryptoErrorCode error names")
     void testCryptoErrorCodeErrorNames() {
-        assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getErrorName()).isEqualTo("KeyResolutionFailed");
+        assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getErrorName())
+                .isEqualTo("KeyResolutionFailed");
     }
 
     @Test

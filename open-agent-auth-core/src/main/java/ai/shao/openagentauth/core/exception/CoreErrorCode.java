@@ -16,19 +16,15 @@
 package ai.shao.openagentauth.core.exception;
 
 /**
- * Interface for Core module error codes.
- * Error code format: {@code OPEN_AGENT_AUTH_10_YYZZ} (system 10, YY=domain, ZZ=error).
+ * Interface for Core module error codes. Error code format: {@code OPEN_AGENT_AUTH_10_YYZZ} (system
+ * 10, YY=domain, ZZ=error).
  */
 public interface CoreErrorCode extends ErrorCode {
 
-    /**
-     * System code for Core module.
-     */
+    /** System code for Core module. */
     String SYSTEM_CODE = "10";
 
-    /**
-     * Domain code for Crypto.
-     */
+    /** Domain code for Crypto. */
     String DOMAIN_CODE_CRYPTO = "03";
 
     @Override

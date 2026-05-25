@@ -16,33 +16,34 @@
 package ai.shao.openagentauth.core.crypto;
 
 import ai.shao.openagentauth.core.util.ValidationUtils;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 /**
- * Utility class for computing SHA-256 hashes of JWT strings, encoded as
- * {@code BASE64URL(SHA-256(ASCII(token_string)))}.
+ * Utility class for computing SHA-256 hashes of JWT strings, encoded as {@code
+ * BASE64URL(SHA-256(ASCII(token_string)))}.
  */
 public class JwtHashUtil {
 
     private static final Base64.Encoder URL_ENCODER = Base64.getUrlEncoder().withoutPadding();
 
     /**
-     * Per-thread SHA-256 digest. {@link MessageDigest} is stateful and not thread-safe,
-     * so we cache one instance per thread and call {@link MessageDigest#reset()} between uses.
-     * SHA-256 is mandatory in every Java distribution, so the initial {@code getInstance}
-     * cannot fail in practice.
+     * Per-thread SHA-256 digest. {@link MessageDigest} is stateful and not thread-safe, so we cache
+     * one instance per thread and call {@link MessageDigest#reset()} between uses. SHA-256 is
+     * mandatory in every Java distribution, so the initial {@code getInstance} cannot fail in
+     * practice.
      */
-    private static final ThreadLocal<MessageDigest> SHA256 = ThreadLocal.withInitial(() -> {
-        try {
-            return MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError("SHA-256 must be present in every JRE", e);
-        }
-    });
+    private static final ThreadLocal<MessageDigest> SHA256 =
+            ThreadLocal.withInitial(
+                    () -> {
+                        try {
+                            return MessageDigest.getInstance("SHA-256");
+                        } catch (NoSuchAlgorithmException e) {
+                            throw new AssertionError("SHA-256 must be present in every JRE", e);
+                        }
+                    });
 
     /**
      * Computes {@code BASE64URL(SHA-256(UTF-8(jwtString)))}.

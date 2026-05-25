@@ -18,9 +18,8 @@ package ai.shao.openagentauth.core.server.model.request;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jspecify.annotations.Nullable;
-
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResourceRequest {
@@ -50,8 +49,7 @@ public class ResourceRequest {
             @JsonProperty("httpMethod") @Nullable String httpMethod,
             @JsonProperty("httpUri") @Nullable String httpUri,
             @JsonProperty("httpHeaders") @Nullable Map<String, String> httpHeaders,
-            @JsonProperty("httpBody") @Nullable String httpBody
-    ) {
+            @JsonProperty("httpBody") @Nullable String httpBody) {
         if (ct == null || ct.isEmpty()) {
             throw new IllegalStateException("ct is REQUIRED");
         }
@@ -66,12 +64,29 @@ public class ResourceRequest {
         this.httpBody = httpBody;
     }
 
-    public String getCt() { return ct; }
-    public String getDpop() { return dpop; }
-    public @Nullable String getHttpMethod() { return httpMethod; }
-    public @Nullable String getHttpUri() { return httpUri; }
-    public @Nullable Map<String, String> getHttpHeaders() { return httpHeaders; }
-    public @Nullable String getHttpBody() { return httpBody; }
+    public String getCt() {
+        return ct;
+    }
+
+    public String getDpop() {
+        return dpop;
+    }
+
+    public @Nullable String getHttpMethod() {
+        return httpMethod;
+    }
+
+    public @Nullable String getHttpUri() {
+        return httpUri;
+    }
+
+    public @Nullable Map<String, String> getHttpHeaders() {
+        return httpHeaders;
+    }
+
+    public @Nullable String getHttpBody() {
+        return httpBody;
+    }
 
     public static Builder builder() {
         return new Builder();

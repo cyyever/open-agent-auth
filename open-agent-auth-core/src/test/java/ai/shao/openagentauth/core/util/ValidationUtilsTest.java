@@ -15,17 +15,16 @@
  */
 package ai.shao.openagentauth.core.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 /**
- * Unit tests for {@link ValidationUtils}.
- * Tests verify that parameter validation methods work correctly
- * following the fail-fast principle.
+ * Unit tests for {@link ValidationUtils}. Tests verify that parameter validation methods work
+ * correctly following the fail-fast principle.
  */
 @DisplayName("ValidationUtils Tests")
 class ValidationUtilsTest {
@@ -270,13 +269,14 @@ class ValidationUtilsTest {
         @DisplayName("Should prevent instantiation")
         void shouldPreventInstantiation() {
             // Act & Assert
-            assertThatThrownBy(() -> {
-                // Use reflection to try to instantiate the utility class
-                java.lang.reflect.Constructor<ValidationUtils> constructor = 
-                    ValidationUtils.class.getDeclaredConstructor();
-                constructor.setAccessible(true);
-                constructor.newInstance();
-            })
+            assertThatThrownBy(
+                            () -> {
+                                // Use reflection to try to instantiate the utility class
+                                java.lang.reflect.Constructor<ValidationUtils> constructor =
+                                        ValidationUtils.class.getDeclaredConstructor();
+                                constructor.setAccessible(true);
+                                constructor.newInstance();
+                            })
                     .isInstanceOf(java.lang.reflect.InvocationTargetException.class)
                     .hasCauseExactlyInstanceOf(UnsupportedOperationException.class)
                     .hasRootCauseMessage("Utility class cannot be instantiated");
@@ -322,11 +322,13 @@ class ValidationUtilsTest {
             String anotherValidParam = "another";
 
             // Act & Assert
-            assertThatThrownBy(() -> {
-                ValidationUtils.validateNotEmpty(validParam, "validParam");
-                ValidationUtils.validateNotEmpty(invalidParam, "invalidParam");
-                ValidationUtils.validateNotEmpty(anotherValidParam, "anotherValidParam");
-            })
+            assertThatThrownBy(
+                            () -> {
+                                ValidationUtils.validateNotEmpty(validParam, "validParam");
+                                ValidationUtils.validateNotEmpty(invalidParam, "invalidParam");
+                                ValidationUtils.validateNotEmpty(
+                                        anotherValidParam, "anotherValidParam");
+                            })
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("invalidParam");
         }
@@ -393,9 +395,7 @@ class ValidationUtilsTest {
         }
     }
 
-    /**
-     * Test class for generic type validation.
-     */
+    /** Test class for generic type validation. */
     private static class TestClass {
         private final String value;
 

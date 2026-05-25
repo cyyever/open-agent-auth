@@ -15,25 +15,24 @@
  */
 package ai.shao.openagentauth.core.protocol.ct;
 
+import ai.shao.openagentauth.core.crypto.JwkConverter;
 import ai.shao.openagentauth.core.model.jwk.Jwk;
 import ai.shao.openagentauth.core.model.token.CredentialToken;
-import ai.shao.openagentauth.core.crypto.JwkConverter;
 import ai.shao.openagentauth.core.util.ValidationUtils;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.text.ParseException;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Parser for Credential Tokens (CT). Converts signed JWT strings into
- * structured {@link CredentialToken} objects.
+ * Parser for Credential Tokens (CT). Converts signed JWT strings into structured {@link
+ * CredentialToken} objects.
  */
 public class CtParser {
 
@@ -46,11 +45,10 @@ public class CtParser {
 
     /**
      * Parses a CT from a signed JWT.
-     * <p>
-     * This method extracts all claims from the JWT and constructs a structured
-     * {@link CredentialToken} object. It validates the input and provides
-     * detailed error messages if parsing fails.
-     * </p>
+     *
+     * <p>This method extracts all claims from the JWT and constructs a structured {@link
+     * CredentialToken} object. It validates the input and provides detailed error messages if
+     * parsing fails.
      *
      * @param signedJwt the signed JWT to parse
      * @return a CredentialToken object
@@ -65,8 +63,7 @@ public class CtParser {
 
         JWSAlgorithm alg = signedJwt.getHeader().getAlgorithm();
         if (!JWSAlgorithm.EdDSA.equals(alg)) {
-            throw new ParseException(
-                    "CT alg header must be 'EdDSA', got: " + alg, 0);
+            throw new ParseException("CT alg header must be 'EdDSA', got: " + alg, 0);
         }
 
         JOSEObjectType typ = signedJwt.getHeader().getType();
@@ -94,12 +91,12 @@ public class CtParser {
     }
 
     /**
-     * Parses the confirmation (cnf) claim from the JWT claims set.
-     * Contains the public key (JWK) used to verify DPoP Proofs. Per AAP spec
-     * the cnf claim is REQUIRED on every CT — missing cnf surfaces as a
-     * ParseException.
+     * Parses the confirmation (cnf) claim from the JWT claims set. Contains the public key (JWK)
+     * used to verify DPoP Proofs. Per AAP spec the cnf claim is REQUIRED on every CT — missing cnf
+     * surfaces as a ParseException.
      */
-    private CredentialToken.Claims.Confirmation parseConfirmationClaim(JWTClaimsSet claims) throws ParseException {
+    private CredentialToken.Claims.Confirmation parseConfirmationClaim(JWTClaimsSet claims)
+            throws ParseException {
 
         Map<String, Object> cnfClaim = claims.getJSONObjectClaim("cnf");
 
@@ -124,9 +121,7 @@ public class CtParser {
             Jwk jwkModel = JwkConverter.convertMapToJwk(jwkMap);
 
             // Build confirmation object
-            return CredentialToken.Claims.Confirmation.builder()
-                    .jwk(jwkModel)
-                    .build();
+            return CredentialToken.Claims.Confirmation.builder().jwk(jwkModel).build();
 
         } catch (Exception e) {
             throw new ParseException("Failed to parse cnf.jwk claim: " + e.getMessage(), 0);
@@ -144,16 +139,16 @@ public class CtParser {
     private CredentialToken buildCredentialToken(
             SignedJWT signedJwt,
             JWTClaimsSet claims,
-            CredentialToken.Claims.Confirmation confirmation
-    ) {
+            CredentialToken.Claims.Confirmation confirmation) {
 
         // Build claims
-        CredentialToken.Claims.ClaimsBuilder claimsBuilder = CredentialToken.Claims.builder()
-                .issuer(claims.getIssuer())
-                .subject(claims.getSubject())
-                .expirationTime(claims.getExpirationTime())
-                .jwtId(claims.getJWTID())
-                .confirmation(confirmation);
+        CredentialToken.Claims.ClaimsBuilder claimsBuilder =
+                CredentialToken.Claims.builder()
+                        .issuer(claims.getIssuer())
+                        .subject(claims.getSubject())
+                        .expirationTime(claims.getExpirationTime())
+                        .jwtId(claims.getJWTID())
+                        .confirmation(confirmation);
 
         // Serialize the JWT to preserve the original JWT string. The JWT
         // was just parsed successfully, so serialize() should never fail
@@ -165,10 +160,6 @@ public class CtParser {
             throw new IllegalStateException("Failed to serialize CT JWT", e);
         }
 
-        return CredentialToken.builder()
-                .claims(claimsBuilder.build())
-                .jwtString(jwtString)
-                .build();
+        return CredentialToken.builder().claims(claimsBuilder.build()).jwtString(jwtString).build();
     }
-
 }

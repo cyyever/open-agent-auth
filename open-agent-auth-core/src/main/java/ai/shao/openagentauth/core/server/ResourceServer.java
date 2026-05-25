@@ -15,19 +15,19 @@
  */
 package ai.shao.openagentauth.core.server;
 
+import ai.shao.openagentauth.core.server.exception.validation.ServerValidationException;
 import ai.shao.openagentauth.core.server.model.request.ResourceRequest;
 import ai.shao.openagentauth.core.server.model.validation.ValidationResult;
-import ai.shao.openagentauth.core.server.exception.validation.ServerValidationException;
 
 /**
- * Resource Server actor interface. Validates incoming requests by chaining
- * the CT (delegation) and DPoP (per-request) validators.
+ * Resource Server actor interface. Validates incoming requests by chaining the CT (delegation) and
+ * DPoP (per-request) validators.
  */
 public interface ResourceServer {
 
     /**
-     * Validates an incoming request: CT signature/claims, then DPoP signature/integrity.
-     * Fails fast — a CT failure short-circuits before DPoP validation runs.
+     * Validates an incoming request: CT signature/claims, then DPoP signature/integrity. Fails fast
+     * — a CT failure short-circuits before DPoP validation runs.
      *
      * @param request the incoming request
      * @return validation result with per-token outcomes

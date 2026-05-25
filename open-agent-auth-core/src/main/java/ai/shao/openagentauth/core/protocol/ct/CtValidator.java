@@ -23,65 +23,61 @@ import ai.shao.openagentauth.core.trust.TrustDomain;
 import ai.shao.openagentauth.core.util.ValidationUtils;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 /**
- * Validator for Credential Tokens (CT). Verifies the signature,
- * expiration, and structure of a {@link CredentialToken}.
+ * Validator for Credential Tokens (CT). Verifies the signature, expiration, and structure of a
+ * {@link CredentialToken}.
  */
 public class CtValidator {
 
-    /**
-     * Logger for this class.
-     */
+    /** Logger for this class. */
     private static final Logger logger = LoggerFactory.getLogger(CtValidator.class);
 
-    /**
-     * The expected trust domain for validation.
-     */
+    /** The expected trust domain for validation. */
     private final TrustDomain expectedTrustDomain;
 
     /**
-     * The key manager used for verifying CT signatures.
-     * Supports dynamic key rotation through KeyManager abstraction.
+     * The key manager used for verifying CT signatures. Supports dynamic key rotation through
+     * KeyManager abstraction.
      */
     private final KeyManager keyManager;
 
-    /**
-     * The key ID used for signature verification.
-     */
+    /** The key ID used for signature verification. */
     private final String verificationKeyId;
 
-    /**
-     * The CT parser.
-     */
+    /** The CT parser. */
     private final CtParser ctParser;
 
     /**
      * Creates a new CT validator with a key manager, verification key ID, and trust domain.
-     * <p>
-     * This constructor supports dynamic key rotation through the KeyManager abstraction.
-     * </p>
+     *
+     * <p>This constructor supports dynamic key rotation through the KeyManager abstraction.
      *
      * @param keyManager the key manager for signature verification
      * @param verificationKeyId the key ID used for signature verification
      * @param expectedTrustDomain the expected trust domain for validation
-     * @throws IllegalArgumentException if keyManager or expectedTrustDomain is null, or verificationKeyId is empty
+     * @throws IllegalArgumentException if keyManager or expectedTrustDomain is null, or
+     *     verificationKeyId is empty
      */
-    public CtValidator(KeyManager keyManager, String verificationKeyId, TrustDomain expectedTrustDomain) {
+    public CtValidator(
+            KeyManager keyManager, String verificationKeyId, TrustDomain expectedTrustDomain) {
         this.keyManager = ValidationUtils.validateNotNull(keyManager, "Key manager");
-        this.verificationKeyId = ValidationUtils.validateNotEmpty(verificationKeyId, "Verification key ID");
-        this.expectedTrustDomain = ValidationUtils.validateNotNull(expectedTrustDomain, "Expected trust domain");
+        this.verificationKeyId =
+                ValidationUtils.validateNotEmpty(verificationKeyId, "Verification key ID");
+        this.expectedTrustDomain =
+                ValidationUtils.validateNotNull(expectedTrustDomain, "Expected trust domain");
         this.ctParser = new CtParser();
 
-        logger.info("CtValidator initialized with KeyManager: {}, keyId: {}, domain: {}",
-                keyManager.getClass().getSimpleName(), verificationKeyId, expectedTrustDomain.domainId());
+        logger.info(
+                "CtValidator initialized with KeyManager: {}, keyId: {}, domain: {}",
+                keyManager.getClass().getSimpleName(),
+                verificationKeyId,
+                expectedTrustDomain.domainId());
     }
 
     /**
@@ -189,8 +185,10 @@ public class CtValidator {
 
             // Log if trust domain is invalid
             if (!isValid) {
-                logger.warn("CT issuer '{}' does not match expected trust domain '{}'",
-                           issuer, expectedTrustDomain.domainId());
+                logger.warn(
+                        "CT issuer '{}' does not match expected trust domain '{}'",
+                        issuer,
+                        expectedTrustDomain.domainId());
             }
             return isValid;
 
@@ -201,8 +199,8 @@ public class CtValidator {
     }
 
     /**
-     * Verifies that required claims are present in the CT: {@code sub}, {@code exp},
-     * and {@code cnf}.
+     * Verifies that required claims are present in the CT: {@code sub}, {@code exp}, and {@code
+     * cnf}.
      *
      * @param signedJwt the signed JWT
      * @return true if all required claims are present, false otherwise
@@ -285,9 +283,6 @@ public class CtValidator {
         }
     }
 
-    /**
-     * Result of cnf claim validation.
-     */
-    private record CnfValidationResult(boolean valid, boolean missing) { }
-
+    /** Result of cnf claim validation. */
+    private record CnfValidationResult(boolean valid, boolean missing) {}
 }

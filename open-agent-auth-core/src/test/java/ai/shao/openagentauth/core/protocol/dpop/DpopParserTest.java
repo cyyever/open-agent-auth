@@ -15,6 +15,9 @@
  */
 package ai.shao.openagentauth.core.protocol.dpop;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import ai.shao.openagentauth.core.model.token.DpopToken;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -29,21 +32,15 @@ import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import java.text.ParseException;
+import java.time.Instant;
+import java.util.Date;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.text.ParseException;
-import java.time.Instant;
-import java.util.Date;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-/**
- * Unit tests for {@link DpopParser}.
- */
+/** Unit tests for {@link DpopParser}. */
 @DisplayName("DPoP Parser Tests")
 class DpopParserTest {
 
@@ -56,9 +53,7 @@ class DpopParserTest {
     void setUp() throws JOSEException {
         dpopParser = new DpopParser();
 
-        signingKey = new OctetKeyPairGenerator(Curve.Ed25519)
-                .keyID("dpop-signing-key")
-                .generate();
+        signingKey = new OctetKeyPairGenerator(Curve.Ed25519).keyID("dpop-signing-key").generate();
 
         sampleWit = "sample-ct-jwt-string";
         sampleAccessToken = "sample-access-token";
@@ -220,18 +215,20 @@ class DpopParserTest {
         @DisplayName("Should reject DPoP signed with non-EdDSA algorithm")
         void shouldRejectWptSignedWithNonEdDsaAlgorithm() throws Exception {
             RSAKey rsaKey = new RSAKeyGenerator(2048).keyID("rs-key").generate();
-            JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                    .audience("resource-server")
-                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                    .jwtID(java.util.UUID.randomUUID().toString())
-                    .claim("wth", computeHash(sampleWit))
-                    .build();
-            SignedJWT rsaSigned = new SignedJWT(
-                    new JWSHeader.Builder(JWSAlgorithm.RS256)
-                            .keyID(rsaKey.getKeyID())
-                            .type(new JOSEObjectType("dpop+jwt"))
-                            .build(),
-                    claims);
+            JWTClaimsSet claims =
+                    new JWTClaimsSet.Builder()
+                            .audience("resource-server")
+                            .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                            .jwtID(java.util.UUID.randomUUID().toString())
+                            .claim("wth", computeHash(sampleWit))
+                            .build();
+            SignedJWT rsaSigned =
+                    new SignedJWT(
+                            new JWSHeader.Builder(JWSAlgorithm.RS256)
+                                    .keyID(rsaKey.getKeyID())
+                                    .type(new JOSEObjectType("dpop+jwt"))
+                                    .build(),
+                            claims);
             rsaSigned.sign(new RSASSASigner(rsaKey));
 
             SignedJWT signedJwt = SignedJWT.parse(rsaSigned.serialize());
@@ -243,18 +240,20 @@ class DpopParserTest {
         @Test
         @DisplayName("Should reject DPoP with disallowed JOSE header parameter (kid)")
         void shouldRejectWptWithKidHeader() throws Exception {
-            JWTClaimsSet claims = new JWTClaimsSet.Builder()
-                    .audience("resource-server")
-                    .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
-                    .jwtID(java.util.UUID.randomUUID().toString())
-                    .claim("wth", computeHash(sampleWit))
-                    .build();
-            SignedJWT signedJwt = new SignedJWT(
-                    new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                            .keyID(signingKey.getKeyID())
-                            .type(new JOSEObjectType("dpop+jwt"))
-                            .build(),
-                    claims);
+            JWTClaimsSet claims =
+                    new JWTClaimsSet.Builder()
+                            .audience("resource-server")
+                            .expirationTime(Date.from(Instant.now().plusSeconds(3600)))
+                            .jwtID(java.util.UUID.randomUUID().toString())
+                            .claim("wth", computeHash(sampleWit))
+                            .build();
+            SignedJWT signedJwt =
+                    new SignedJWT(
+                            new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                                    .keyID(signingKey.getKeyID())
+                                    .type(new JOSEObjectType("dpop+jwt"))
+                                    .build(),
+                            claims);
             signedJwt.sign(new com.nimbusds.jose.crypto.Ed25519Signer(signingKey));
 
             SignedJWT parsed = SignedJWT.parse(signedJwt.serialize());
@@ -295,19 +294,20 @@ class DpopParserTest {
     private String createValidWpt() throws JOSEException {
         Instant expirationTime = Instant.now().plusSeconds(3600);
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .audience("resource-server")
-                .expirationTime(Date.from(expirationTime))
-                .jwtID(java.util.UUID.randomUUID().toString())
-                .claim("wth", computeHash(sampleWit))
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .audience("resource-server")
+                        .expirationTime(Date.from(expirationTime))
+                        .jwtID(java.util.UUID.randomUUID().toString())
+                        .claim("wth", computeHash(sampleWit))
+                        .build();
 
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .type(new JOSEObjectType("dpop+jwt"))
-                        .build(),
-                claimsSet
-        );
+        SignedJWT signedJwt =
+                new SignedJWT(
+                        new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                                .type(new JOSEObjectType("dpop+jwt"))
+                                .build(),
+                        claimsSet);
 
         signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
@@ -316,20 +316,21 @@ class DpopParserTest {
     private String createWptWithOptionalClaims() throws JOSEException {
         Instant expirationTime = Instant.now().plusSeconds(3600);
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .audience("resource-server")
-                .expirationTime(Date.from(expirationTime))
-                .jwtID(java.util.UUID.randomUUID().toString())
-                .claim("wth", computeHash(sampleWit))
-                .claim("ath", computeHash(sampleAccessToken))
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .audience("resource-server")
+                        .expirationTime(Date.from(expirationTime))
+                        .jwtID(java.util.UUID.randomUUID().toString())
+                        .claim("wth", computeHash(sampleWit))
+                        .claim("ath", computeHash(sampleAccessToken))
+                        .build();
 
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .type(new JOSEObjectType("dpop+jwt"))
-                        .build(),
-                claimsSet
-        );
+        SignedJWT signedJwt =
+                new SignedJWT(
+                        new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                                .type(new JOSEObjectType("dpop+jwt"))
+                                .build(),
+                        claimsSet);
 
         signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
@@ -338,20 +339,21 @@ class DpopParserTest {
     private String createWptWithCustomTyp() throws JOSEException {
         Instant expirationTime = Instant.now().plusSeconds(3600);
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .audience("resource-server")
-                .expirationTime(Date.from(expirationTime))
-                .jwtID(java.util.UUID.randomUUID().toString())
-                .claim("wth", computeHash(sampleWit))
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .audience("resource-server")
+                        .expirationTime(Date.from(expirationTime))
+                        .jwtID(java.util.UUID.randomUUID().toString())
+                        .claim("wth", computeHash(sampleWit))
+                        .build();
 
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .keyID(signingKey.getKeyID())
-                        .type(new JOSEObjectType("custom-type"))
-                        .build(),
-                claimsSet
-        );
+        SignedJWT signedJwt =
+                new SignedJWT(
+                        new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                                .keyID(signingKey.getKeyID())
+                                .type(new JOSEObjectType("custom-type"))
+                                .build(),
+                        claimsSet);
 
         signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
@@ -360,27 +362,29 @@ class DpopParserTest {
     private String createWptWithoutTyp() throws JOSEException {
         Instant expirationTime = Instant.now().plusSeconds(3600);
 
-        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .audience("resource-server")
-                .expirationTime(Date.from(expirationTime))
-                .jwtID(java.util.UUID.randomUUID().toString())
-                .claim("wth", computeHash(sampleWit))
-                .build();
+        JWTClaimsSet claimsSet =
+                new JWTClaimsSet.Builder()
+                        .audience("resource-server")
+                        .expirationTime(Date.from(expirationTime))
+                        .jwtID(java.util.UUID.randomUUID().toString())
+                        .claim("wth", computeHash(sampleWit))
+                        .build();
 
-        SignedJWT signedJwt = new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.EdDSA)
-                        .keyID(signingKey.getKeyID())
-                        .build(),
-                claimsSet
-        );
+        SignedJWT signedJwt =
+                new SignedJWT(
+                        new JWSHeader.Builder(JWSAlgorithm.EdDSA)
+                                .keyID(signingKey.getKeyID())
+                                .build(),
+                        claimsSet);
 
         signedJwt.sign(new Ed25519Signer(signingKey));
         return signedJwt.serialize();
     }
 
     private String computeHash(String input) {
-        return "hash-" + java.util.Base64.getUrlEncoder()
-                .withoutPadding()
-                .encodeToString(input.getBytes());
+        return "hash-"
+                + java.util.Base64.getUrlEncoder()
+                        .withoutPadding()
+                        .encodeToString(input.getBytes());
     }
 }

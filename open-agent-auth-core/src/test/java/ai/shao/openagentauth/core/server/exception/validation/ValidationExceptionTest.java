@@ -15,14 +15,12 @@
  */
 package ai.shao.openagentauth.core.server.exception.validation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-/**
- * Test class for Validation domain exceptions in the Server module.
- */
+/** Test class for Validation domain exceptions in the Server module. */
 @DisplayName("Validation Exception Test")
 class ValidationExceptionTest {
 
@@ -30,9 +28,10 @@ class ValidationExceptionTest {
     @DisplayName("Test ServerValidationException with message")
     void testServerValidationExceptionWithMessage() {
         ServerValidationException exception = new ServerValidationException("Validation failed");
-        
+
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Server validation failed: Validation failed");
+        assertThat(exception.getFormattedMessage())
+                .isEqualTo("Server validation failed: Validation failed");
         assertThat(exception.getErrorParams()).containsExactly("Validation failed");
         assertThat(exception.getFailedLayer()).isEqualTo(0);
     }
@@ -41,9 +40,10 @@ class ValidationExceptionTest {
     @DisplayName("Test ServerValidationException with message and failed layer")
     void testServerValidationExceptionWithMessageAndFailedLayer() {
         ServerValidationException exception = new ServerValidationException(2, "Validation failed");
-        
+
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Server validation failed: Validation failed");
+        assertThat(exception.getFormattedMessage())
+                .isEqualTo("Server validation failed: Validation failed");
         assertThat(exception.getErrorParams()).containsExactly("Validation failed");
         assertThat(exception.getFailedLayer()).isEqualTo(2);
     }
@@ -52,10 +52,12 @@ class ValidationExceptionTest {
     @DisplayName("Test ServerValidationException with message and cause")
     void testServerValidationExceptionWithMessageAndCause() {
         Throwable cause = new RuntimeException("Invalid parameter");
-        ServerValidationException exception = new ServerValidationException("Validation failed", cause);
-        
+        ServerValidationException exception =
+                new ServerValidationException("Validation failed", cause);
+
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Server validation failed: Validation failed");
+        assertThat(exception.getFormattedMessage())
+                .isEqualTo("Server validation failed: Validation failed");
         assertThat(exception.getCause()).isEqualTo(cause);
         assertThat(exception.getFailedLayer()).isEqualTo(0);
     }
@@ -64,10 +66,12 @@ class ValidationExceptionTest {
     @DisplayName("Test ServerValidationException with message, failed layer and cause")
     void testServerValidationExceptionWithMessageFailedLayerAndCause() {
         Throwable cause = new RuntimeException("Invalid parameter");
-        ServerValidationException exception = new ServerValidationException(3, "Validation failed", cause);
-        
+        ServerValidationException exception =
+                new ServerValidationException(3, "Validation failed", cause);
+
         assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
-        assertThat(exception.getFormattedMessage()).isEqualTo("Server validation failed: Validation failed");
+        assertThat(exception.getFormattedMessage())
+                .isEqualTo("Server validation failed: Validation failed");
         assertThat(exception.getCause()).isEqualTo(cause);
         assertThat(exception.getFailedLayer()).isEqualTo(3);
     }
@@ -77,8 +81,10 @@ class ValidationExceptionTest {
     void testValidationErrorCodeProperties() {
         assertThat(ValidationErrorCode.DOMAIN_CODE).isEqualTo("03");
 
-        assertThat(ValidationErrorCode.VALIDATION_FAILED.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
-        assertThat(ValidationErrorCode.VALIDATION_FAILED.getErrorName()).isEqualTo("ServerValidationFailed");
+        assertThat(ValidationErrorCode.VALIDATION_FAILED.getErrorCode())
+                .isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(ValidationErrorCode.VALIDATION_FAILED.getErrorName())
+                .isEqualTo("ServerValidationFailed");
     }
 
     @Test

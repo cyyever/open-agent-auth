@@ -15,15 +15,14 @@
  */
 package ai.shao.openagentauth.core.exception;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 /**
- * Base exception for all Core module exceptions.
- * Error code format: {@code OPEN_AGENT_AUTH_10_YYZZ} (system 10, YY=domain, ZZ=error).
+ * Base exception for all Core module exceptions. Error code format: {@code OPEN_AGENT_AUTH_10_YYZZ}
+ * (system 10, YY=domain, ZZ=error).
  */
 public abstract class CoreException extends OpenAgentAuthException {
 
@@ -43,8 +42,11 @@ public abstract class CoreException extends OpenAgentAuthException {
      * @param errorParams the error parameters (varargs)
      */
     protected CoreException(ErrorCode errorCode, Object... errorParams) {
-        super(errorCode.getErrorCode(), errorCode.formatMessage(errorParams),
-              Arrays.asList(errorParams), null);
+        super(
+                errorCode.getErrorCode(),
+                errorCode.formatMessage(errorParams),
+                Arrays.asList(errorParams),
+                null);
     }
 
     /**
@@ -54,9 +56,15 @@ public abstract class CoreException extends OpenAgentAuthException {
      * @param errorParams the error parameters (varargs)
      * @param context the context information
      */
-    protected CoreException(ErrorCode errorCode, @Nullable List<Object> errorParams, @Nullable Map<String, Object> context) {
-        super(errorCode.getErrorCode(), errorCode.formatMessage(errorParams != null ? errorParams.toArray() : null),
-              errorParams, context);
+    protected CoreException(
+            ErrorCode errorCode,
+            @Nullable List<Object> errorParams,
+            @Nullable Map<String, Object> context) {
+        super(
+                errorCode.getErrorCode(),
+                errorCode.formatMessage(errorParams != null ? errorParams.toArray() : null),
+                errorParams,
+                context);
     }
 
     /**
@@ -77,22 +85,33 @@ public abstract class CoreException extends OpenAgentAuthException {
      * @param errorParams the error parameters (varargs)
      */
     protected CoreException(ErrorCode errorCode, Throwable cause, Object... errorParams) {
-        super(errorCode.getErrorCode(), errorCode.formatMessage(errorParams),
-              Arrays.asList(errorParams), null, cause);
+        super(
+                errorCode.getErrorCode(),
+                errorCode.formatMessage(errorParams),
+                Arrays.asList(errorParams),
+                null,
+                cause);
     }
 
     /**
-     * Constructs a new Core exception with the specified error code, parameters, context, and cause.
+     * Constructs a new Core exception with the specified error code, parameters, context, and
+     * cause.
      *
      * @param errorCode the error code
      * @param errorParams the error parameters (varargs)
      * @param context the context information
      * @param cause the cause
      */
-    protected CoreException(ErrorCode errorCode, @Nullable List<Object> errorParams,
-                          @Nullable Map<String, Object> context, @Nullable Throwable cause) {
-        super(errorCode.getErrorCode(), errorCode.formatMessage(errorParams != null ? errorParams.toArray() : null),
-              errorParams, context, cause);
+    protected CoreException(
+            ErrorCode errorCode,
+            @Nullable List<Object> errorParams,
+            @Nullable Map<String, Object> context,
+            @Nullable Throwable cause) {
+        super(
+                errorCode.getErrorCode(),
+                errorCode.formatMessage(errorParams != null ? errorParams.toArray() : null),
+                errorParams,
+                context,
+                cause);
     }
-
 }

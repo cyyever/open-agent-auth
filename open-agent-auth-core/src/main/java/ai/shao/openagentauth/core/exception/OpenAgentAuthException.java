@@ -15,35 +15,26 @@
  */
 package ai.shao.openagentauth.core.exception;
 
-import org.jspecify.annotations.Nullable;
-
 import java.util.List;
 import java.util.Map;
+import org.jspecify.annotations.Nullable;
 
 /**
- * Root exception class for the project. Carries a structured error code,
- * formatted message, optional parameter list, and optional context map.
+ * Root exception class for the project. Carries a structured error code, formatted message,
+ * optional parameter list, and optional context map.
  */
 public abstract class OpenAgentAuthException extends RuntimeException {
-    
-    /**
-     * The error code associated with this exception.
-     */
+
+    /** The error code associated with this exception. */
     private final String errorCode;
 
-    /**
-     * The error parameters used for message formatting.
-     */
+    /** The error parameters used for message formatting. */
     private final @Nullable List<Object> errorParams;
 
-    /**
-     * The context information associated with this exception.
-     */
+    /** The context information associated with this exception. */
     private final @Nullable Map<String, Object> context;
 
-    /**
-     * The formatted error message.
-     */
+    /** The formatted error message. */
     private final String formattedMessage;
 
     /**
@@ -67,7 +58,8 @@ public abstract class OpenAgentAuthException extends RuntimeException {
      * @param formattedMessage the formatted error message
      * @param cause the cause
      */
-    protected OpenAgentAuthException(String errorCode, String formattedMessage, @Nullable Throwable cause) {
+    protected OpenAgentAuthException(
+            String errorCode, String formattedMessage, @Nullable Throwable cause) {
         super(formattedMessage, cause);
         this.errorCode = errorCode;
         this.errorParams = null;
@@ -76,16 +68,19 @@ public abstract class OpenAgentAuthException extends RuntimeException {
     }
 
     /**
-     * Constructs a new Open Agent Auth exception with the specified error code, message,
-     * error parameters, and context.
+     * Constructs a new Open Agent Auth exception with the specified error code, message, error
+     * parameters, and context.
      *
      * @param errorCode the error code
      * @param formattedMessage the formatted error message
      * @param errorParams the error parameters
      * @param context the context information
      */
-    protected OpenAgentAuthException(String errorCode, String formattedMessage,
-                                     @Nullable List<Object> errorParams, @Nullable Map<String, Object> context) {
+    protected OpenAgentAuthException(
+            String errorCode,
+            String formattedMessage,
+            @Nullable List<Object> errorParams,
+            @Nullable Map<String, Object> context) {
         super(formattedMessage);
         this.errorCode = errorCode;
         this.errorParams = errorParams != null ? List.copyOf(errorParams) : null;
@@ -94,8 +89,8 @@ public abstract class OpenAgentAuthException extends RuntimeException {
     }
 
     /**
-     * Constructs a new Open Agent Auth exception with the specified error code, message,
-     * error parameters, context, and cause.
+     * Constructs a new Open Agent Auth exception with the specified error code, message, error
+     * parameters, context, and cause.
      *
      * @param errorCode the error code
      * @param formattedMessage the formatted error message
@@ -103,9 +98,12 @@ public abstract class OpenAgentAuthException extends RuntimeException {
      * @param context the context information
      * @param cause the cause
      */
-    protected OpenAgentAuthException(String errorCode, String formattedMessage,
-                                     @Nullable List<Object> errorParams, @Nullable Map<String, Object> context,
-                                     @Nullable Throwable cause) {
+    protected OpenAgentAuthException(
+            String errorCode,
+            String formattedMessage,
+            @Nullable List<Object> errorParams,
+            @Nullable Map<String, Object> context,
+            @Nullable Throwable cause) {
         super(formattedMessage, cause);
         this.errorCode = errorCode;
         this.errorParams = errorParams != null ? List.copyOf(errorParams) : null;
@@ -151,9 +149,14 @@ public abstract class OpenAgentAuthException extends RuntimeException {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "{" +
-                "errorCode='" + errorCode + '\'' +
-                ", formattedMessage='" + formattedMessage + '\'' +
-                '}';
+        return this.getClass().getSimpleName()
+                + "{"
+                + "errorCode='"
+                + errorCode
+                + '\''
+                + ", formattedMessage='"
+                + formattedMessage
+                + '\''
+                + '}';
     }
 }

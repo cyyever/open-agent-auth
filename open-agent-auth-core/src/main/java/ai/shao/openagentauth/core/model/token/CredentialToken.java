@@ -19,15 +19,14 @@ import ai.shao.openagentauth.core.model.jwk.Jwk;
 import ai.shao.openagentauth.core.util.ValidationUtils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Date;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Date;
-
 /**
- * Represents a Credential Token (CT). A CT is a JWT that identifies a workload
- * and contains a public key in the {@code cnf} claim used to verify the corresponding
- * DPoP Proof (DPoP). Per AAP spec §3 the JOSE header is fixed at
- * {@code {alg=EdDSA, typ=ct+jwt}}, so neither parameter is carried on this record.
+ * Represents a Credential Token (CT). A CT is a JWT that identifies a workload and contains a
+ * public key in the {@code cnf} claim used to verify the corresponding DPoP Proof (DPoP). Per AAP
+ * spec §3 the JOSE header is fixed at {@code {alg=EdDSA, typ=ct+jwt}}, so neither parameter is
+ * carried on this record.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CredentialToken(
@@ -44,27 +43,65 @@ public record CredentialToken(
         }
     }
 
-    public @Nullable String getIssuer()          { return claims.issuer();         }
-    public String getSubject()                   { return claims.subject();        }
-    public Date   getExpirationTime()            { return claims.expirationTime(); }
-    public @Nullable String getJwtId()           { return claims.jwtId();          }
-    public String getWorkloadIdentifier()        { return claims.subject();        }
-    public Claims.Confirmation getConfirmation() { return claims.confirmation();   }
-    public Jwk    getJwk()                       { return claims.jwk();            }
+    public @Nullable String getIssuer() {
+        return claims.issuer();
+    }
 
-    public boolean isExpired() { return claims.isExpired(); }
-    public boolean isValid()   { return claims.isValid();   }
+    public String getSubject() {
+        return claims.subject();
+    }
 
-    public static Builder builder() { return new Builder(); }
+    public Date getExpirationTime() {
+        return claims.expirationTime();
+    }
+
+    public @Nullable String getJwtId() {
+        return claims.jwtId();
+    }
+
+    public String getWorkloadIdentifier() {
+        return claims.subject();
+    }
+
+    public Claims.Confirmation getConfirmation() {
+        return claims.confirmation();
+    }
+
+    public Jwk getJwk() {
+        return claims.jwk();
+    }
+
+    public boolean isExpired() {
+        return claims.isExpired();
+    }
+
+    public boolean isValid() {
+        return claims.isValid();
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public static class Builder {
         private @Nullable Claims claims;
         private @Nullable String signature;
         private @Nullable String jwtString;
 
-        public Builder claims(Claims claims)       { this.claims = claims;       return this; }
-        public Builder signature(String signature) { this.signature = signature; return this; }
-        public Builder jwtString(String jwtString) { this.jwtString = jwtString; return this; }
+        public Builder claims(Claims claims) {
+            this.claims = claims;
+            return this;
+        }
+
+        public Builder signature(String signature) {
+            this.signature = signature;
+            return this;
+        }
+
+        public Builder jwtString(String jwtString) {
+            this.jwtString = jwtString;
+            return this;
+        }
 
         public CredentialToken build() {
             if (claims == null) {
@@ -96,10 +133,14 @@ public record CredentialToken(
         }
 
         /** Workload Identifier alias for subject. */
-        public String getWorkloadIdentifier() { return subject; }
+        public String getWorkloadIdentifier() {
+            return subject;
+        }
 
         /** JWK from the confirmation claim. */
-        public Jwk jwk() { return confirmation.jwk(); }
+        public Jwk jwk() {
+            return confirmation.jwk();
+        }
 
         public boolean isExpired() {
             return expirationTime.getTime() < System.currentTimeMillis();
@@ -109,7 +150,9 @@ public record CredentialToken(
             return System.currentTimeMillis() <= expirationTime.getTime();
         }
 
-        public static ClaimsBuilder builder() { return new ClaimsBuilder(); }
+        public static ClaimsBuilder builder() {
+            return new ClaimsBuilder();
+        }
 
         public static class ClaimsBuilder {
             private @Nullable String issuer;
@@ -118,11 +161,30 @@ public record CredentialToken(
             private @Nullable String jwtId;
             private @Nullable Confirmation confirmation;
 
-            public ClaimsBuilder issuer(@Nullable String issuer)         { this.issuer = issuer;                 return this; }
-            public ClaimsBuilder subject(@Nullable String subject)       { this.subject = subject;               return this; }
-            public ClaimsBuilder expirationTime(@Nullable Date expirationTime) { this.expirationTime = expirationTime; return this; }
-            public ClaimsBuilder jwtId(@Nullable String jwtId)           { this.jwtId = jwtId;                   return this; }
-            public ClaimsBuilder confirmation(@Nullable Confirmation confirmation) { this.confirmation = confirmation; return this; }
+            public ClaimsBuilder issuer(@Nullable String issuer) {
+                this.issuer = issuer;
+                return this;
+            }
+
+            public ClaimsBuilder subject(@Nullable String subject) {
+                this.subject = subject;
+                return this;
+            }
+
+            public ClaimsBuilder expirationTime(@Nullable Date expirationTime) {
+                this.expirationTime = expirationTime;
+                return this;
+            }
+
+            public ClaimsBuilder jwtId(@Nullable String jwtId) {
+                this.jwtId = jwtId;
+                return this;
+            }
+
+            public ClaimsBuilder confirmation(@Nullable Confirmation confirmation) {
+                this.confirmation = confirmation;
+                return this;
+            }
 
             public Claims build() {
                 if (subject == null || subject.isEmpty()) {
@@ -139,8 +201,8 @@ public record CredentialToken(
         }
 
         /**
-         * Confirmation claim (cnf) structure as defined in RFC 7800.
-         * Contains the JWK used to verify the corresponding DPoP.
+         * Confirmation claim (cnf) structure as defined in RFC 7800. Contains the JWK used to
+         * verify the corresponding DPoP.
          */
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public record Confirmation(@JsonProperty("jwk") Jwk jwk) {
@@ -151,16 +213,22 @@ public record CredentialToken(
                 }
             }
 
-            public static ConfirmationBuilder builder() { return new ConfirmationBuilder(); }
+            public static ConfirmationBuilder builder() {
+                return new ConfirmationBuilder();
+            }
 
             public static class ConfirmationBuilder {
                 private @Nullable Jwk jwk;
 
-                public ConfirmationBuilder jwk(Jwk jwk) { this.jwk = jwk; return this; }
+                public ConfirmationBuilder jwk(Jwk jwk) {
+                    this.jwk = jwk;
+                    return this;
+                }
 
                 public Confirmation build() {
                     if (jwk == null) {
-                        throw new IllegalStateException("jwk is REQUIRED in confirmation (cnf) claim");
+                        throw new IllegalStateException(
+                                "jwk is REQUIRED in confirmation (cnf) claim");
                     }
                     return new Confirmation(jwk);
                 }

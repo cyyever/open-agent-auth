@@ -17,14 +17,10 @@ package ai.shao.openagentauth.core.server.exception.validation;
 
 import ai.shao.openagentauth.core.server.exception.ServerException;
 
-/**
- * Base exception for all Validation domain exceptions.
- */
+/** Base exception for all Validation domain exceptions. */
 public abstract class ValidationException extends ServerException {
 
-    /**
-     * The layer where validation failed.
-     */
+    /** The layer where validation failed. */
     private final int failedLayer;
 
     /**
@@ -38,13 +34,15 @@ public abstract class ValidationException extends ServerException {
     }
 
     /**
-     * Constructs a new Validation exception with the specified error code, failed layer, and parameters.
+     * Constructs a new Validation exception with the specified error code, failed layer, and
+     * parameters.
      *
      * @param failedLayer the layer where validation failed
-     * @param errorCode   the error code
+     * @param errorCode the error code
      * @param errorParams the error parameters (varargs)
      */
-    protected ValidationException(int failedLayer, ValidationErrorCode errorCode, Object... errorParams) {
+    protected ValidationException(
+            int failedLayer, ValidationErrorCode errorCode, Object... errorParams) {
         super(errorCode, errorParams);
         this.failedLayer = failedLayer;
     }
@@ -56,19 +54,25 @@ public abstract class ValidationException extends ServerException {
      * @param cause the cause
      * @param errorParams the error parameters (varargs)
      */
-    protected ValidationException(ValidationErrorCode errorCode, Throwable cause, Object... errorParams) {
+    protected ValidationException(
+            ValidationErrorCode errorCode, Throwable cause, Object... errorParams) {
         this(0, errorCode, cause, errorParams);
     }
 
     /**
-     * Constructs a new Validation exception with the specified error code, cause, failed layer, and parameters.
+     * Constructs a new Validation exception with the specified error code, cause, failed layer, and
+     * parameters.
      *
      * @param failedLayer the layer where validation failed
-     * @param errorCode   the error code
-     * @param cause       the cause
+     * @param errorCode the error code
+     * @param cause the cause
      * @param errorParams the error parameters (varargs)
      */
-    protected ValidationException(int failedLayer, ValidationErrorCode errorCode, Throwable cause, Object... errorParams) {
+    protected ValidationException(
+            int failedLayer,
+            ValidationErrorCode errorCode,
+            Throwable cause,
+            Object... errorParams) {
         super(errorCode, cause, errorParams);
         this.failedLayer = failedLayer;
     }

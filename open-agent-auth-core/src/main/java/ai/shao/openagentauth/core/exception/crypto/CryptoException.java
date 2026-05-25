@@ -20,19 +20,15 @@ import ai.shao.openagentauth.core.exception.CoreException;
 
 /**
  * Base exception for all Crypto domain exceptions.
- * <p>
- * This exception serves as the root for all exceptions in the Crypto domain.
- * All cryptographic operation exceptions should extend from this class.
- * </p>
- * <p>
- * <b>Domain Code:</b> 03
- * </p>
- * <p>
- * <b>Error Code Format:</b> OPEN_AGENT_AUTH_10_03ZZ
- * </p>
+ *
+ * <p>This exception serves as the root for all exceptions in the Crypto domain. All cryptographic
+ * operation exceptions should extend from this class.
+ *
+ * <p><b>Domain Code:</b> 03
+ *
+ * <p><b>Error Code Format:</b> OPEN_AGENT_AUTH_10_03ZZ
  */
-public abstract sealed class CryptoException extends CoreException
-        permits KeyResolutionException {
+public abstract sealed class CryptoException extends CoreException permits KeyResolutionException {
 
     /**
      * Constructs a new Crypto exception with the specified error code and parameters.
@@ -43,7 +39,7 @@ public abstract sealed class CryptoException extends CoreException
     protected CryptoException(CryptoErrorCode errorCode, Object... errorParams) {
         super(errorCode, errorParams);
     }
-    
+
     /**
      * Constructs a new Crypto exception with the specified error code, cause, and parameters.
      *

@@ -18,13 +18,12 @@ package ai.shao.openagentauth.core.server.model.validation;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import org.jspecify.annotations.Nullable;
 
-import java.util.List;
-
 /**
- * Result of request validation: overall valid flag, per-layer breakdown, and
- * the flat list of error messages collected across all failed layers.
+ * Result of request validation: overall valid flag, per-layer breakdown, and the flat list of error
+ * messages collected across all failed layers.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ValidationResult(
@@ -33,11 +32,12 @@ public record ValidationResult(
         @JsonProperty("errors") @Nullable List<String> errors) {
 
     @JsonCreator
-    public ValidationResult {
-    }
+    public ValidationResult {}
 
     /** Boolean-getter alias for {@link #valid()}, matching the existing API. */
-    public boolean isValid() { return valid; }
+    public boolean isValid() {
+        return valid;
+    }
 
     public static Builder builder() {
         return new Builder();
@@ -77,11 +77,12 @@ public record ValidationResult(
             @JsonProperty("message") @Nullable String message) {
 
         @JsonCreator
-        public LayerResult {
-        }
+        public LayerResult {}
 
         /** Boolean-getter alias for {@link #valid()}, matching the existing API. */
-        public boolean isValid() { return valid; }
+        public boolean isValid() {
+            return valid;
+        }
 
         public static Builder builder() {
             return new Builder();
