@@ -28,7 +28,7 @@ class CryptoErrorCodeTest {
     void shouldVerifyKeyResolutionFailedErrorCodeProperties() {
         CryptoErrorCode errorCode = CryptoErrorCode.KEY_RESOLUTION_FAILED;
 
-        assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_0306");
+        assertThat(errorCode.getErrorCode()).isEqualTo("AAP_RS_10_0306");
         assertThat(errorCode.getDomainCode()).isEqualTo("03");
         assertThat(errorCode.getSubCode()).isEqualTo("06");
         assertThat(errorCode.getErrorName()).isEqualTo("KeyResolutionFailed");
@@ -61,8 +61,8 @@ class CryptoErrorCodeTest {
     @DisplayName("Should verify error code format consistency")
     void shouldVerifyErrorCodeFormatConsistency() {
         for (CryptoErrorCode errorCode : CryptoErrorCode.values()) {
-            assertThat(errorCode.getErrorCode()).matches("OPEN_AGENT_AUTH_10_03\\d{2}");
-            assertThat(errorCode.getErrorCode()).hasSize(23);
+            assertThat(errorCode.getErrorCode()).matches("AAP_RS_10_03\\d{2}");
+            assertThat(errorCode.getErrorCode()).hasSize(14);
         }
     }
 }

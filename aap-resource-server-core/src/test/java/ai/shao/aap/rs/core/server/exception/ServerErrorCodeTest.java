@@ -132,21 +132,21 @@ class ServerErrorCodeTest {
     @DisplayName("Should generate correct error code for Auth domain")
     void shouldGenerateCorrectErrorCodeForAuthDomain() {
         assertThat(TestServerErrorCode.TEST_AUTH_ERROR.getErrorCode())
-                .isEqualTo("OPEN_AGENT_AUTH_11_0101");
+                .isEqualTo("AAP_RS_11_0101");
     }
 
     @Test
     @DisplayName("Should generate correct error code for Token domain")
     void shouldGenerateCorrectErrorCodeForTokenDomain() {
         assertThat(TestServerErrorCode.TEST_TOKEN_ERROR.getErrorCode())
-                .isEqualTo("OPEN_AGENT_AUTH_11_0102");
+                .isEqualTo("AAP_RS_11_0102");
     }
 
     @Test
     @DisplayName("Should generate correct error code for Validation domain")
     void shouldGenerateCorrectErrorCodeForValidationDomain() {
         assertThat(TestServerErrorCode.TEST_VALIDATION_ERROR.getErrorCode())
-                .isEqualTo("OPEN_AGENT_AUTH_11_0103");
+                .isEqualTo("AAP_RS_11_0103");
     }
 
     @Test

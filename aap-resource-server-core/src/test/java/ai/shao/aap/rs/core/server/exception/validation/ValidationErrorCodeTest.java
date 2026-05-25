@@ -40,7 +40,7 @@ class ValidationErrorCodeTest {
     @DisplayName("Should generate correct error code for VALIDATION_FAILED")
     void shouldGenerateCorrectErrorCodeForValidationFailed() {
         assertThat(ValidationErrorCode.VALIDATION_FAILED.getErrorCode())
-                .isEqualTo("OPEN_AGENT_AUTH_11_0301");
+                .isEqualTo("AAP_RS_11_0301");
     }
 
     @Test

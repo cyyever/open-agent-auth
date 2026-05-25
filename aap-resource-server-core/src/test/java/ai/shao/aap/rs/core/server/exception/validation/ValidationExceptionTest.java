@@ -29,7 +29,7 @@ class ValidationExceptionTest {
     void testServerValidationExceptionWithMessage() {
         ServerValidationException exception = new ServerValidationException("Validation failed");
 
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0301");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server validation failed: Validation failed");
         assertThat(exception.getErrorParams()).containsExactly("Validation failed");
@@ -41,7 +41,7 @@ class ValidationExceptionTest {
     void testServerValidationExceptionWithMessageAndFailedLayer() {
         ServerValidationException exception = new ServerValidationException(2, "Validation failed");
 
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0301");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server validation failed: Validation failed");
         assertThat(exception.getErrorParams()).containsExactly("Validation failed");
@@ -55,7 +55,7 @@ class ValidationExceptionTest {
         ServerValidationException exception =
                 new ServerValidationException("Validation failed", cause);
 
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0301");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server validation failed: Validation failed");
         assertThat(exception.getCause()).isEqualTo(cause);
@@ -69,7 +69,7 @@ class ValidationExceptionTest {
         ServerValidationException exception =
                 new ServerValidationException(3, "Validation failed", cause);
 
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0301");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server validation failed: Validation failed");
         assertThat(exception.getCause()).isEqualTo(cause);
@@ -82,7 +82,7 @@ class ValidationExceptionTest {
         assertThat(ValidationErrorCode.DOMAIN_CODE).isEqualTo("03");
 
         assertThat(ValidationErrorCode.VALIDATION_FAILED.getErrorCode())
-                .isEqualTo("OPEN_AGENT_AUTH_11_0301");
+                .isEqualTo("AAP_RS_11_0301");
         assertThat(ValidationErrorCode.VALIDATION_FAILED.getErrorName())
                 .isEqualTo("ServerValidationFailed");
     }

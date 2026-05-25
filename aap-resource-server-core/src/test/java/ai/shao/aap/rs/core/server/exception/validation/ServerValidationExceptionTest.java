@@ -38,7 +38,7 @@ class ServerValidationExceptionTest {
         ServerValidationException exception =
                 new ServerValidationException("Request validation failed");
 
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0301");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server validation failed: Request validation failed");
         assertThat(exception.getMessage()).contains("Request validation failed");
@@ -52,7 +52,7 @@ class ServerValidationExceptionTest {
         ServerValidationException exception =
                 new ServerValidationException(2, "Layer 2 validation failed");
 
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0301");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server validation failed: Layer 2 validation failed");
         assertThat(exception.getFailedLayer()).isEqualTo(2);
@@ -65,7 +65,7 @@ class ServerValidationExceptionTest {
         ServerValidationException exception =
                 new ServerValidationException("Cannot validate request", cause);
 
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0301");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server validation failed: Cannot validate request");
         assertThat(exception.getCause()).isEqualTo(cause);
@@ -79,7 +79,7 @@ class ServerValidationExceptionTest {
         ServerValidationException exception =
                 new ServerValidationException(3, "Layer 3 validation failed", cause);
 
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0301");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server validation failed: Layer 3 validation failed");
         assertThat(exception.getFailedLayer()).isEqualTo(3);
@@ -119,7 +119,7 @@ class ServerValidationExceptionTest {
     void shouldHaveCorrectErrorCodeConstant() {
         ServerValidationException exception = new ServerValidationException("test");
 
-        assertThat(exception.getErrorCode()).startsWith("OPEN_AGENT_AUTH_11_03");
+        assertThat(exception.getErrorCode()).startsWith("AAP_RS_11_03");
         assertThat(exception.getErrorCode()).endsWith("01");
     }
 

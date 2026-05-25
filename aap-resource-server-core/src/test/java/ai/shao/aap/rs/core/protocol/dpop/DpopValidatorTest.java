@@ -105,8 +105,9 @@ class DpopValidatorTest {
 
             TokenValidationResult<DpopToken> result = dpopValidator.validate(dpop, ct);
 
-            assertThat(result.isValid()).isFalse();
-            assertThat(result.getErrorMessage()).contains("DPoP expired");
+            assertThat(result).isInstanceOf(TokenValidationResult.Failure.class);
+            var failure = (TokenValidationResult.Failure<DpopToken>) result;
+            assertThat(failure.errorMessage()).contains("DPoP expired");
         }
 
         @Test
@@ -135,8 +136,9 @@ class DpopValidatorTest {
 
             TokenValidationResult<DpopToken> result = dpopValidator.validate(tamperedWpt, ct);
 
-            assertThat(result.isValid()).isFalse();
-            assertThat(result.getErrorMessage()).contains("DPoP signature verification failed");
+            assertThat(result).isInstanceOf(TokenValidationResult.Failure.class);
+            var failure = (TokenValidationResult.Failure<DpopToken>) result;
+            assertThat(failure.errorMessage()).contains("DPoP signature verification failed");
         }
 
         @Test
@@ -163,8 +165,9 @@ class DpopValidatorTest {
 
             TokenValidationResult<DpopToken> result = dpopValidator.validate(dpop, ct);
 
-            assertThat(result.isValid()).isFalse();
-            assertThat(result.getErrorMessage()).contains("required claim");
+            assertThat(result).isInstanceOf(TokenValidationResult.Failure.class);
+            var failure = (TokenValidationResult.Failure<DpopToken>) result;
+            assertThat(failure.errorMessage()).contains("required claim");
         }
 
         @Test
@@ -175,8 +178,9 @@ class DpopValidatorTest {
 
             TokenValidationResult<DpopToken> result = dpopValidator.validate(dpop, ct);
 
-            assertThat(result.isValid()).isTrue();
-            assertThat(result.getToken().claims().workloadTokenHash()).isNotNull();
+            assertThat(result).isInstanceOf(TokenValidationResult.Success.class);
+            var success = (TokenValidationResult.Success<DpopToken>) result;
+            assertThat(success.token().claims().workloadTokenHash()).isNotNull();
         }
     }
 
@@ -194,8 +198,9 @@ class DpopValidatorTest {
 
             TokenValidationResult<DpopToken> result = dpopValidator.validate(dpop, differentWit);
 
-            assertThat(result.isValid()).isFalse();
-            assertThat(result.getErrorMessage()).contains("does not match CT hash");
+            assertThat(result).isInstanceOf(TokenValidationResult.Failure.class);
+            var failure = (TokenValidationResult.Failure<DpopToken>) result;
+            assertThat(failure.errorMessage()).contains("does not match CT hash");
         }
 
         @Test
@@ -221,8 +226,9 @@ class DpopValidatorTest {
 
             TokenValidationResult<DpopToken> result = dpopValidator.validate(null, ct);
 
-            assertThat(result.isValid()).isFalse();
-            assertThat(result.getErrorMessage()).contains("DPoP cannot be null");
+            assertThat(result).isInstanceOf(TokenValidationResult.Failure.class);
+            var failure = (TokenValidationResult.Failure<DpopToken>) result;
+            assertThat(failure.errorMessage()).contains("DPoP cannot be null");
         }
 
         @Test
@@ -233,8 +239,9 @@ class DpopValidatorTest {
 
             TokenValidationResult<DpopToken> result = dpopValidator.validate(dpop, null);
 
-            assertThat(result.isValid()).isFalse();
-            assertThat(result.getErrorMessage()).contains("CT cannot be null");
+            assertThat(result).isInstanceOf(TokenValidationResult.Failure.class);
+            var failure = (TokenValidationResult.Failure<DpopToken>) result;
+            assertThat(failure.errorMessage()).contains("CT cannot be null");
         }
     }
 

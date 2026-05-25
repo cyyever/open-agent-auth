@@ -140,7 +140,7 @@ class ServerExceptionTest {
     void testServerExceptionWithErrorCodeOnly() {
         TestServerException exception =
                 new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED);
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0101");
         assertThat(exception.getFormattedMessage()).isEqualTo("Server authentication failed: {0}");
         assertThat(exception.getErrorParams()).isNull();
     }
@@ -150,7 +150,7 @@ class ServerExceptionTest {
     void testServerExceptionWithVarargsParameters() {
         TestServerException exception =
                 new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, "john.doe");
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0101");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server authentication failed: john.doe");
         assertThat(exception.getErrorParams()).containsExactly("john.doe");
@@ -162,7 +162,7 @@ class ServerExceptionTest {
         TestServerException exception =
                 new TestServerException(
                         TestServerErrorCode.TEST_VALIDATION_ERROR, "username", "cannot be empty");
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0301");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server validation failed: username - cannot be empty");
         assertThat(exception.getErrorParams()).containsExactly("username", "cannot be empty");
@@ -179,7 +179,7 @@ class ServerExceptionTest {
         TestServerException exception =
                 new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, errorParams, context);
 
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0101");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server authentication failed: john.doe");
         assertThat(exception.getErrorParams()).containsExactly("john.doe");
@@ -194,7 +194,7 @@ class ServerExceptionTest {
                 new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, cause);
 
         assertThat(exception.getCause()).isEqualTo(cause);
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0101");
     }
 
     @Test
@@ -205,7 +205,7 @@ class ServerExceptionTest {
                 new TestServerException(TestServerErrorCode.TEST_AUTH_FAILED, cause, "john.doe");
 
         assertThat(exception.getCause()).isEqualTo(cause);
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0101");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server authentication failed: john.doe");
     }
@@ -223,7 +223,7 @@ class ServerExceptionTest {
                         TestServerErrorCode.TEST_VALIDATION_ERROR, errorParams, context, cause);
 
         assertThat(exception.getCause()).isEqualTo(cause);
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0301");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_11_0301");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Server validation failed: username - cannot be empty");
         assertThat(exception.getErrorParams()).containsExactly("username", "cannot be empty");
@@ -235,7 +235,7 @@ class ServerExceptionTest {
     void testErrorCodeProperties() {
         TestServerErrorCode errorCode = TestServerErrorCode.TEST_AUTH_FAILED;
 
-        assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_11_0101");
+        assertThat(errorCode.getErrorCode()).isEqualTo("AAP_RS_11_0101");
         assertThat(errorCode.getErrorName()).isEqualTo("TestAuthFailed");
         assertThat(errorCode.getMessageTemplate()).isEqualTo("Server authentication failed: {0}");
     }
@@ -248,7 +248,7 @@ class ServerExceptionTest {
 
         String toString = exception.toString();
         assertThat(toString).contains("TestServerException");
-        assertThat(toString).contains("errorCode='OPEN_AGENT_AUTH_11_0101'");
+        assertThat(toString).contains("errorCode='AAP_RS_11_0101'");
         assertThat(toString).contains("formattedMessage='Server authentication failed: john.doe'");
     }
 

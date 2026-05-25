@@ -28,7 +28,7 @@ class CryptoExceptionTest {
     @DisplayName("Test CryptoErrorCode error code format")
     void testCryptoErrorCodeFormat() {
         assertThat(CryptoErrorCode.KEY_RESOLUTION_FAILED.getErrorCode())
-                .isEqualTo("OPEN_AGENT_AUTH_10_0306");
+                .isEqualTo("AAP_RS_10_0306");
     }
 
     @Test

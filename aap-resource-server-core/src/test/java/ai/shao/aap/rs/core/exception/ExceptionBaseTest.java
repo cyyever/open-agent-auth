@@ -227,7 +227,7 @@ class ExceptionBaseTest {
     @DisplayName("Test CoreException with error code only")
     void testCoreExceptionWithErrorCodeOnly() {
         TestCoreException exception = new TestCoreException(TestCoreErrorCode.TEST_AUTH_FAILED);
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_10_010001");
         assertThat(exception.getFormattedMessage()).isEqualTo("Authentication failed for user {0}");
         assertThat(exception.getErrorParams()).isNull();
     }
@@ -237,7 +237,7 @@ class ExceptionBaseTest {
     void testCoreExceptionWithVarargsParameters() {
         TestCoreException exception =
                 new TestCoreException(TestCoreErrorCode.TEST_AUTH_FAILED, "john.doe");
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_10_010001");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Authentication failed for user john.doe");
         assertThat(exception.getErrorParams()).containsExactly("john.doe");
@@ -249,7 +249,7 @@ class ExceptionBaseTest {
         TestCoreException exception =
                 new TestCoreException(
                         TestCoreErrorCode.TEST_VALIDATION_ERROR, "username", "cannot be empty");
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_10_010001");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Validation failed: username - cannot be empty");
         assertThat(exception.getErrorParams()).containsExactly("username", "cannot be empty");
@@ -266,7 +266,7 @@ class ExceptionBaseTest {
         TestCoreException exception =
                 new TestCoreException(TestCoreErrorCode.TEST_AUTH_FAILED, errorParams, context);
 
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_10_010001");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Authentication failed for user john.doe");
         assertThat(exception.getErrorParams()).containsExactly("john.doe");
@@ -281,7 +281,7 @@ class ExceptionBaseTest {
                 new TestCoreException(TestCoreErrorCode.TEST_AUTH_FAILED, cause);
 
         assertThat(exception.getCause()).isEqualTo(cause);
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_10_010001");
     }
 
     @Test
@@ -292,7 +292,7 @@ class ExceptionBaseTest {
                 new TestCoreException(TestCoreErrorCode.TEST_AUTH_FAILED, cause, "john.doe");
 
         assertThat(exception.getCause()).isEqualTo(cause);
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_10_010001");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Authentication failed for user john.doe");
     }
@@ -310,7 +310,7 @@ class ExceptionBaseTest {
                         TestCoreErrorCode.TEST_VALIDATION_ERROR, errorParams, context, cause);
 
         assertThat(exception.getCause()).isEqualTo(cause);
-        assertThat(exception.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
+        assertThat(exception.getErrorCode()).isEqualTo("AAP_RS_10_010001");
         assertThat(exception.getFormattedMessage())
                 .isEqualTo("Validation failed: username - cannot be empty");
         assertThat(exception.getErrorParams()).containsExactly("username", "cannot be empty");
@@ -322,7 +322,7 @@ class ExceptionBaseTest {
     void testFrameworkErrorCodeProperties() {
         TestFrameworkErrorCode errorCode = TestFrameworkErrorCode.TEST_AGENT_ERROR;
 
-        assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
+        assertThat(errorCode.getErrorCode()).isEqualTo("AAP_RS_10_010001");
         assertThat(errorCode.getErrorName()).isEqualTo("TEST_AGENT_ERROR");
         assertThat(errorCode.getMessageTemplate()).isEqualTo("Agent operation failed: {0}");
     }
@@ -358,7 +358,7 @@ class ExceptionBaseTest {
     void testErrorCodeProperties() {
         TestCoreErrorCode errorCode = TestCoreErrorCode.TEST_AUTH_FAILED;
 
-        assertThat(errorCode.getErrorCode()).isEqualTo("OPEN_AGENT_AUTH_10_010001");
+        assertThat(errorCode.getErrorCode()).isEqualTo("AAP_RS_10_010001");
         assertThat(errorCode.getErrorName()).isEqualTo("TEST_AUTH_FAILED");
         assertThat(errorCode.getMessageTemplate()).isEqualTo("Authentication failed for user {0}");
     }
@@ -371,7 +371,7 @@ class ExceptionBaseTest {
 
         String toString = exception.toString();
         assertThat(toString).contains("TestCoreException");
-        assertThat(toString).contains("errorCode='OPEN_AGENT_AUTH_10_010001'");
+        assertThat(toString).contains("errorCode='AAP_RS_10_010001'");
         assertThat(toString).contains("formattedMessage='Authentication failed for user john.doe'");
     }
 }
