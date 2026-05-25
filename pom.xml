@@ -5,7 +5,7 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>ai.shao.openagentauth</groupId>
+    <groupId>ai.shao.aap.rs</groupId>
     <artifactId>open-agent-auth</artifactId>
     <version>0.1.0-beta.1-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -53,7 +53,7 @@
         <dependencies>
             <!-- Internal Module -->
             <dependency>
-                <groupId>ai.shao.openagentauth</groupId>
+                <groupId>ai.shao.aap.rs</groupId>
                 <artifactId>open-agent-auth-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -334,7 +334,7 @@
                             <compilerArgs combine.children="append">
                                 <arg>-XDcompilePolicy=simple</arg>
                                 <arg>--should-stop=ifError=FLOW</arg>
-                                <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=ai.shao.openagentauth -XepExcludedPaths:.*/src/test/.*</arg>
+                                <arg>-Xplugin:ErrorProne -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=ai.shao.aap.rs -XepExcludedPaths:.*/src/test/.*</arg>
                                 <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
                                 <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
                                 <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>

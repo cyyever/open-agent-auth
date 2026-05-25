@@ -13,7 +13,7 @@ Single Maven module `open-agent-auth-core`. Protocol primitives (JWS
 sign/verify, key management, JWKS provider, trust roots, CT/DPoP under
 `core.protocol.{ct,dpop}`) plus the server-side actor (`ResourceServer`,
 `DefaultResourceServer`, request/result models) under
-`ai.shao.openagentauth.core.server.*`. Pure Java, no Spring.
+`ai.shao.aap.rs.core.server.*`. Pure Java, no Spring.
 
 The module requires **Java 21 LTS** (or later). Only direct deps are
 [Nimbus JOSE+JWT](https://connect2id.com/products/nimbus-jose-jwt),
