@@ -45,11 +45,6 @@ public interface ServerErrorCode extends ErrorCode {
      */
     String DOMAIN_CODE_VALIDATION = "03";
 
-    /**
-     * Domain code for OAuth2.
-     */
-    String DOMAIN_CODE_OAUTH2 = "04";
-
     @Override
     default String getSystemCode() {
         return SYSTEM_CODE;

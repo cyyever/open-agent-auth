@@ -39,8 +39,7 @@ class ServerErrorCodeTest {
     private enum TestServerErrorCode implements ServerErrorCode {
         TEST_AUTH_ERROR("01", "TestAuthError", "Auth error: {0}", HttpStatus.BAD_REQUEST),
         TEST_TOKEN_ERROR("02", "TestTokenError", "Token error: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
-        TEST_VALIDATION_ERROR("03", "TestValidationError", "Validation error: {0}", HttpStatus.BAD_REQUEST),
-        TEST_OAUTH2_ERROR("04", "TestOAuth2Error", "OAuth2 error: {0}", HttpStatus.BAD_REQUEST);
+        TEST_VALIDATION_ERROR("03", "TestValidationError", "Validation error: {0}", HttpStatus.BAD_REQUEST);
 
         private final String subCode;
         private final String errorName;
@@ -105,18 +104,11 @@ class ServerErrorCodeTest {
     }
 
     @Test
-    @DisplayName("Should have correct domain code for OAuth2")
-    void shouldHaveCorrectDomainCodeForOauth2() {
-        assertThat(ServerErrorCode.DOMAIN_CODE_OAUTH2).isEqualTo("04");
-    }
-
-    @Test
     @DisplayName("Should return correct system code from default method")
     void shouldReturnCorrectSystemCodeFromDefaultMethod() {
         assertThat(TestServerErrorCode.TEST_AUTH_ERROR.getSystemCode()).isEqualTo("11");
         assertThat(TestServerErrorCode.TEST_TOKEN_ERROR.getSystemCode()).isEqualTo("11");
         assertThat(TestServerErrorCode.TEST_VALIDATION_ERROR.getSystemCode()).isEqualTo("11");
-        assertThat(TestServerErrorCode.TEST_OAUTH2_ERROR.getSystemCode()).isEqualTo("11");
     }
 
     @Test
@@ -169,19 +161,11 @@ class ServerErrorCodeTest {
     }
 
     @Test
-    @DisplayName("Should generate correct error code for OAuth2 domain")
-    void shouldGenerateCorrectErrorCodeForOauth2Domain() {
-        assertThat(TestServerErrorCode.TEST_OAUTH2_ERROR.getErrorCode())
-                .isEqualTo("OPEN_AGENT_AUTH_11_0104");
-    }
-
-    @Test
     @DisplayName("Should return correct sub code")
     void shouldReturnCorrectSubCode() {
         assertThat(TestServerErrorCode.TEST_AUTH_ERROR.getSubCode()).isEqualTo("01");
         assertThat(TestServerErrorCode.TEST_TOKEN_ERROR.getSubCode()).isEqualTo("02");
         assertThat(TestServerErrorCode.TEST_VALIDATION_ERROR.getSubCode()).isEqualTo("03");
-        assertThat(TestServerErrorCode.TEST_OAUTH2_ERROR.getSubCode()).isEqualTo("04");
     }
 
     @Test
@@ -204,6 +188,5 @@ class ServerErrorCodeTest {
         assertThat(ServerErrorCode.DOMAIN_CODE_AUTH).isEqualTo("01");
         assertThat(ServerErrorCode.DOMAIN_CODE_TOKEN).isEqualTo("02");
         assertThat(ServerErrorCode.DOMAIN_CODE_VALIDATION).isEqualTo("03");
-        assertThat(ServerErrorCode.DOMAIN_CODE_OAUTH2).isEqualTo("04");
     }
 }

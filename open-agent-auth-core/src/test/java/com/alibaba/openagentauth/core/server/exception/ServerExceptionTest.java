@@ -47,10 +47,8 @@ class ServerExceptionTest {
                         "Server authentication failed: {0}", HttpStatus.UNAUTHORIZED),
         TEST_TOKEN_ERROR("02", "TestTokenError", 
                         "Server token generation failed: {0}", HttpStatus.INTERNAL_SERVER_ERROR),
-        TEST_VALIDATION_ERROR("03", "TestValidationError", 
-                             "Server validation failed: {0} - {1}", HttpStatus.BAD_REQUEST),
-        TEST_OAUTH2_ERROR("04", "TestOAuth2Error", 
-                         "Server OAuth2 processing failed: {0}", HttpStatus.BAD_REQUEST);
+        TEST_VALIDATION_ERROR("03", "TestValidationError",
+                             "Server validation failed: {0} - {1}", HttpStatus.BAD_REQUEST);
 
         private final String subCode;
         private final String errorName;
@@ -132,7 +130,6 @@ class ServerExceptionTest {
         assertThat(ServerErrorCode.DOMAIN_CODE_AUTH).isEqualTo("01");
         assertThat(ServerErrorCode.DOMAIN_CODE_TOKEN).isEqualTo("02");
         assertThat(ServerErrorCode.DOMAIN_CODE_VALIDATION).isEqualTo("03");
-        assertThat(ServerErrorCode.DOMAIN_CODE_OAUTH2).isEqualTo("04");
     }
 
     @Test
