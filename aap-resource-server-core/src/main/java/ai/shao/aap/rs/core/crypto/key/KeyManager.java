@@ -21,9 +21,8 @@ import com.nimbusds.jose.jwk.JWK;
 /**
  * Resolves an Ed25519 verification key by {@code kid}. Implementations are verifier-only —
  * consumers wire their own backend (typically {@link
- * ai.shao.aap.rs.core.crypto.key.resolve.JwksConsumerKeyResolver} for a remote JWKS
- * endpoint, but file-backed or KMS-backed adapters are equally valid). Implementations must be
- * thread-safe.
+ * ai.shao.aap.rs.core.crypto.key.resolve.JwksConsumerKeyResolver} for a remote JWKS endpoint, but
+ * file-backed or KMS-backed adapters are equally valid). Implementations must be thread-safe.
  */
 public interface KeyManager {
 

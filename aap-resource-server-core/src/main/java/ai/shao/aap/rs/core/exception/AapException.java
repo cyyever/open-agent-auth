@@ -58,8 +58,7 @@ public abstract class AapException extends RuntimeException {
      * @param formattedMessage the formatted error message
      * @param cause the cause
      */
-    protected AapException(
-            String errorCode, String formattedMessage, @Nullable Throwable cause) {
+    protected AapException(String errorCode, String formattedMessage, @Nullable Throwable cause) {
         super(formattedMessage, cause);
         this.errorCode = errorCode;
         this.errorParams = null;
@@ -68,8 +67,8 @@ public abstract class AapException extends RuntimeException {
     }
 
     /**
-     * Constructs a new AAP exception with the specified error code, message, error
-     * parameters, and context.
+     * Constructs a new AAP exception with the specified error code, message, error parameters, and
+     * context.
      *
      * @param errorCode the error code
      * @param formattedMessage the formatted error message
@@ -89,8 +88,8 @@ public abstract class AapException extends RuntimeException {
     }
 
     /**
-     * Constructs a new AAP exception with the specified error code, message, error
-     * parameters, context, and cause.
+     * Constructs a new AAP exception with the specified error code, message, error parameters,
+     * context, and cause.
      *
      * @param errorCode the error code
      * @param formattedMessage the formatted error message

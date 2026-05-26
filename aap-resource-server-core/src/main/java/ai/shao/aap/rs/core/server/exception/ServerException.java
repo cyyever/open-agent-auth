@@ -15,8 +15,8 @@
  */
 package ai.shao.aap.rs.core.server.exception;
 
-import ai.shao.aap.rs.core.exception.ErrorCode;
 import ai.shao.aap.rs.core.exception.AapException;
+import ai.shao.aap.rs.core.exception.ErrorCode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
