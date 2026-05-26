@@ -76,18 +76,16 @@ runs fast.
   audit trail.
 - **Don't write javadoc that restates the signature.** Public-API
   protocol contracts deserve a one-liner; everything else doesn't.
-- **Don't add new javadoc cross-references** (`@see`/`@link`) for
-  in-package types. They become bit-rot during the M1 rename.
-- **Records over Builder-classes** for new pure-data types. All four
-  model classes (Jwk, AgentIdentity, DpopToken, CredentialToken) were
-  converted in this trim and saved ~78% LoC. Use compact canonical
-  constructors for REQUIRED-field validation. Throw
+- **Records over Builder-classes** for new pure-data types. Use compact
+  canonical constructors for REQUIRED-field validation. Throw
   `IllegalStateException` (matches existing test expectations), not
   `NullPointerException` from `Objects.requireNonNull`.
 - **Builders allowed only for ergonomic construction** of records with
   many optional fields. Keep them as static inner classes.
-- **No new functionality during the trim phase.** If something has zero
-  external refs, delete it. Don't preserve it "for future use".
+- **Scope is the M1 tail.** Trim is done. New functionality belongs to
+  one of the four pending M1 items (PIC, CRL, JSONL, HTTP whitelist);
+  anything else with zero external refs should be deleted, not kept
+  "for future use".
 
 ## Conventions when committing
 
@@ -128,37 +126,20 @@ key-id constants, residual `WIMSE` / `AOA` / `AOAT` / `DCR` /
 `5-layer` / `OIDC` strings) shipped early — see commits `f37f37b`,
 `643bbfb`, `1ebd5f2`.
 
-## Perf hot spots already identified
+## Perf decisions on record
 
-Audited but not yet fixed (most need M1 rename first):
-
-1. ~~`JwtHashUtil.computeSha256Hash`~~ — **done**. `ThreadLocal<MessageDigest>`
-   + static `Base64.Encoder` already in place. JMH baseline (Temurin 26,
-   Apple Silicon, 1024-byte JWT): 2.07 ops/μs single-thread, 10.35 ops/μs
-   at 8 threads. Bench module: `aap-resource-server-bench` (opt-in `-P bench`).
-2. ~~`DpopValidator.convertToJWK`~~ — **done**. `ConcurrentHashMap<Jwk, JWK>`
-   keyed by record-value-equality on `Jwk`; first validation per cnf.jwk
-   pays the Base64-decode, subsequent ones hit cache.
-3. ~~`JwksConsumerKeyResolver`~~ — **done**. TTL + single-flight on cold
-   start (`compute`-locked) + key-not-found throttle were already in
-   place; stale-while-revalidate added so a TTL-expired entry serves
-   the stale value while one background virtual thread refreshes.
-   Cold-start fetches still block (correct).
-4. ~~`SignedJWT.parse` called twice per DPoP validation~~ — **done**.
-   `DpopParser.parse(SignedJWT)` mirrors `CtParser`; `DefaultResourceServer`
-   parses once and passes the `SignedJWT` into `DpopValidator.validate`
-   for signature verify. The ad-hoc 2-arg `validate(DpopToken, CredentialToken)`
-   is kept as back-compat (still parses internally).
-5. ~~`Token.isExpired/isValid`~~ — **done**. Now compares
-   `expirationTime.getTime()` against `System.currentTimeMillis()` —
-   zero allocations. Internal `Date` field kept (the M1 rename of the
-   surrounding records may revisit type).
+All hot-path optimizations are landed; the bench module
+`aap-resource-server-bench` (opt-in `-P bench`) holds the JMH harness
+for `JwtHashUtil` (the only one with a recorded baseline: 2.07 ops/μs
+single-thread, 10.35 ops/μs at 8 threads on Temurin 26 / Apple Silicon
+with a 1024-byte JWT). Other paths optimized: `DpopValidator` JWK
+cache, `JwksConsumerKeyResolver` TTL + single-flight + stale-while-
+revalidate, single-`SignedJWT.parse` per DPoP validation, allocation-
+free `Token.isExpired/isValid`. **Before re-optimizing any of these,
+read the git log** — the prior commit explains why the current shape
+was chosen.
 
 ## Bookmarks
 
-- This repo's git history is the long-form record of the trim. Recent
-  pattern: 20+ `chore(aap): drop X` commits between `c8f7c95` and
-  `5a83240` cleared the upstream OAA scaffolding (~25k LoC net).
-- The actual fork branch convention is `aap-main` per spec §10.3;
-  the current trim is happening on `main` because no upstream rebase
-  is happening yet.
+- The fork branch convention is `aap-main` per spec §10.3; we are
+  still on `main` because no upstream rebase is happening yet.
